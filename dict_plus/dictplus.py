@@ -1,16 +1,14 @@
-from dict_plus import Element, Iterable
+from dict_plus import Element, Iterable, OrderedIterable, KeyValuePair
 from dict_plus.exceptions import InvalidElementTypeException
 
 
 class DictPlus(Iterable):
-    def insert(self, index, obj):
-        element = self._eltype(obj=obj)
-        if element.id in self._indexes:
-            raise KeyError("Key '{}' already exists!".format(element.id))
+    pass
 
-        self._elements.insert(index, element)
-        self._update_index()
-        return element
+
+class OrderedDictPlus(OrderedIterable):
+    def __init__(self, data=None, element_type=None, **kwargs):
+        super(OrderedDictPlus, self).__init__(data, element_type or KeyValuePair, **kwargs)
 
     def __eq__(self, other):
         result = True
@@ -37,10 +35,6 @@ class DictPlus(Iterable):
             return result
         else:
             return False
-
-
-
-
 
     # def __eq__(self, other):
     #     result = True

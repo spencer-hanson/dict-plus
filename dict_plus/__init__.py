@@ -1,11 +1,10 @@
 from dict_plus.exceptions import *
 
 
-class Iterable(object):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME REASON
-    # __hash__ = None
+class Iterable(object):  # TODO CHANGE ME TO dict after debug
+    # __hash__ = None  # TODO ?
 
     def __init__(self, data=None, element_type=None, **kwargs):
-        # def __init__(self, seq=None, **kwargs):  # known special case of dict.__init__
         """
         dict() -> new empty dictionary
         dict(mapping) -> new dictionary initialized from a mapping object's
@@ -18,10 +17,10 @@ class Iterable(object):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME RE
             in the keyword argument list.  For example:  dict(one=1, two=2)
         # (copied from class doc)
         """
-        super().__init__()
 
+        super().__init__()
         if not element_type:
-            element_type = KeyValuePair
+            element_type = Element
 
         self._elements = []
         self._eltype = element_type
@@ -31,81 +30,22 @@ class Iterable(object):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME RE
             self.update(data)
         elif isinstance(data, list):
             for idx, el in enumerate(data):
-                self.insert(-1, (idx, el))
+                self.insert(len(self), (idx, el))
         elif data:
             for k, v in data:
-                self.insert(-1, (k, v))
+                self.insert(len(self), (k, v))
         if kwargs:
             for k, v in kwargs.items():
                 self[k] = v
-    # def __check_eltype(self, o):
-    #     # TODO make this typeof instead?
-    #     if not isinstance(o, self.__eltype):
-    #        raise InvalidElementTypeException("Element added to Iterable instance is invalid type for ElementType '{}'"
-    #                                           .format(self.__eltype))
-
-    def _update_index(self):
-        self._indexes = {}
-        for idx, el in enumerate(self._elements):
-            self._indexes[el.id] = idx
-##
-
-    def fold_left(self, func):
-        if len(self._elements) < 2:
-            return self  # Can't fold unless we have at least 2 elements
-
-        tmp_el = self._elements[0]
-        for el in self._elements[1:]:
-            result = func(tmp_el, el)
-            tmp_el = self._eltype(obj=result)
-        return tmp_el
-
-    def fold_right(self, func):
-        self._elements = self._elements[::-1]
-        folded = self.fold_left(func)
-        self._elements = self._elements[::-1]
-        return folded
-
-    # squish any number of keys into a smaller amount of keypairs
-    # f = (e_list) -> (new_e_list)
-    def squish(self, keys, new_keys, func):
-        a = [self.getitem(key) for key in keys]
-        func(*a)
-        tw = 2
-
-    # expand any number of keys into a larger amount of keypairs
-    def expand(self, keys, func):
-        raise NotImplementedError
-
-    def map(self, func):
-        mapped = map(func, self._elements)
-        self.clear()
-        for element in mapped:
-            self.insert(0, element)
-
-    def rekey(self, func):
-        raise NotImplementedError
-
-    # TODO: Give default plus behavior, expected from adding two dicts together, d1+d2 = d1.update(d2)
-    def plus(self, iterable):
-        raise NotImplementedError
-
-    def minus(self, iterable):
-        raise NotImplementedError
-
-    def chop(self, func):
-        raise NotImplementedError
-
-    def multiply(self, iterable, func):
-        raise NotImplementedError
-
-    def divide(self, iterable, func_inv):
-        raise NotImplementedError
-
-##
 
     def insert(self, index, obj):
-        raise NotImplementedError("Can't call .insert on Iterable!")
+        element = self._eltype(obj=obj)
+        if element.id in self._indexes:
+            raise KeyError("Key '{}' already exists!".format(element.id))
+
+        self._elements.insert(len(self), element)  # Just add to the end of the iterable
+        self._indexes[element.id] = element.value
+        return element
 
     def get(self, k, v_alt=None):
         """ D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None. """
@@ -125,24 +65,20 @@ class Iterable(object):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME RE
         If key is not found, d is returned if given, otherwise KeyError is raised
         """
         if k in self._indexes:
-            for i in range(0, len(self._elements)):
-                if self._elements[i].id == k:
-                    el = self._elements.pop(i)
-                    self._update_index()
-                    return el.value
+            raise NotImplementedError
+            # TODO swap here
         elif v_alt:
             return v_alt
-
         raise KeyError("Key '{}' not found!".format(k))
 
-    def popitem(self):  
+    def popitem(self):
         """
         D.popitem() -> (k, v), remove and return some (key, value) pair as a
         2-tuple; but raise KeyError if D is empty.
         """
-
-        k, v = self._elements.pop(len(self._elements)).parts()
-        self._update_index()
+        if self._indexes == {}:
+            raise NotImplementedError  # TODO
+        k, v = self._elements.pop(-1).parts()
         return k, v
 
     def unupdate(self, e=None, **kwargs):
@@ -158,7 +94,7 @@ class Iterable(object):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME RE
             if self.pop(k) != kwargs[k]:
                 raise InvalidElementValueException
 
-    def update(self, e=None, **kwargs):  # known special case of dict.update
+    def update(self, e=None, **kwargs):
         """
         D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
         If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
@@ -170,21 +106,21 @@ class Iterable(object):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME RE
                 if k in self._indexes:
                     self[k] = e[k]
                 else:
-                    self.insert(-1, (k, e[k]))
+                    self.insert(len(self), (k, e[k]))
         else:
             for k, v in e:
-                self.insert(-1, (k, v))
+                self.insert(len(self), (k, v))
         for k in kwargs:
-            self.insert(-1, (k, kwargs[k]))
+            self.insert(len(self), (k, kwargs[k]))
 
 ##
 
-    def clear(self):  
+    def clear(self):
         """ D.clear() -> None.  Remove all items from D. """
         self._elements = []
         self._indexes = {}
 
-    def copy(self):  
+    def copy(self):
         """ D.copy() -> a shallow copy of D """
         i = self.__class__(element_type=self._eltype)
         i._elements = self._elements.copy()
@@ -196,19 +132,19 @@ class Iterable(object):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME RE
         """ Returns a new dict with keys from iterable and values equal to value. """
         raise NotImplementedError
 
-    def items(self):  
+    def items(self):
         """ D.items() -> a set-like object providing a view on D's items """
         raise NotImplementedError
 
-    def keys(self):  
+    def keys(self):
         """ D.keys() -> a set-like object providing a view on D's keys """
         return [el.id for el in self._elements]
 
-    def values(self):  
+    def values(self):
         """ D.values() -> an object providing a view on D's values """
         return [el.value for el in self._elements]
 
-    def setdefault(self, k, d=None):  
+    def setdefault(self, k, d=None):
         """ D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D """
         raise NotImplementedError
 
@@ -217,8 +153,8 @@ class Iterable(object):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME RE
         for el in self._elements:
             d[el.id] = el.value
         return d
-##
 
+    ##
     # @staticmethod  # known case of __new__
     # def __new__(*args, **kwargs):  # real signature unknown
     #     """ Create and return a new object.  See help(type) for accurate signature. """
@@ -240,7 +176,7 @@ class Iterable(object):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME RE
     #     raise NotImplementedError
     #
 
-    def __getitem__(self, key):  
+    def __getitem__(self, key):
         """ x.__getitem__(y) <==> x[y] """
         return self.get(key)
 
@@ -249,7 +185,7 @@ class Iterable(object):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME RE
         if key in self._indexes:
             self._elements[self._indexes[key]].value = value
         else:
-            self.insert(-1, (key, value))
+            self.insert(len(self), (key, value))
 
     #
     # def __ge__(self, *args, **kwargs):  # real signature unknown
@@ -289,9 +225,100 @@ class Iterable(object):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME RE
     def __str__(self):
         return str(self.todict())
 
-    # def __sizeof__(self):  
+    # def __sizeof__(self):
     #     """ D.__sizeof__() -> size of D in memory, in bytes """
     #     raise NotImplementedError
+
+
+class OrderedIterable(Iterable):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME REASON
+    def _update_indexes(self, from_idx):  # TODO Use from_idx to optimize
+        self._indexes = {}
+        for idx, el in enumerate(self._elements):
+            self._indexes[el.id] = idx
+##
+
+    def insert(self, index, obj):
+        element = self._eltype(obj=obj)
+        if element.id in self._indexes:
+            raise KeyError("Key '{}' already exists!".format(element.id))
+
+        self._elements.insert(index, element)
+        self._update_indexes(index)
+        return element
+
+    def pop(self, k, v_alt=None):
+        """
+        D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
+        If key is not found, d is returned if given, otherwise KeyError is raised
+        """
+        if k in self._indexes:
+            idx = self._indexes[k]
+            result = self._elements.pop(idx).value
+            self._update_indexes(idx)
+            return result
+        elif v_alt:
+            return v_alt
+        raise KeyError("Key '{}' not found!".format(k))
+
+    def fold_left(self, func):
+        if len(self._elements) < 2:
+            return self  # Can't fold unless we have at least 2 elements
+
+        tmp_el = self._elements[0]
+        for el in self._elements[1:]:
+            result = func(tmp_el, el)
+            tmp_el = self._eltype(obj=result)
+        return tmp_el
+
+    def fold_right(self, func):
+        if len(self._elements) < 2:
+            return self  # Can't fold unless we have at least 2 elements
+
+        tmp_el = self._elements[-1]
+        for idx in range(len(self._elements)-1, 0, -1):
+            result = func(tmp_el, self._elements[idx-1])
+            tmp_el = self._eltype(obj=result)
+        return tmp_el
+
+    # squish any number of keys into a smaller amount of keypairs
+    # f = (e_list) -> (new_e_list)
+    def squish(self, keys, new_keys, func):
+        a = [self.getitem(key) for key in keys]
+        func(*a)
+        tw = 2
+        raise NotImplementedError
+
+    # expand any number of keys into a larger amount of keypairs
+    def expand(self, keys, func):
+        raise NotImplementedError
+
+    def map(self, func):
+        mapped = map(func, self._elements)
+        self.clear()
+        for element in mapped:
+            self.insert(0, element)
+
+    def rekey(self, func):
+        raise NotImplementedError
+
+    # TODO: Give default plus behavior, expected from adding two dicts together, d1+d2 = d1.update(d2)
+    def plus(self, iterable):
+        raise NotImplementedError
+
+    # Same with minus TODO
+    def minus(self, iterable):
+        raise NotImplementedError
+
+    def chop(self, func):
+        raise NotImplementedError
+
+    def multiply(self, iterable, func):
+        raise NotImplementedError
+
+    def divide(self, iterable, func_inv):
+        raise NotImplementedError
+
+##
 
 
 class Element(object):
@@ -322,6 +349,7 @@ class Element(object):
             if k == self.id and v == self.value:
                 return True
         return False
+
 
 class KeyValuePair(Element):
     @staticmethod
