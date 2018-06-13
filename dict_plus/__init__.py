@@ -113,7 +113,14 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         for k in kwargs:
             self.insert(len(self), (k, kwargs[k]))
 
-##
+    def map(self, func):
+        mapped = map(func, self._elements)
+        self.clear()
+        for element in mapped:
+            self.insert(0, element)
+
+    def rekey(self, func):
+        raise NotImplementedError
 
     def clear(self):
         """ D.clear() -> None.  Remove all items from D. """
@@ -229,12 +236,39 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     #     """ D.__sizeof__() -> size of D in memory, in bytes """
     #     raise NotImplementedError
 
+    # squish any number of keys into a smaller amount of keypairs
+    # f = (e_list) -> (new_e_list)
+    def squish(self, keys, new_keys, func):
+        a = [self.getitem(key) for key in keys]
+        func(*a)
+        tw = 2
+        raise NotImplementedError
+
+    # expand any number of keys into a larger amount of keypairs
+    def expand(self, keys, func):
+        raise NotImplementedError
+
+    # TODO: Give default plus behavior, expected from adding two dicts together, d1+d2 = d1.update(d2)
+    def plus(self, iterable):
+        raise NotImplementedError
+
+    # Same with minus TODO
+    def minus(self, iterable):
+        raise NotImplementedError
+
+    def chop(self, func):
+        raise NotImplementedError
+
+    def funcmap(self, f, g):
+        raise NotImplementedError
+
 
 class OrderedIterable(Iterable):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME REASON
     def _update_indexes(self, from_idx):  # TODO Use from_idx to optimize
         self._indexes = {}
         for idx, el in enumerate(self._elements):
             self._indexes[el.id] = idx
+
 ##
 
     def insert(self, index, obj):
@@ -280,44 +314,23 @@ class OrderedIterable(Iterable):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FO
             tmp_el = self._eltype(obj=result)
         return tmp_el
 
-    # squish any number of keys into a smaller amount of keypairs
-    # f = (e_list) -> (new_e_list)
-    def squish(self, keys, new_keys, func):
-        a = [self.getitem(key) for key in keys]
-        func(*a)
-        tw = 2
-        raise NotImplementedError
-
-    # expand any number of keys into a larger amount of keypairs
-    def expand(self, keys, func):
-        raise NotImplementedError
-
-    def map(self, func):
-        mapped = map(func, self._elements)
-        self.clear()
-        for element in mapped:
-            self.insert(0, element)
-
-    def rekey(self, func):
-        raise NotImplementedError
-
-    # TODO: Give default plus behavior, expected from adding two dicts together, d1+d2 = d1.update(d2)
-    def plus(self, iterable):
-        raise NotImplementedError
-
-    # Same with minus TODO
-    def minus(self, iterable):
-        raise NotImplementedError
-
-    def chop(self, func):
-        raise NotImplementedError
-
     def multiply(self, iterable, func):
         raise NotImplementedError
 
     def divide(self, iterable, func_inv):
         raise NotImplementedError
 
+    def __le__(self, other):
+        raise NotImplementedError
+
+    def __lt__(self, other):
+        raise NotImplementedError
+
+    def __ge__(self, other):
+        raise NotImplementedError
+
+    def __gt__(self, other):
+        raise NotImplementedError
 ##
 
 
@@ -331,7 +344,7 @@ class Element(object):
             self.id = _id
             self.value = value
 
-    # Parse stuff like ("a", 1) -> {"a": 1}
+    # Parse stuff like ("a", 1) -> Element("a", 1)
     @staticmethod
     def parse_object(obj):
         raise NotImplementedError
@@ -344,10 +357,6 @@ class Element(object):
             return True
         elif isinstance(other, tuple) and self.id == other[0] and self.value == other[1]:
             return True
-        elif isinstance(other, dict) and len(other) == 1:
-            k, v = list(other.items())[0]
-            if k == self.id and v == self.value:
-                return True
         return False
 
 
@@ -362,4 +371,10 @@ class KeyValuePair(Element):
             raise InvalidElementTypeException("Invalid KeyPair object, length must be 2")
         return obj[0], obj[1]
 
+    def __eq__(self, other):
+        if isinstance(other, dict) and len(other) == 1:
+            k, v = list(other.items())[0]
+            if k == self.id and v == self.value:
+                return True
+        return super(KeyValuePair, self).__eq__(other)
 

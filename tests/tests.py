@@ -3,14 +3,49 @@ from dict_plus import KeyValuePair
 from dict_plus.exceptions import *
 
 
-# Iterable.get
+##################
+
+
+def test_keyvaluepair_parse_object():
+    raise NotImplementedError
+
+
+def test_keyvaluepair___eq__():
+    raise NotImplementedError
+
+
+##################
+
+
+def test_element___init__():
+    raise NotImplementedError
+
+
+def test_element_parts():
+    raise NotImplementedError
+
+
+def test_element___eq__():
+    d = OrderedDictPlus()
+    d.insert(0, ("4", "3"))
+    assert d.getitem("4") == KeyValuePair("4", "3")
+    assert ("4", "3") == KeyValuePair("4", "3")
+    assert KeyValuePair("a", "b") == KeyValuePair("a", "b")
+    assert KeyValuePair("1", "2") == ("1", "2")
+    assert KeyValuePair("1", "2") != ["1", "2"]
+    assert KeyValuePair("a", "b") == {"a": "b"}
+    assert KeyValuePair("c", "d") != {"a": "b", "c": "d"}
+
+
+##################
+
+
 def test_iterable_get():
     d = OrderedDictPlus()
     d.insert(0, ("1", "2"))
     assert d.get("1") == "2"
 
 
-# Iterable.getitem
 def test_iterable_getitem():
     d = OrderedDictPlus()
     d.insert(0, ("1", "2"))
@@ -18,39 +53,18 @@ def test_iterable_getitem():
     assert d.getitem("1") == KeyValuePair("1", "2")
 
 
-# Iterable.insert
 def test_iterable_insert():
-    d = OrderedDictPlus()
-    assert d.insert(0, ("a", "b")) == KeyValuePair("a", "b")
-    assert d.insert(1, ("b", "c")) == ("b", "c")
-    assert d.insert(5, KeyValuePair("g", "h")) == KeyValuePair("g", "h")
-    assert d.insert(0, KeyValuePair("e", "f")) == ("e", "f")
-    assert d == {"a": "b", "b": "c", "g": "h", "e": "f"}
-    assert d.values() == ["f", "b", "c", "h"]
-    assert d.keys() == ["e", "a", "b", "g"]
-    try:
-        d.insert(0, "meow")
-    except Exception as e:
-        assert e.__class__ == InvalidElementTypeException
-    else:
-        assert 2 != 2  # Throw assertion error since exception wasn't thrown
+    raise NotImplementedError
 
 
-# Iterable.__eq__
-def test_iterable_eq():
-    d = OrderedDictPlus()
-    d.insert(0, (0, "asdf"))
-    d.insert(1, (1, "fdsa"))
-    assert d != 8
-    assert d == {1: "fdsa", 0: "asdf"}
-    assert d != ["asdf", "fdsa"]
-    assert d != ["fdsa", "asdf"]
-    assert d != ["2"]
-    assert OrderedDictPlus() == {}
-    assert OrderedDictPlus() != []
+def test_iterable_pop():
+    raise NotImplementedError
 
 
-# Iterable.__copy__
+def test_iterable_popitem():
+    raise NotImplementedError
+
+
 def test_iterable_copy():
     d = OrderedDictPlus()
     d.insert(0, ("1", "2"))
@@ -60,7 +74,6 @@ def test_iterable_copy():
     assert d != c
 
 
-# Iterable.__getitem__
 def test_iterable___getitem__():
     d = OrderedDictPlus()
     d.insert(0, ("1", "2"))
@@ -77,15 +90,50 @@ def test_iterable___setitem__():
     assert d == {"asdf": "asdf", "AAA": "AAA"}
 
 
-# Iterable.pop
-def test_iterable_pop():
+def test_iterable___len__():
+    raise NotImplementedError
+
+
+def test_iterable___str__():
+    raise NotImplementedError
+
+
+def test_iterable_fromkeys():
+    raise NotImplementedError
+
+
+def test_iterable_items():
+    raise NotImplementedError
+
+
+def test_iterable_keys():
+    raise NotImplementedError
+
+
+def test_iterable_values():
+    raise NotImplementedError
+
+
+def test_iterable_setdefault():
+    raise NotImplementedError
+
+
+def test_iterable_todict():
     d = OrderedDictPlus()
     d.insert(0, ("1", "2"))
-    assert d.pop("1") == "2"
-    assert d.pop("1", "2") == "2"
+    assert d.todict() == {"1": "2"}
+    assert d == d.todict()
+    assert d == d.copy().todict()
 
 
-# Iterable.update
+def test_iterable_swap():
+    raise NotImplementedError
+
+
+def test_iterable_clear():
+    raise NotImplementedError
+
+
 def test_iterable_update():
     def subtest_iterable_update(e, **kwargs):
         d = OrderedDictPlus()
@@ -103,14 +151,6 @@ def test_iterable_update():
     subtest_iterable_update([("21", "12"), ("Y", "YZ")], a="meow", b="cat")
 
 
-def test_iterable_todict():
-    d = OrderedDictPlus()
-    d.insert(0, ("1", "2"))
-    assert d == d.todict()
-    assert d == d.copy().todict()
-
-
-# Iterable.unupdate
 def test_iterable_unupdate():
     def subtest_iterable_unupdate(e, ee, **kwargs):
         d = OrderedDictPlus()
@@ -150,7 +190,6 @@ def test_iterable_unupdate():
         assert False
 
 
-# Iterator.map
 def test_iterable_map():
     d = OrderedDictPlus()
     d["a"] = 1
@@ -171,47 +210,44 @@ def test_iterable_map():
     assert d == od
 
 
-# OrderedDictPlus.__init__
-def test_OrderedDictPlus___init__():
-    def subtest_OrderedDictPlus__init__(data):
-        d = OrderedDictPlus(data=data)
-        assert d == data
-        assert OrderedDictPlus(data={"v": data}) == {"v": data}
-
-    assert OrderedDictPlus() != []
-    assert OrderedDictPlus() == {}
-    # subtest_OrderedDictPlus__init__([])
-    subtest_OrderedDictPlus__init__({})
-    # TODO test for ListPlus
-    # subtest_OrderedDictPlus__init__([1, 2, 3])
-    # subtest_OrderedDictPlus__init__([KeyValuePair(0, 1), KeyValuePair(1, 2)])
-    subtest_OrderedDictPlus__init__({"a": 1, "b": 2})
-    # subtest_OrderedDictPlus__init__([1])
+def test_iterable_rekey():
+    raise NotImplementedError
 
 
-# Element.__eq__
-def test_element_eq():
-    d = OrderedDictPlus()
-    d.insert(0, ("4", "3"))
-    assert d.getitem("4") == KeyValuePair("4", "3")
-    assert ("4", "3") == KeyValuePair("4", "3")
-    assert KeyValuePair("a", "b") == KeyValuePair("a", "b")
-    assert KeyValuePair("1", "2") == ("1", "2")
-    assert KeyValuePair("1", "2") != ["1", "2"]
-    assert KeyValuePair("a", "b") == {"a": "b"}
-    assert KeyValuePair("c", "d") != {"a": "b", "c": "d"}
+def test_iterable_plus():
+    raise NotImplementedError
 
 
-def func_ee2e(e1, e2):
-    return e1.id + e2.id, e1.value + e2.value
+def test_iterable_minus():
+    raise NotImplementedError
 
 
-def func2_ee2e(*es):
-    return KeyValuePair(es[0].id + es[1].id, es[0].value + es[1].value)
+def test_iterable_chop():
+    raise NotImplementedError
 
 
-# Iterator.fold_left
-def subtest_iterable_fold(fold_func):
+def test_iterable_squish():
+    raise NotImplementedError
+
+
+def test_iterable_expand():
+    raise NotImplementedError
+
+
+def test_iterable_funcmap():
+    raise NotImplementedError
+
+
+##################
+
+
+def subtest_orderediterable_fold(fold_func):
+    def func_ee2e(e1, e2):
+        return e1.id + e2.id, e1.value + e2.value
+
+    def func2_ee2e(*es):
+        return KeyValuePair(es[0].id + es[1].id, es[0].value + es[1].value)
+
     def subsubtest_iterable_fold_left(di):
         g = getattr(di, fold_func)(func_ee2e)
         gp = getattr(di, fold_func)(func2_ee2e)
@@ -226,8 +262,11 @@ def subtest_iterable_fold(fold_func):
     assert subsubtest_iterable_fold_left(d) == {3: 3}
 
 
-def test_iterable_fold_left():
-    subtest_iterable_fold("fold_left")
+def test_orderediterable_fold_left():
+    def func_ee2e(e1, e2):
+        return e1.id + e2.id, e1.value + e2.value
+
+    subtest_orderediterable_fold("fold_left")
     d = OrderedDictPlus()
     d.update([(0, "a"), (1, "b"), (2, "c")])
     r = d.fold_left(func_ee2e)
@@ -235,12 +274,91 @@ def test_iterable_fold_left():
     assert r == {3: "abc"}
 
 
-def test_iterable_fold_right():
-    subtest_iterable_fold("fold_right")
+def test_orderediterable_fold_right():
+    def func_ee2e(e1, e2):
+        return e1.id + e2.id, e1.value + e2.value
+
+    subtest_orderediterable_fold("fold_right")
     d = OrderedDictPlus()
     d.update([(0, "a"), (1, "b"), (2, "c")])
     r = d.fold_right(func_ee2e)
     assert r == {3: "cba"}
+
+
+def test_orderediterable_insert():
+    d = OrderedDictPlus()
+    assert d.insert(0, ("a", "b")) == KeyValuePair("a", "b")
+    assert d.insert(1, ("b", "c")) == ("b", "c")
+    assert d.insert(5, KeyValuePair("g", "h")) == KeyValuePair("g", "h")
+    assert d.insert(0, KeyValuePair("e", "f")) == ("e", "f")
+    assert d == {"a": "b", "b": "c", "g": "h", "e": "f"}
+    assert d.values() == ["f", "b", "c", "h"]
+    assert d.keys() == ["e", "a", "b", "g"]
+    try:
+        d.insert(0, "meow")
+    except Exception as e:
+        assert e.__class__ == InvalidElementTypeException
+    else:
+        assert 2 != 2  # Throw assertion error since exception wasn't thrown
+
+
+def test_orderediterable_pop():
+    d = OrderedDictPlus()
+    d.insert(0, ("1", "2"))
+    assert d.pop("1") == "2"
+    assert d.pop("1", "2") == "2"
+
+
+def test_orderediterable_multiply():
+    raise NotImplementedError
+
+
+def test_orderediterable_divide():
+    raise NotImplementedError
+
+
+def test_orderediterable___le__():
+    raise NotImplementedError
+
+
+def test_orderediterable___lt__():
+    raise NotImplementedError
+
+def test_orderediterable___ge__():
+    raise NotImplementedError
+
+
+def test_orderediterable___gt__():
+    raise NotImplementedError
+
+
+##################
+
+
+def test_ordereddictplus___init__():
+    def subtest_ordereddictplus__init__(data):
+        d = OrderedDictPlus(data=data)
+        assert d == data
+        assert OrderedDictPlus(data={"v": data}) == {"v": data}
+
+    assert OrderedDictPlus() != []
+    assert OrderedDictPlus() == {}
+    subtest_ordereddictplus__init__({})
+    subtest_ordereddictplus__init__({"a": 1, "b": 2})
+
+
+def test_ordereddictplus___eq__():
+    d = OrderedDictPlus()
+    d.insert(0, (0, "asdf"))
+    d.insert(1, (1, "fdsa"))
+    assert d != 8
+    assert d == {1: "fdsa", 0: "asdf"}
+    assert d != ["asdf", "fdsa"]
+    assert d != ["fdsa", "asdf"]
+    assert d != ["2"]
+    assert OrderedDictPlus() == {}
+    assert OrderedDictPlus() != []
+
 
 # # .squish
 # d = OrderedDictPlus()
@@ -252,28 +370,79 @@ def test_iterable_fold_right():
 # tw = 2
 
 
-# OrderedDictPlus tests
-test_OrderedDictPlus___init__()
-
 # KeyValuePair tests
+tests = [
+    test_keyvaluepair_parse_object,
+    test_keyvaluepair___eq__,
 
+    # Element tests
+    test_element___init__,
+    test_element_parts,
+    test_element___eq__,
 
-# Element tests
-test_element_eq()
+    # Iterable tests
+    test_iterable_get,
+    test_iterable_getitem,
+    test_iterable_insert,
+    test_iterable_pop,
+    test_iterable_popitem,
+    test_iterable_copy,
+    test_iterable___setitem__,
+    test_iterable___getitem__,
+    test_iterable___len__,
+    test_iterable___str__,
+    test_iterable_fromkeys,
+    test_iterable_items,
+    test_iterable_keys,
+    test_iterable_values,
+    test_iterable_setdefault,
+    test_iterable_todict,
+    test_iterable_swap,
+    test_iterable_clear,
+    test_iterable_update,
+    test_iterable_unupdate,
+    test_iterable_map,
+    test_iterable_rekey,
+    test_iterable_plus,
+    test_iterable_minus,
+    test_iterable_chop,
+    test_iterable_squish,
+    test_iterable_expand,
+    test_iterable_funcmap,
 
-# OrderedIterable base tests
-test_iterable_get()
-test_iterable_eq()
-test_iterable_getitem()
-test_iterable_insert()  # TODO test separate needed
-test_iterable_pop()  # TODO test separate needed
-test_iterable_copy()
-test_iterable___setitem__()
-test_iterable___getitem__()
-test_iterable_update()
-test_iterable_unupdate()
+    # OrderedIterable tests
+    test_orderediterable_fold_left,
+    test_orderediterable_fold_right,
+    test_orderediterable_insert,
+    test_orderediterable_pop,
+    test_orderediterable_multiply,
+    test_orderediterable_divide,
+    test_orderediterable___le__,
+    test_orderediterable___lt__,
+    test_orderediterable___ge__,
+    test_orderediterable___gt__,
 
-# OrderedIterable func tests
-test_iterable_map()
-test_iterable_fold_left()
-test_iterable_fold_right()
+    # DictPlus tests
+
+    # OrderedDictPlus tests
+    test_ordereddictplus___init__,
+    test_ordereddictplus___eq__]
+
+results = {}
+pass_count = 0
+total_count = 0
+
+for test in tests:
+    name = getattr(test, "__name__")
+    try:
+        test()
+        results[name] = "Passed"
+        pass_count = pass_count + 1
+    except Exception as e:
+        results[name] = "{}: \'{}\'".format(e.__class__.__name__, str(e))
+    total_count = total_count + 1
+
+for k, v in results.items():
+    print("{}:\n{}\n".format(k, v))
+
+print("Passed: {} Total: {} -- {}%".format(pass_count, total_count, round((pass_count/total_count), 4)))
