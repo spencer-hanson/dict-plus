@@ -1,28 +1,53 @@
-from dict_plus.dictplus import OrderedDictPlus
-from dict_plus import KeyValuePair
+from dict_plus.dictplus import *
+from dict_plus import *
 from dict_plus.exceptions import *
+
+
+def ex(f, ex_class, *args):
+    try:
+        f(*args)
+    except Exception as _e:
+        assert _e.__class__ == ex_class
+    else:
+        assert 2 != 2
 
 
 ##################
 
 
 def test_keyvaluepair_parse_object():
-    raise NotImplementedError
+    def subtest_keyvaluepair_parse_object(_id, val):
+        parse = KeyValuePair.parse_object
+
+        ex(parse, InvalidElementTypeException, (_id, _id, _id))
+        ex(parse, InvalidElementTypeException, (val, val, val))
+
+        assert parse((_id, val)) == (_id, val)
+        assert parse((val, _id)) == (val, _id)
+
+        assert parse(KeyValuePair(_id, val)) == (_id, val)
+        assert parse(KeyValuePair(val, _id)) == (val, _id)
+    subtest_keyvaluepair_parse_object("a", "b")
+    subtest_keyvaluepair_parse_object("a", 1)
+    subtest_keyvaluepair_parse_object(1, 1)
 
 
 def test_keyvaluepair___eq__():
-    raise NotImplementedError
+    assert KeyValuePair("a", "b") == {"a": "b"}
 
 
 ##################
 
 
 def test_element___init__():
-    raise NotImplementedError
+    ex(Element, TypeError, "id", None)
+    ex(Element, TypeError, None, "value")
+    assert KeyValuePair(0, 1) == KeyValuePair(obj=(0, 1))
+    assert KeyValuePair(obj=KeyValuePair(0, 1)) == KeyValuePair(obj=(0, 1))
 
 
 def test_element_parts():
-    raise NotImplementedError
+    assert Element(0, 1) == (0, 1)
 
 
 def test_element___eq__():
@@ -39,31 +64,38 @@ def test_element___eq__():
 
 ##################
 
-
 def test_iterable_get():
-    d = OrderedDictPlus()
+    d = DictPlus()
     d.insert(0, ("1", "2"))
     assert d.get("1") == "2"
 
 
 def test_iterable_getitem():
-    d = OrderedDictPlus()
+    d = DictPlus()
     d.insert(0, ("1", "2"))
     assert d.getitem("1") != 8
     assert d.getitem("1") == KeyValuePair("1", "2")
 
 
 def test_iterable_insert():
-    raise NotImplementedError
+    d = DictPlus()
+    assert d.insert(12345, ("a", "g"))
+    ex(d.insert, KeyError, 12345, ("a", "b"))
+    assert d._indexes["a"] == 0
+    assert d._elements[0] == ("a", "g")
 
 
 def test_iterable_pop():
-    raise NotImplementedError
+    d = DictPlus({"a": "b", "c": "d"})
+    assert d.pop("a") == "b"
+    assert d == {"c": "d"}
 
 
 def test_iterable_popitem():
-    raise NotImplementedError
-
+    d = DictPlus({"a": "b"})
+    t = d.popitem()
+    assert t == ("a", "b")
+    ex(d.popitem, KeyError)
 
 def test_iterable_copy():
     d = OrderedDictPlus()
@@ -91,35 +123,60 @@ def test_iterable___setitem__():
 
 
 def test_iterable___len__():
-    raise NotImplementedError
+    assert len(DictPlus()) == 0
+    assert len(DictPlus(a="b")) == 1
+    d = DictPlus(a="1", b="2")
+    assert len(d) == 2
+    d.popitem()
+    assert len(d) == 1
+    d.insert(0, ("c", 3))
+    assert len(d) == 2
 
 
 def test_iterable___str__():
-    raise NotImplementedError
+    assert str(DictPlus()) == str({})
+    assert str(DictPlus({"a": "b"})) == str({"a": "b"})
 
 
 def test_iterable_fromkeys():
-    raise NotImplementedError
+    ex(Iterable.fromkeys, NotImplementedError, ["a"], 5)
 
 
 def test_iterable_items():
-    raise NotImplementedError
+    d = DictPlus()
+    assert d.items() == []
+    d.insert(0, ("a", "b"))
+
+    assert d.items() == [("a", "b")]
 
 
 def test_iterable_keys():
-    raise NotImplementedError
+    d = DictPlus()
+    assert d.keys() == {}.keys()
+    d.insert(0, ("a", 1))
+    d.insert(1, ("b", 2))
+    assert d.keys() == {"a": 1, "b": 2}.keys()
 
 
 def test_iterable_values():
-    raise NotImplementedError
+    d = DictPlus()
+    assert d.values() == {}.values()
+    d.insert(0, ("a", 1))
+    d.insert(1, ("b", 2))
+    assert d.values() == {"a": 1, "b": 2}.values()
 
 
 def test_iterable_setdefault():
-    raise NotImplementedError
+    d = DictPlus()
+    d2 = {}
+    assert d.setdefault("a", 1) == d2.setdefault("a", 1)
+    assert d == d2
+    assert d.setdefault("b") == d2.setdefault("b")
+    assert d == d2
 
 
 def test_iterable_todict():
-    d = OrderedDictPlus()
+    d = DictPlus()
     d.insert(0, ("1", "2"))
     assert d.todict() == {"1": "2"}
     assert d == d.todict()
@@ -127,11 +184,17 @@ def test_iterable_todict():
 
 
 def test_iterable_swap():
-    raise NotImplementedError
+    d = DictPlus({"a": {"aa": 1}, "b": {"bb": 2}})
+    d.swap("a", "b")
+    assert d.get("a") == {"bb": 2}
+    assert d.get("b") == {"aa": 1}
 
 
 def test_iterable_clear():
-    raise NotImplementedError
+    d = DictPlus({"a": 1})
+    assert d == {"a": 1}
+    d.clear()
+    assert d == {}
 
 
 def test_iterable_update():
@@ -211,6 +274,12 @@ def test_iterable_map():
 
 
 def test_iterable_rekey():
+    def func_k2k(k):
+        return k + "a"
+
+    def invfunc_k2k(k):
+        return k[:-1]
+    
     raise NotImplementedError
 
 
@@ -294,12 +363,7 @@ def test_orderediterable_insert():
     assert d == {"a": "b", "b": "c", "g": "h", "e": "f"}
     assert d.values() == ["f", "b", "c", "h"]
     assert d.keys() == ["e", "a", "b", "g"]
-    try:
-        d.insert(0, "meow")
-    except Exception as e:
-        assert e.__class__ == InvalidElementTypeException
-    else:
-        assert 2 != 2  # Throw assertion error since exception wasn't thrown
+    ex(d.insert, InvalidElementTypeException, 0, "meow")
 
 
 def test_orderediterable_pop():
@@ -324,12 +388,48 @@ def test_orderediterable___le__():
 def test_orderediterable___lt__():
     raise NotImplementedError
 
+
 def test_orderediterable___ge__():
     raise NotImplementedError
 
 
 def test_orderediterable___gt__():
     raise NotImplementedError
+
+#################
+
+
+def test_dictplus___eq__():
+    d = DictPlus()
+    d.insert(0, (0, "asdf"))
+    d.insert(1, (1, "fdsa"))
+
+    d2 = DictPlus()
+    d2.insert(0, (1, "fdsa"))
+    d2.insert(1, (0, "asdf"))
+
+    assert d != 8
+    assert d2 != 8
+    assert d == {1: "fdsa", 0: "asdf"}
+    assert d2 == {1: "fdsa", 0: "asdf"}
+    assert d == d2
+    assert DictPlus() == {}
+    assert DictPlus() != []
+
+    d3 = OrderedDictPlus({1: "fdsa", 0: "asdf"})
+    assert d == d3
+    assert d3 != d
+
+    d4 = OrderedDictPlus()
+    d4.insert(0, (0, "asdf"))
+    d4.insert(1, (1, "fdsa"))
+    assert d == d4
+    assert d4 == d
+
+
+def test_dictplus_fromkeys():
+    assert dict.fromkeys(["a", "b", "c"]) == DictPlus.fromkeys(["a", "b", "c"])
+    assert dict.fromkeys(["a", "b", "c"], 10) == DictPlus.fromkeys(["a", "b", "c"], 10)
 
 
 ##################
@@ -349,16 +449,29 @@ def test_ordereddictplus___init__():
 
 def test_ordereddictplus___eq__():
     d = OrderedDictPlus()
+
     d.insert(0, (0, "asdf"))
     d.insert(1, (1, "fdsa"))
+
+    d2 = OrderedDictPlus()
+    d2.insert(0, (1, "fdsa"))
+    d2.insert(1, (0, "asdf"))
+
     assert d != 8
     assert d == {1: "fdsa", 0: "asdf"}
-    assert d != ["asdf", "fdsa"]
-    assert d != ["fdsa", "asdf"]
-    assert d != ["2"]
+    assert d2 == {1: "fdsa", 0: "asdf"}
+    assert d != d2
     assert OrderedDictPlus() == {}
     assert OrderedDictPlus() != []
 
+    d3 = DictPlus({1: "fdsa", 0: "asdf"})
+    assert d != d3
+    assert d3 == d
+
+
+def test_ordereddictplus_fromkeys():
+    assert dict.fromkeys(["a", "b", "c"]) == DictPlus.fromkeys(["a", "b", "c"])
+    assert dict.fromkeys(["a", "b", "c"], 10) == DictPlus.fromkeys(["a", "b", "c"], 10)
 
 # # .squish
 # d = OrderedDictPlus()
@@ -423,10 +536,14 @@ tests = [
     test_orderediterable___gt__,
 
     # DictPlus tests
+    test_dictplus___eq__,
+    test_dictplus_fromkeys,
 
     # OrderedDictPlus tests
     test_ordereddictplus___init__,
-    test_ordereddictplus___eq__]
+    test_ordereddictplus___eq__,
+    test_ordereddictplus_fromkeys,
+]
 
 results = {}
 pass_count = 0
@@ -439,10 +556,11 @@ for test in tests:
         results[name] = "Passed"
         pass_count = pass_count + 1
     except Exception as e:
-        results[name] = "{}: \'{}\'".format(e.__class__.__name__, str(e))
+        results[name] = "{}: {}".format(e.__class__.__name__, str(e))
+        raise e
     total_count = total_count + 1
 
 for k, v in results.items():
     print("{}:\n{}\n".format(k, v))
 
-print("Passed: {} Total: {} -- {}%".format(pass_count, total_count, round((pass_count/total_count), 4)))
+print("Passed: {} Total: {} - {}%".format(pass_count, total_count, round((pass_count/total_count), 4)))

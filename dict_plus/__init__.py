@@ -44,7 +44,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             raise KeyError("Key '{}' already exists!".format(element.id))
 
         self._elements.insert(len(self), element)  # Just add to the end of the iterable
-        self._indexes[element.id] = element.value
+        self._indexes[element.id] = len(self)-1
         return element
 
     def get(self, k, v_alt=None):
@@ -64,9 +64,16 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
         If key is not found, d is returned if given, otherwise KeyError is raised
         """
+        # Don't care about order, so we move the last element to the position of the removed
+        # element, remove the index to the popped element
         if k in self._indexes:
-            raise NotImplementedError
-            # TODO swap here
+            last_el = self._elements.pop(-1)
+            el_idx = self._indexes[k]
+            element = self._elements[el_idx]
+            self._elements[el_idx] = last_el
+            self._indexes[last_el.id] = el_idx
+            self._indexes.pop(k)
+            return element.value
         elif v_alt:
             return v_alt
         raise KeyError("Key '{}' not found!".format(k))
@@ -77,8 +84,10 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         2-tuple; but raise KeyError if D is empty.
         """
         if self._indexes == {}:
-            raise NotImplementedError  # TODO
+            raise KeyError("Can't .popitem, dict is empty!")
         k, v = self._elements.pop(-1).parts()
+        self._indexes.pop(k)
+
         return k, v
 
     def unupdate(self, e=None, **kwargs):
@@ -134,10 +143,9 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         i._indexes = self._indexes.copy()
         return i
 
-    @staticmethod  # known case
-    def fromkeys(*args, **kwargs):  # real signature unknown
-        """ Returns a new dict with keys from iterable and values equal to value. """
-        raise NotImplementedError
+    @staticmethod
+    def fromkeys(sequence, value=None):
+        raise NotImplementedError("Can't call .fromkeys() on Iterator!")
 
     def items(self):
         """ D.items() -> a set-like object providing a view on D's items """
@@ -160,6 +168,9 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         for el in self._elements:
             d[el.id] = el.value
         return d
+
+    def swap(self, k1, k2):
+        raise NotImplementedError
 
     ##
     # @staticmethod  # known case of __new__
@@ -263,7 +274,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         raise NotImplementedError
 
 
-class OrderedIterable(Iterable):  # dict): # TODO CHANGE ME BACK DOESNT DEBUG FOR SOME REASON
+class OrderedIterable(Iterable):
     def _update_indexes(self, from_idx):  # TODO Use from_idx to optimize
         self._indexes = {}
         for idx, el in enumerate(self._elements):
