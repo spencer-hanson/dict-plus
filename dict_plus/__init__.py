@@ -44,7 +44,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             self._indexes[el.id] = idx
 
     def insert(self, index, obj):
-        element = self._eltype(obj=obj)
+        element = self._eltype(obj)
         if element.id in self._indexes:
             raise KeyError("Key '{}' already exists!".format(element.id))
 
@@ -74,9 +74,12 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         if k in self._indexes:
             last_el = self._elements.pop(-1)
             el_idx = self._indexes[k]
-            element = self._elements[el_idx]
-            self._elements[el_idx] = last_el
-            self._indexes[last_el.id] = el_idx
+            if el_idx != len(self):
+                element = self._elements[el_idx]
+                self._elements[el_idx] = last_el
+                self._indexes[last_el.id] = el_idx
+            else:
+                element = last_el
             self._indexes.pop(k)
             return element.value
         elif v_alt:
@@ -130,7 +133,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     def map(self, func):
         for i in range(0, len(self)):
             idx = self._indexes.pop(self._elements[i].id)
-            self._elements[i] = self._eltype(obj=func(*self._elements[i].parts()))
+            self._elements[i] = self._eltype(func(*self._elements[i].parts()))
             self._indexes[self._elements[i].id] = idx
 
     def rekey(self, func):
@@ -199,7 +202,6 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     def expand(self, keys, func):
         raise NotImplementedError
 
-    # TODO: Give default plus behavior, expected from adding two dicts together, d1+d2 = d1.update(d2)
     def plus(self, other, func=None):
         if not isinstance(other, Iterable):
             other = self.__init__(other)
@@ -209,12 +211,17 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
                 return e1
         for i in range(0, min(len(self), len(other))):
             ep = func(self._elements[i], other.atindex(i))
-            self._elements[i] = self._eltype(obj=ep)
+            if ep:  # If the func returns 'None' don't set anything
+                self._elements[i] = self._eltype(ep)
+
         return self
 
-    # Same with minus TODO
     def minus(self, other, func_inv=None):
-        raise NotImplementedError
+        if not func_inv:
+            def func_inv(e1, e2):
+                self.pop(e2.id)
+                return None
+        return self.plus(other, func_inv)
 
     def chop(self, func):
         raise NotImplementedError
@@ -229,7 +236,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         tmp_el = self._elements[0]
         for el in self._elements[1:]:
             result = func(tmp_el, el)
-            tmp_el = self._eltype(obj=result)
+            tmp_el = self._eltype(result)
         return tmp_el
 
     def fold_right(self, func):
@@ -239,7 +246,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         tmp_el = self._elements[-1]
         for idx in range(len(self._elements) - 1, 0, -1):
             result = func(tmp_el, self._elements[idx - 1])
-            tmp_el = self._eltype(obj=result)
+            tmp_el = self._eltype(result)
         return tmp_el
 
     def multiply(self, iterable, func):
@@ -357,7 +364,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 class OrderedIterable(Iterable):
 
     def insert(self, index, obj):
-        element = self._eltype(obj=obj)
+        element = self._eltype(obj)
         if element.id in self._indexes:
             raise KeyError("Key '{}' already exists!".format(element.id))
 
@@ -381,9 +388,9 @@ class OrderedIterable(Iterable):
 
 
 class Element(object):
-    def __init__(self, _id=None, value=None, obj=None):
-        if obj:
-            self.id, self.value = self.parse_object(obj)
+    def __init__(self, _id=None, value=None):
+        if _id and not value:
+            self.id, self.value = self.parse_object(_id)
         else:
             if _id is None or value is None:
                 raise TypeError("Invalid args, must provide id and value or object")

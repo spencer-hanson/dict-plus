@@ -40,10 +40,10 @@ def test_keyvaluepair___eq__():
 
 
 def test_element___init__():
-    ex(Element, TypeError, "id", None)
-    ex(Element, TypeError, None, "value")
-    assert KeyValuePair(0, 1) == KeyValuePair(obj=(0, 1))
-    assert KeyValuePair(obj=KeyValuePair(0, 1)) == KeyValuePair(obj=(0, 1))
+    ex(KeyValuePair, InvalidElementTypeException, "id", None)
+    ex(KeyValuePair, TypeError, None, "value")
+    assert KeyValuePair(0, 1) == KeyValuePair((0, 1))
+    assert KeyValuePair(KeyValuePair(0, 1)) == KeyValuePair((0, 1))
 
 
 def test_element_parts():
@@ -89,6 +89,10 @@ def test_iterable_pop():
     d = DictPlus({"a": "b", "c": "d"})
     assert d.pop("a") == "b"
     assert d == {"c": "d"}
+    d.insert(1, ("a", "b"))
+    assert d.pop("a") == "b"
+    assert d.pop("c") == "d"
+    ex(d.pop, KeyError, "a")
 
 
 def test_iterable_popitem():
@@ -312,15 +316,41 @@ def test_iterable_plus():
     assert d1.plus(d2) == d3
     assert d1 == d3
     d1 = DictPlus(o1)
-    t = d1.plus(d2, func_ee2e)
-    assert t == {"ac": 4, "bd": 6}
+    assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6}
     d1 = DictPlus(o1)
     d1.insert(-1, ("g", 6))
     assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6, "g": 6}
 
 
 def test_iterable_minus():
-    raise NotImplementedError
+    o1 = {"a": 1, "b": 2}
+    o2 = {"c": 3, "d": 4}
+    o3 = {"a": 1, "b": 2, "c": 3, "d": 4}
+    d1 = DictPlus(o1)
+    d2 = DictPlus(o2)
+    d3 = DictPlus(o3)
+
+    def func_ee2e(e1, e2):
+        return e1.id + e2.id, e1.value + e2.value
+
+    def func_inv_ee2e(e1, e2):
+        return e1.id[:-1], e1.value - e2.value
+
+    assert d3.minus(d2) == d1
+    d3 = DictPlus(o3)
+    assert d3.minus(d1) == d2
+    assert d2 == d3
+    assert d3.plus(d1) == o3
+
+    assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6}
+    assert d1.minus(d2, func_inv_ee2e) == o1
+    d1.insert(-1, ("g", 6))
+    assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6, "g": 6}
+    assert d1.minus(d2, func_inv_ee2e) == {"a": 1, "b": 2, "g": 6}
+    d1.pop("g")
+    assert d1 == o1
+    assert d2 == o2
+    assert d3 == o3
 
 
 def test_iterable_chop():
