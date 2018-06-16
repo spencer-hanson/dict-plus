@@ -1,4 +1,4 @@
-from dict_plus import Element, Iterable, OrderedIterable, KeyValuePair
+from dict_plus import Iterable, OrderedIterable, KeyValuePair
 from dict_plus.exceptions import InvalidElementTypeException
 
 

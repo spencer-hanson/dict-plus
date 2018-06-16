@@ -38,13 +38,18 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             for k, v in kwargs.items():
                 self[k] = v
 
+    def _update_indexes(self, from_idx):  # TODO Use from_idx to optimize
+        self._indexes = {}
+        for idx, el in enumerate(self._elements):
+            self._indexes[el.id] = idx
+
     def insert(self, index, obj):
         element = self._eltype(obj=obj)
         if element.id in self._indexes:
             raise KeyError("Key '{}' already exists!".format(element.id))
 
         self._elements.insert(len(self), element)  # Just add to the end of the iterable
-        self._indexes[element.id] = len(self)-1
+        self._indexes[element.id] = len(self) - 1
         return element
 
     def get(self, k, v_alt=None):
@@ -123,13 +128,16 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             self.insert(len(self), (k, kwargs[k]))
 
     def map(self, func):
-        mapped = map(func, self._elements)
-        self.clear()
-        for element in mapped:
-            self.insert(0, element)
+        for i in range(0, len(self)):
+            idx = self._indexes.pop(self._elements[i].id)
+            self._elements[i] = self._eltype(obj=func(*self._elements[i].parts()))
+            self._indexes[self._elements[i].id] = idx
 
     def rekey(self, func):
-        raise NotImplementedError
+        for i in range(0, len(self)):
+            idx = self._indexes.pop(self._elements[i].id)
+            self._elements[i].id = func(self._elements[i].id)
+            self._indexes[self._elements[i].id] = idx
 
     def clear(self):
         """ D.clear() -> None.  Remove all items from D. """
@@ -143,17 +151,20 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         i._indexes = self._indexes.copy()
         return i
 
+    def atindex(self, int_val):
+        return self.getitem(self._elements[int_val].id)
+
     @staticmethod
     def fromkeys(sequence, value=None):
         raise NotImplementedError("Can't call .fromkeys() on Iterator!")
 
     def items(self):
         """ D.items() -> a set-like object providing a view on D's items """
-        raise NotImplementedError
+        return set([el.parts() for el in self._elements])
 
     def keys(self):
         """ D.keys() -> a set-like object providing a view on D's keys """
-        return [el.id for el in self._elements]
+        return set([el.id for el in self._elements])
 
     def values(self):
         """ D.values() -> an object providing a view on D's values """
@@ -161,7 +172,11 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     def setdefault(self, k, d=None):
         """ D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D """
-        raise NotImplementedError
+        if k in self._indexes:
+            return self._elements[self._indexes[k]]
+        else:
+            self[k] = d
+            return d
 
     def todict(self):
         d = {}
@@ -170,6 +185,79 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return d
 
     def swap(self, k1, k2):
+        tmp_val = self._elements[self._indexes[k1]]
+        self._elements[self._indexes[k1]] = self._elements[self._indexes[k2]]
+        self._elements[self._indexes[k2]] = tmp_val
+
+    def squish(self, keys, new_keys, func):
+        a = [self.getitem(key) for key in keys]
+        func(*a)
+        tw = 2
+        raise NotImplementedError
+
+    # expand any number of keys into a larger amount of keypairs
+    def expand(self, keys, func):
+        raise NotImplementedError
+
+    # TODO: Give default plus behavior, expected from adding two dicts together, d1+d2 = d1.update(d2)
+    def plus(self, other, func=None):
+        if not isinstance(other, Iterable):
+            other = self.__init__(other)
+        if not func:
+            def func(e1, e2):
+                self.insert(-1, e2)
+                return e1
+        for i in range(0, min(len(self), len(other))):
+            ep = func(self._elements[i], other.atindex(i))
+            self._elements[i] = self._eltype(obj=ep)
+        return self
+
+    # Same with minus TODO
+    def minus(self, other, func_inv=None):
+        raise NotImplementedError
+
+    def chop(self, func):
+        raise NotImplementedError
+
+    def funcmap(self, f, g):
+        raise NotImplementedError
+
+    def fold_left(self, func):
+        if len(self._elements) < 2:
+            return self  # Can't fold unless we have at least 2 elements
+
+        tmp_el = self._elements[0]
+        for el in self._elements[1:]:
+            result = func(tmp_el, el)
+            tmp_el = self._eltype(obj=result)
+        return tmp_el
+
+    def fold_right(self, func):
+        if len(self._elements) < 2:
+            return self  # Can't fold unless we have at least 2 elements
+
+        tmp_el = self._elements[-1]
+        for idx in range(len(self._elements) - 1, 0, -1):
+            result = func(tmp_el, self._elements[idx - 1])
+            tmp_el = self._eltype(obj=result)
+        return tmp_el
+
+    def multiply(self, iterable, func):
+        raise NotImplementedError
+
+    def divide(self, iterable, func_inv):
+        raise NotImplementedError
+
+    def __le__(self, other):
+        raise NotImplementedError
+
+    def __lt__(self, other):
+        raise NotImplementedError
+
+    def __ge__(self, other):
+        raise NotImplementedError
+
+    def __gt__(self, other):
         raise NotImplementedError
 
     ##
@@ -188,15 +276,30 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     #
     def __eq__(self, other):
         raise NotImplementedError("Can't equate Iterable instances!")
+
+    def __add__(self, other):
+        raise NotImplementedError
+
+    def __sub__(self, other):
+        raise NotImplementedError
+
+    def __mul__(self, other):
+        raise NotImplementedError
+
+    def __divmod__(self, other):  # TODO ???
+        raise NotImplementedError
+
     #
     # def __getattribute__(self, *args, **kwargs):  # real signature unknown
     #     """ Return getattr(self, name). """
     #     raise NotImplementedError
     #
 
-    def __getitem__(self, key):
+    # TODO: when checked for 'a in self', under 'object' superclass, it will call this method
+    # TODO over and over with keys '0, 1, 2, ...' without bound?
+    def __getitem__(self, k):
         """ x.__getitem__(y) <==> x[y] """
-        return self.get(key)
+        return self.get(k)
 
     def __setitem__(self, key, value):
         """ Set self[key] to value. """
@@ -249,38 +352,9 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     # squish any number of keys into a smaller amount of keypairs
     # f = (e_list) -> (new_e_list)
-    def squish(self, keys, new_keys, func):
-        a = [self.getitem(key) for key in keys]
-        func(*a)
-        tw = 2
-        raise NotImplementedError
-
-    # expand any number of keys into a larger amount of keypairs
-    def expand(self, keys, func):
-        raise NotImplementedError
-
-    # TODO: Give default plus behavior, expected from adding two dicts together, d1+d2 = d1.update(d2)
-    def plus(self, iterable):
-        raise NotImplementedError
-
-    # Same with minus TODO
-    def minus(self, iterable):
-        raise NotImplementedError
-
-    def chop(self, func):
-        raise NotImplementedError
-
-    def funcmap(self, f, g):
-        raise NotImplementedError
 
 
 class OrderedIterable(Iterable):
-    def _update_indexes(self, from_idx):  # TODO Use from_idx to optimize
-        self._indexes = {}
-        for idx, el in enumerate(self._elements):
-            self._indexes[el.id] = idx
-
-##
 
     def insert(self, index, obj):
         element = self._eltype(obj=obj)
@@ -304,45 +378,6 @@ class OrderedIterable(Iterable):
         elif v_alt:
             return v_alt
         raise KeyError("Key '{}' not found!".format(k))
-
-    def fold_left(self, func):
-        if len(self._elements) < 2:
-            return self  # Can't fold unless we have at least 2 elements
-
-        tmp_el = self._elements[0]
-        for el in self._elements[1:]:
-            result = func(tmp_el, el)
-            tmp_el = self._eltype(obj=result)
-        return tmp_el
-
-    def fold_right(self, func):
-        if len(self._elements) < 2:
-            return self  # Can't fold unless we have at least 2 elements
-
-        tmp_el = self._elements[-1]
-        for idx in range(len(self._elements)-1, 0, -1):
-            result = func(tmp_el, self._elements[idx-1])
-            tmp_el = self._eltype(obj=result)
-        return tmp_el
-
-    def multiply(self, iterable, func):
-        raise NotImplementedError
-
-    def divide(self, iterable, func_inv):
-        raise NotImplementedError
-
-    def __le__(self, other):
-        raise NotImplementedError
-
-    def __lt__(self, other):
-        raise NotImplementedError
-
-    def __ge__(self, other):
-        raise NotImplementedError
-
-    def __gt__(self, other):
-        raise NotImplementedError
-##
 
 
 class Element(object):
@@ -388,4 +423,3 @@ class KeyValuePair(Element):
             if k == self.id and v == self.value:
                 return True
         return super(KeyValuePair, self).__eq__(other)
-

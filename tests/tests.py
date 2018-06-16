@@ -9,7 +9,7 @@ def ex(f, ex_class, *args):
     except Exception as _e:
         assert _e.__class__ == ex_class
     else:
-        assert 2 != 2
+        assert 8 != 8
 
 
 ##################
@@ -97,8 +97,9 @@ def test_iterable_popitem():
     assert t == ("a", "b")
     ex(d.popitem, KeyError)
 
+
 def test_iterable_copy():
-    d = OrderedDictPlus()
+    d = DictPlus()
     d.insert(0, ("1", "2"))
     c = d.copy()
     assert d == c
@@ -106,11 +107,20 @@ def test_iterable_copy():
     assert d != c
 
 
+def test_iterable_atindex():
+    d = DictPlus({"a": 1, "b": 2})
+    assert d.atindex(0) == ("a", 1)
+    assert d.atindex(1) == ("b", 2)
+
+
 def test_iterable___getitem__():
     d = OrderedDictPlus()
     d.insert(0, ("1", "2"))
     assert d.get("1") == d["1"]
     assert d["1"] == "2"
+    # assert "1" in d
+    # assert "5" not in d  # TODO: Fix 'in' bug
+    ex(d.__getitem__, KeyError, "5")
 
 
 def test_iterable___setitem__():
@@ -144,10 +154,9 @@ def test_iterable_fromkeys():
 
 def test_iterable_items():
     d = DictPlus()
-    assert d.items() == []
+    assert d.items() == {}.items()
     d.insert(0, ("a", "b"))
-
-    assert d.items() == [("a", "b")]
+    assert d.items() == {"a": "b"}.items()
 
 
 def test_iterable_keys():
@@ -160,10 +169,10 @@ def test_iterable_keys():
 
 def test_iterable_values():
     d = DictPlus()
-    assert d.values() == {}.values()
+    assert d.values() == list({}.values())
     d.insert(0, ("a", 1))
     d.insert(1, ("b", 2))
-    assert d.values() == {"a": 1, "b": 2}.values()
+    assert d.values() == list({"a": 1, "b": 2}.values())
 
 
 def test_iterable_setdefault():
@@ -205,7 +214,7 @@ def test_iterable_update():
         assert d == {"1": "2", **dict(e), **kwargs}
         d.update({"1": "asdf"})
         assert d == {"1": "asdf", **dict(e), **kwargs}
-        assert d.keys() == ["1"] + list(dict(e).keys()) + list(kwargs.keys())
+        assert d.keys() == set(["1"] + list(dict(e).keys()) + list(kwargs.keys()))
         assert d.values() == ["asdf"] + list(dict(e).values()) + list(kwargs.values())
 
     subtest_iterable_update({"21": "12", "Y": "YZ"})
@@ -258,19 +267,19 @@ def test_iterable_map():
     d["a"] = 1
     d.update({"b": 2, "c": 3})
 
-    def func_e2e(e):
-        k, v = e.parts()
+    def func_e2e(k, v):
         return str(k) + "a", v * 2
 
-    def invfunc_e2e(e):
-        k, v = e.parts()
+    def invfunc_e2e(k, v):
         return str(k)[:-1], v / 2
 
     od = d.copy()
     d.map(func_e2e)
     assert d == {"aa": 2, "ba": 4, "ca": 6}
+    assert d.get("aa") == 2
     d.map(invfunc_e2e)
     assert d == od
+    assert d.get("a") == 1
 
 
 def test_iterable_rekey():
@@ -279,12 +288,35 @@ def test_iterable_rekey():
 
     def invfunc_k2k(k):
         return k[:-1]
-    
-    raise NotImplementedError
+    o = {"a": 1, "b": 2}
+    d = DictPlus(o)
+    d.rekey(func_k2k)
+    assert d == {"aa": 1, "ba": 2}
+    assert d.get("aa") == 1
+    d.rekey(invfunc_k2k)
+    assert d.get("a") == 1
+    assert d == o
 
 
 def test_iterable_plus():
-    raise NotImplementedError
+    o1 = {"a": 1, "b": 2}
+    o2 = {"c": 3, "d": 4}
+    o3 = {"a": 1, "b": 2, "c": 3, "d": 4}
+    d1 = DictPlus(o1)
+    d2 = DictPlus(o2)
+    d3 = DictPlus(o3)
+
+    def func_ee2e(e1, e2):
+        return e1.id + e2.id, e1.value + e2.value
+
+    assert d1.plus(d2) == d3
+    assert d1 == d3
+    d1 = DictPlus(o1)
+    t = d1.plus(d2, func_ee2e)
+    assert t == {"ac": 4, "bd": 6}
+    d1 = DictPlus(o1)
+    d1.insert(-1, ("g", 6))
+    assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6, "g": 6}
 
 
 def test_iterable_minus():
@@ -307,51 +339,113 @@ def test_iterable_funcmap():
     raise NotImplementedError
 
 
-##################
-
-
-def subtest_orderediterable_fold(fold_func):
+def subtest_iterable_fold(fold_func):
     def func_ee2e(e1, e2):
         return e1.id + e2.id, e1.value + e2.value
 
     def func2_ee2e(*es):
         return KeyValuePair(es[0].id + es[1].id, es[0].value + es[1].value)
 
-    def subsubtest_iterable_fold_left(di):
+    def subsubtest_iterable_fold(di):
         g = getattr(di, fold_func)(func_ee2e)
         gp = getattr(di, fold_func)(func2_ee2e)
         assert gp == g
         return g
 
-    d = OrderedDictPlus()
-    assert subsubtest_iterable_fold_left(d) == {}
+    d = DictPlus()
+    assert subsubtest_iterable_fold(d) == {}
     d.insert(0, (1, 1))
-    assert subsubtest_iterable_fold_left(d) == {1: 1}
+    assert subsubtest_iterable_fold(d) == {1: 1}
     d.insert(1, (2, 2))
-    assert subsubtest_iterable_fold_left(d) == {3: 3}
+    assert subsubtest_iterable_fold(d) == {3: 3}
 
 
-def test_orderediterable_fold_left():
+def test_iterable_fold_left():
     def func_ee2e(e1, e2):
         return e1.id + e2.id, e1.value + e2.value
 
-    subtest_orderediterable_fold("fold_left")
-    d = OrderedDictPlus()
+    subtest_iterable_fold("fold_left")
+    d = DictPlus()
     d.update([(0, "a"), (1, "b"), (2, "c")])
     r = d.fold_left(func_ee2e)
     assert r != d.fold_right(func_ee2e)
     assert r == {3: "abc"}
 
 
-def test_orderediterable_fold_right():
+def test_iterable_fold_right():
     def func_ee2e(e1, e2):
         return e1.id + e2.id, e1.value + e2.value
 
-    subtest_orderediterable_fold("fold_right")
-    d = OrderedDictPlus()
+    subtest_iterable_fold("fold_right")
+    d = DictPlus()
     d.update([(0, "a"), (1, "b"), (2, "c")])
     r = d.fold_right(func_ee2e)
     assert r == {3: "cba"}
+
+
+def test_iterable_multiply():
+    raise NotImplementedError
+
+
+def test_iterable_divide():
+    raise NotImplementedError
+
+
+def test_iterable___le__():
+    raise NotImplementedError
+
+
+def test_iterable___lt__():
+    raise NotImplementedError
+
+
+def test_iterable___ge__():
+    raise NotImplementedError
+
+
+def test_iterable___gt__():
+    raise NotImplementedError
+
+
+def test_iterable___add__():
+    o1 = {"a": 1, "b": 2}
+    o2 = {"c": 3, "d": 4}
+
+    o3 = o1.copy()
+    o3.update(o2)
+
+    d1 = DictPlus(o1)
+    d2 = DictPlus(o2)
+    d3 = d1 + d2
+
+    assert d1 + d3 == d3
+    assert d1 + d2 == o3
+    assert d1 + o2 == o3
+    assert d2 + o1 == o3
+
+
+def test_iterable___sub__():
+    o1 = {"a": 1, "b": 2}
+    o2 = {"c": 3, "d": 4}
+
+    o3 = o1.copy()
+    o3.update(o2)
+
+    d3 = DictPlus(o3)
+    d2 = DictPlus(o2)
+    d1 = DictPlus(o1)
+
+    assert d3 - d2 == d1
+    assert d3 - o2 == o1
+    assert d3 - o2 - o1 == {}
+    ex(d3.__sub__, KeyError, {"g": 5})
+    ex(d3.__sub__, KeyError, {"a": 20})
+
+    assert d1 == o1
+    assert d2 == o2
+    assert d3 == o3
+
+##################
 
 
 def test_orderediterable_insert():
@@ -372,29 +466,6 @@ def test_orderediterable_pop():
     assert d.pop("1") == "2"
     assert d.pop("1", "2") == "2"
 
-
-def test_orderediterable_multiply():
-    raise NotImplementedError
-
-
-def test_orderediterable_divide():
-    raise NotImplementedError
-
-
-def test_orderediterable___le__():
-    raise NotImplementedError
-
-
-def test_orderediterable___lt__():
-    raise NotImplementedError
-
-
-def test_orderediterable___ge__():
-    raise NotImplementedError
-
-
-def test_orderediterable___gt__():
-    raise NotImplementedError
 
 #################
 
@@ -500,6 +571,7 @@ tests = [
     test_iterable_pop,
     test_iterable_popitem,
     test_iterable_copy,
+    test_iterable_atindex,
     test_iterable___setitem__,
     test_iterable___getitem__,
     test_iterable___len__,
@@ -522,18 +594,18 @@ tests = [
     test_iterable_squish,
     test_iterable_expand,
     test_iterable_funcmap,
+    test_iterable_fold_left,
+    test_iterable_fold_right,
+    test_iterable_multiply,
+    test_iterable_divide,
+    test_iterable___le__,
+    test_iterable___lt__,
+    test_iterable___ge__,
+    test_iterable___gt__,
 
     # OrderedIterable tests
-    test_orderediterable_fold_left,
-    test_orderediterable_fold_right,
     test_orderediterable_insert,
     test_orderediterable_pop,
-    test_orderediterable_multiply,
-    test_orderediterable_divide,
-    test_orderediterable___le__,
-    test_orderediterable___lt__,
-    test_orderediterable___ge__,
-    test_orderediterable___gt__,
 
     # DictPlus tests
     test_dictplus___eq__,
