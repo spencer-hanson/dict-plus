@@ -27,6 +27,7 @@ def test_keyvaluepair_parse_object():
 
         assert parse(KeyValuePair(_id, val)) == (_id, val)
         assert parse(KeyValuePair(val, _id)) == (val, _id)
+
     subtest_keyvaluepair_parse_object("a", "b")
     subtest_keyvaluepair_parse_object("a", 1)
     subtest_keyvaluepair_parse_object(1, 1)
@@ -292,6 +293,7 @@ def test_iterable_rekey():
 
     def invfunc_k2k(k):
         return k[:-1]
+
     o = {"a": 1, "b": 2}
     d = DictPlus(o)
     d.rekey(func_k2k)
@@ -354,7 +356,23 @@ def test_iterable_minus():
 
 
 def test_iterable_chop():
-    raise NotImplementedError
+    o = {
+        0: "a", 1: "b", 2: "c",
+        3: "d", 4: "e", 5: "f",
+        6: "g", 7: "h"
+    }
+    d = DictPlus(o)
+
+    def func_chop(k, v):
+        return int(k % 2 != 0)
+
+    chopped = d.chop(func_chop)
+    assert chopped[0] == {0: "a", 2: "c", 4: "e", 6: "g"}
+    assert chopped[1] == {1: "b", 3: "d", 5: "f", 7: "h"}
+    d2 = DictPlus()
+    d2.update(chopped[0])
+    d2.update(chopped[1])
+    assert d2 == o
 
 
 def test_iterable_squish():
@@ -475,6 +493,7 @@ def test_iterable___sub__():
     assert d2 == o2
     assert d3 == o3
 
+
 ##################
 
 
@@ -574,6 +593,7 @@ def test_ordereddictplus_fromkeys():
     assert dict.fromkeys(["a", "b", "c"]) == DictPlus.fromkeys(["a", "b", "c"])
     assert dict.fromkeys(["a", "b", "c"], 10) == DictPlus.fromkeys(["a", "b", "c"], 10)
 
+
 # # .squish
 # d = OrderedDictPlus()
 # d.insert(0, ("1", "2"))
@@ -665,4 +685,4 @@ for test in tests:
 for k, v in results.items():
     print("{}:\n{}\n".format(k, v))
 
-print("Passed: {} Total: {} - {}%".format(pass_count, total_count, round((pass_count/total_count), 4)))
+print("Passed: {} Total: {} - {}%".format(pass_count, total_count, round((pass_count / total_count), 4)))

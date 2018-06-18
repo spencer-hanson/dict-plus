@@ -224,7 +224,18 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return self.plus(other, func_inv)
 
     def chop(self, func):
-        raise NotImplementedError
+        chopped = []
+        data = {}
+        for el in self._elements:
+            idx = func(el.id, el.value)
+            if idx in data:
+                data[idx][el.id] = el.value
+            else:
+                data[idx] = {el.id: el.value}
+        for k, v in data.items():
+            chopped.insert(k, v)
+
+        return chopped
 
     def funcmap(self, f, g):
         raise NotImplementedError
