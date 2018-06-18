@@ -192,19 +192,23 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         self._elements[self._indexes[k1]] = self._elements[self._indexes[k2]]
         self._elements[self._indexes[k2]] = tmp_val
 
-    def squish(self, keys, new_keys, func):
-        a = [self.getitem(key) for key in keys]
-        func(*a)
-        tw = 2
-        raise NotImplementedError
+    def squish(self, keys, new_key, func):
+        vals = []
+        for key in keys:
+            vals.append(self.pop(key))
+        self.insert(-1, (new_key, func(vals)))
 
     # expand any number of keys into a larger amount of keypairs
-    def expand(self, keys, func):
-        raise NotImplementedError
+    def expand(self, key, new_keys, func_inv):
+        vals = func_inv(self.pop(key))
+        if len(vals) != len(new_keys):
+            raise IndexError("Number of values returned from the function != number of keys given!")
+        for idx in range(0, len(new_keys)):
+            self.insert(-1, (new_keys[idx], vals[idx]))
 
     def plus(self, other, func=None):
         if not isinstance(other, Iterable):
-            other = self.__init__(other)
+            other = self.__class__(other)
         if not func:
             def func(e1, e2):
                 self.insert(-1, e2)
@@ -220,7 +224,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         if not func_inv:
             def func_inv(e1, e2):
                 self.pop(e2.id)
-                return None
+                return None  # Explicitly return None for example purposes
         return self.plus(other, func_inv)
 
     def chop(self, func):
@@ -237,7 +241,13 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
         return chopped
 
-    def funcmap(self, f, g):
+    # Combine self and other with function 'f' using mapping 'g'
+    def funcmap(self, other, f, g):
+        if not isinstance(other, Iterable):
+            other = self.__init__(other)
+
+        for el in self._elements:
+            pass
         raise NotImplementedError
 
     def fold_left(self, func):

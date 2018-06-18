@@ -321,7 +321,7 @@ def test_iterable_plus():
     assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6}
     d1 = DictPlus(o1)
     d1.insert(-1, ("g", 6))
-    assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6, "g": 6}
+    assert d1.plus(o2, func_ee2e) == {"ac": 4, "bd": 6, "g": 6}
 
 
 def test_iterable_minus():
@@ -376,11 +376,23 @@ def test_iterable_chop():
 
 
 def test_iterable_squish():
-    raise NotImplementedError
+    d = DictPlus({"1": "8", "asdf": "[E]"})
+
+    d.squish(["1", "asdf"], "tt", lambda x: x[0]+x[1])
+    assert d == {"tt": "8[E]"}
 
 
 def test_iterable_expand():
-    raise NotImplementedError
+    o = {"tt": "8[E]"}
+    o2 = {"1": "8", "asdf": "[E]"}
+
+    d = DictPlus({"1": "8", "asdf": "[E]"})
+    d.squish(["1", "asdf"], "tt", lambda x: x[0]+x[1])
+    assert d == o
+
+    d.expand("tt", ["1", "asdf"], lambda x: (x[0], x[1:]))
+    assert d == o2
+    ex(d.expand, IndexError, "asdf", ["a", "sdf"], lambda x: x)
 
 
 def test_iterable_funcmap():
@@ -593,15 +605,6 @@ def test_ordereddictplus_fromkeys():
     assert dict.fromkeys(["a", "b", "c"]) == DictPlus.fromkeys(["a", "b", "c"])
     assert dict.fromkeys(["a", "b", "c"], 10) == DictPlus.fromkeys(["a", "b", "c"], 10)
 
-
-# # .squish
-# d = OrderedDictPlus()
-# d.insert(0, ("1", "2"))
-# d.insert(0, ("asdf", "[E]"))
-#
-# d.squish(["1", "asdf"], ["tt"], func2_ee2e)
-# assert d == {"tt": "2[E]"}
-# tw = 2
 
 
 # KeyValuePair tests
