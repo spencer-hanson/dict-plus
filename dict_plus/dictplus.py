@@ -14,12 +14,8 @@ class DictPlus(Iterable):
         return d
 
     def __eq__(self, other):
-        result = True
-
-        if other == {} and self._elements == []:
-            return True
-
-        if not hasattr(other, "__len__") or len(other) != self.__len__():
+        result = super(DictPlus, self).__eq__(other)
+        if not result:
             return False
 
         if isinstance(other, Iterable):
@@ -30,18 +26,8 @@ class DictPlus(Iterable):
                         if self._elements[i] == other._elements[j]:
                             checked.append(j)
             if set(range(0, len(other))) != set(checked):
-                result = False
-            return result
-        elif isinstance(other, dict):
-            for el in self._elements:
-                if el.id not in other:
-                    result = False
-                    break
-                else:
-                    result = result and el.value == other[el.id]
-            return result
-        else:
-            return False
+                return False
+        return True
 
 
 class OrderedDictPlus(OrderedIterable):
@@ -56,55 +42,19 @@ class OrderedDictPlus(OrderedIterable):
         return d
 
     def __eq__(self, other):
-        result = True
-
-        if other == {} and self._elements == []:
-            return True
-
-        if not hasattr(other, "__len__") or len(other) != self.__len__():
+        result = super(OrderedDictPlus, self).__eq__(other)
+        if not result:
             return False
 
         if isinstance(other, Iterable):
             for i in range(0, self.__len__()):
                 if other._elements[i] != self._elements[i]:
-                    result = False
-                    break
-            return result
-        elif isinstance(other, dict):
-            for el in self._elements:
-                if el.id not in other:
-                    result = False
-                    break
-                else:
-                    result = result and el.value == other[el.id]
-            return result
-        else:
-            return False
+                    return False
+        return True
 
     # def __eq__(self, other):
     #     result = True
-    #
-    #     if (other == {} or other == []) and self._elements == []:
-    #         return True
-    #
-    #     if not hasattr(other, "__len__") or len(other) != self.__len__():
-    #         return False
-    #
-    #     if isinstance(other, Iterable):
-    #         for i in range(0, self.__len__()):
-    #             if other._elements[i] != self._elements[i]:
-    #                 result = False
-    #                 break
-    #         return result
-    #     elif isinstance(other, dict):
-    #         for el in self._elements:
-    #             if el.id not in other:
-    #                 result = False
-    #                 break
-    #             else:
-    #                 result = result and el.value == other[el.id]
-    #         return result
-    #     elif isinstance(other, list):
+    #     if isinstance(other, list):
     #         for i in range(0, self.__len__()):
     #             idx = self._elements[i].id
     #             if not isinstance(idx, int):

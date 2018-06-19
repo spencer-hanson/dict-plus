@@ -274,10 +274,11 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             tmp_el = self._eltype(result)
         return tmp_el
 
-    def multiply(self, iterable, func):
+    def multiply(self, other, func):
+
         raise NotImplementedError
 
-    def divide(self, iterable, func_inv):
+    def divide(self, other, func_inv):
         raise NotImplementedError
 
     def __le__(self, other):
@@ -307,7 +308,20 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     #     raise NotImplementedError
     #
     def __eq__(self, other):
-        raise NotImplementedError("Can't equate Iterable instances!")
+        if other == {} and self._elements == []:
+            return True
+
+        if not hasattr(other, "__len__") or len(other) != self.__len__():
+            return False
+
+        if isinstance(other, dict):
+            for el in self._elements:
+                if el.id not in other:
+                    return False
+                else:
+                    if not el.value == other[el.id]:
+                        return False
+        return True
 
     def __add__(self, other):
         raise NotImplementedError
