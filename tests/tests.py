@@ -15,6 +15,35 @@ def ex(f, ex_class, *args):
 ##################
 
 
+def test_iterableindex():
+    class A(object):
+        pass
+
+    class B(object):
+        __hash__ = None
+
+    ii = Iterable.IterableIndex()
+
+    things_to_hash = [
+        [1, 2, 3, 4],
+        [1, 2, 3, "4"],
+        [[1, 2, 3, "4"], [1, 2, 3, 4]],
+        [[A(), 1, "4"], {"a": A(), "b": B()}],
+        {"a": A(), "b": [B(), B(), 2]},
+        "1",
+        {"A", "B", "C"},
+        50,
+        False,
+        -25,
+    ]
+
+    for idx, thing in enumerate(things_to_hash):
+        ii.set(thing, idx)
+
+
+##################
+
+
 def test_keyvaluepair_parse_object():
     def subtest_keyvaluepair_parse_object(_id, val):
         parse = KeyValuePair.parse_object
@@ -84,7 +113,7 @@ def test_iterable_insert():
     d = DictPlus()
     assert d.insert(12345, ("a", "g"))
     ex(d.insert, KeyError, 12345, ("a", "b"))
-    assert d._indexes["a"] == 0
+    assert d._indexes.get("a") == 0
     assert d._elements[0] == ("a", "g")
 
 
@@ -666,8 +695,11 @@ def test_ordereddictplus_fromkeys():
     assert dict.fromkeys(["a", "b", "c"], 10) == DictPlus.fromkeys(["a", "b", "c"], 10)
 
 
-# KeyValuePair tests
 tests = [
+    # IterableIndex tests
+    test_iterableindex,
+
+    # KeyValuePair tests
     test_keyvaluepair_parse_object,
     test_keyvaluepair___eq__,
 
@@ -741,7 +773,8 @@ for test in tests:
         pass_count = pass_count + 1
     except Exception as e:
         results[name] = "{}: {}".format(e.__class__.__name__, str(e))
-        raise e
+        if e.__class__ != NotImplementedError:
+            raise e
     total_count = total_count + 1
 
 for k, v in results.items():

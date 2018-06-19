@@ -4,6 +4,51 @@ from dict_plus.exceptions import *
 class Iterable(object):  # TODO CHANGE ME TO dict after debug
     # __hash__ = None  # TODO ?
 
+    class IterableIndex(object):
+        """
+        Index object to keep track of 'unhashable' types
+        """
+        def __make_hash(self, o):
+            if o.__hash__:
+                return hash(o)
+            elif isinstance(o, list):
+                hashes = []
+                for el in o:
+                    hashes.append(self.__make_hash(el))
+                return hash(str(hashes) + str(o.__class__))
+            elif isinstance(o, dict):
+                return self.__make_hash(o.items())
+            elif isinstance(o, set):
+                return hash(str(self.__make_hash(list(o))) + str(o.__class__))
+            elif hasattr(o, "__str__"):
+                return hash(str(o) + str(o.__class__))
+            else:
+                raise TypeError("Can't hash, submit an issue!")
+
+        def __init__(self, data=None):
+            self.__data = {} if not data else data.copy()
+
+        def get(self, key):
+            return self.__data[self.__make_hash(key)]
+
+        def set(self, key, value):
+            self.__data[self.__make_hash(key)] = value
+
+        def has(self, key):
+            if self.__make_hash(key) in self.__data:
+                return True
+            else:
+                return False
+
+        def pop(self, key):
+            return self.__data.pop(self.__make_hash(key))
+
+        def isempty(self):
+            return self.__data == {}
+
+        def copy(self):
+            return Iterable.IterableIndex(self.__data)
+
     def __init__(self, data=None, element_type=None, **kwargs):
         """
         dict() -> new empty dictionary
@@ -24,7 +69,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
         self._elements = []
         self._eltype = element_type
-        self._indexes = {}
+        self._indexes = Iterable.IterableIndex()
 
         if isinstance(data, dict):
             self.update(data)
@@ -39,17 +84,17 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
                 self[k] = v
 
     def _update_indexes(self, from_idx):  # TODO Use from_idx to optimize
-        self._indexes = {}
+        self._indexes = Iterable.IterableIndex()
         for idx, el in enumerate(self._elements):
-            self._indexes[el.id] = idx
+            self._indexes.set(el.id, idx)
 
     def insert(self, index, obj):
         element = self._eltype(obj)
-        if element.id in self._indexes:
+        if self._indexes.has(element.id):
             raise KeyError("Key '{}' already exists!".format(element.id))
 
         self._elements.insert(len(self), element)  # Just add to the end of the iterable
-        self._indexes[element.id] = len(self) - 1
+        self._indexes.set(element.id, len(self) - 1)
         return element
 
     def get(self, k, v_alt=None):
@@ -57,8 +102,8 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return self.getitem(k, v_alt).value
 
     def getitem(self, k, v_alt=None):
-        if k in self._indexes:
-            return self._elements[self._indexes[k]]
+        if self._indexes.has(k):
+            return self._elements[self._indexes.get(k)]
         elif v_alt:
             return self._eltype(k, v_alt)
         else:
@@ -71,13 +116,13 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         """
         # Don't care about order, so we move the last element to the position of the removed
         # element, remove the index to the popped element
-        if k in self._indexes:
+        if self._indexes.has(k):
             last_el = self._elements.pop(-1)
-            el_idx = self._indexes[k]
+            el_idx = self._indexes.get(k)
             if el_idx != len(self):
                 element = self._elements[el_idx]
                 self._elements[el_idx] = last_el
-                self._indexes[last_el.id] = el_idx
+                self._indexes.set(last_el.id, el_idx)
             else:
                 element = last_el
             self._indexes.pop(k)
@@ -91,7 +136,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         D.popitem() -> (k, v), remove and return some (key, value) pair as a
         2-tuple; but raise KeyError if D is empty.
         """
-        if self._indexes == {}:
+        if self._indexes.isempty():
             raise KeyError("Can't .popitem, dict is empty!")
         k, v = self._elements.pop(-1).parts()
         self._indexes.pop(k)
@@ -120,7 +165,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         """
         if hasattr(e, "keys"):
             for k in e.keys():
-                if k in self._indexes:
+                if self._indexes.has(k):
                     self[k] = e[k]
                 else:
                     self.insert(len(self), (k, e[k]))
@@ -134,18 +179,18 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         for i in range(0, len(self)):
             idx = self._indexes.pop(self._elements[i].id)
             self._elements[i] = self._eltype(func(*self._elements[i].parts()))
-            self._indexes[self._elements[i].id] = idx
+            self._indexes.set(self._elements[i].id, idx)
 
     def rekey(self, func):
         for i in range(0, len(self)):
             idx = self._indexes.pop(self._elements[i].id)
             self._elements[i].id = func(self._elements[i].id)
-            self._indexes[self._elements[i].id] = idx
+            self._indexes.set(self._elements[i].id, idx)
 
     def clear(self):
         """ D.clear() -> None.  Remove all items from D. """
         self._elements = []
-        self._indexes = {}
+        self._indexes = Iterable.IterableIndex()
 
     def copy(self):
         """ D.copy() -> a shallow copy of D """
@@ -175,8 +220,8 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     def setdefault(self, k, d=None):
         """ D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D """
-        if k in self._indexes:
-            return self._elements[self._indexes[k]]
+        if self._indexes.has(k):
+            return self._elements[self._indexes.get(k)]
         else:
             self[k] = d
             return d
@@ -188,9 +233,9 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return d
 
     def swap(self, k1, k2):
-        tmp_val = self._elements[self._indexes[k1]]
-        self._elements[self._indexes[k1]] = self._elements[self._indexes[k2]]
-        self._elements[self._indexes[k2]] = tmp_val
+        tmp_val = self._elements[self._indexes.get(k1)]
+        self._elements[self._indexes.get(k1)] = self._elements[self._indexes.get(k2)]
+        self._elements[self._indexes.get(k2)] = tmp_val
 
     def squish(self, keys, new_key, func):
         vals = []
@@ -349,8 +394,8 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     def __setitem__(self, key, value):
         """ Set self[key] to value. """
-        if key in self._indexes:
-            self._elements[self._indexes[key]].value = value
+        if self._indexes.has(key):
+            self._elements[self._indexes.get(key)].value = value
         else:
             self.insert(len(self), (key, value))
 
@@ -369,22 +414,9 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     #     return super(Iterable, self).__iter__()
     #
 
-    def __len__(self):  # real signature unknown
+    def __len__(self):
         return len(self._elements)
 
-    #
-    # def __le__(self, *args, **kwargs):  # real signature unknown
-    #     """ Return self<=value. """
-    #     raise NotImplementedError
-    #
-    # def __lt__(self, *args, **kwargs):  # real signature unknown
-    #     """ Return self<value. """
-    #     raise NotImplementedError
-    #
-    # def __ne__(self, *args, **kwargs):  # real signature unknown
-    #     """ Return self!=value. """
-    #     raise NotImplementedError
-    #
     # def __repr__(self, *args, **kwargs):  # real signature unknown
     #     return super(Iterable, self).__repr__(*args, **kwargs)
     #     # raise NotImplementedError
@@ -404,7 +436,7 @@ class OrderedIterable(Iterable):
 
     def insert(self, index, obj):
         element = self._eltype(obj)
-        if element.id in self._indexes:
+        if self._indexes.has(element.id):
             raise KeyError("Key '{}' already exists!".format(element.id))
 
         self._elements.insert(index, element)
@@ -416,8 +448,8 @@ class OrderedIterable(Iterable):
         D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
         If key is not found, d is returned if given, otherwise KeyError is raised
         """
-        if k in self._indexes:
-            idx = self._indexes[k]
+        if self._indexes.has(k):
+            idx = self._indexes.get(k)
             result = self._elements.pop(idx).value
             self._update_indexes(idx)
             return result
