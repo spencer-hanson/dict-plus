@@ -27,6 +27,8 @@ class DictPlus(Iterable):
                             checked.append(j)
             if set(range(0, len(other))) != set(checked):
                 return False
+        elif isinstance(other, list):
+            return False
         return True
 
 
@@ -41,6 +43,9 @@ class OrderedDictPlus(OrderedIterable):
             d.insert(-1, (item, value))
         return d
 
+    def keys(self):
+        return [el.id for el in self._elements]
+
     def __eq__(self, other):
         result = super(OrderedDictPlus, self).__eq__(other)
         if not result:
@@ -50,6 +55,8 @@ class OrderedDictPlus(OrderedIterable):
             for i in range(0, self.__len__()):
                 if other._elements[i] != self._elements[i]:
                     return False
+        elif isinstance(other, list):
+            return False
         return True
 
     # def __eq__(self, other):

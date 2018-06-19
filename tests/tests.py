@@ -244,7 +244,7 @@ def test_iterable_clear():
 
 def test_iterable_update():
     def subtest_iterable_update(e, **kwargs):
-        d = OrderedDictPlus()
+        d = DictPlus()
         d.insert(0, ("1", "2"))
         d.update(e, **kwargs)
         assert d == {"1": "2", **dict(e), **kwargs}
