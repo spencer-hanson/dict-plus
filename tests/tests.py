@@ -35,6 +35,8 @@ def test_keyvaluepair_parse_object():
 
 def test_keyvaluepair___eq__():
     assert KeyValuePair("a", "b") == {"a": "b"}
+    assert KeyValuePair("a", "b") == ("a", "b")
+    assert KeyValuePair("a", "b") != ("b", "a")
 
 
 ##################
