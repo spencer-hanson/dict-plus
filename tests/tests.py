@@ -373,12 +373,14 @@ def test_iterable_chop():
     d2.update(chopped[0])
     d2.update(chopped[1])
     assert d2 == o
+    assert chopped[0].__class__ == DictPlus
+    assert chopped[1].__class__ == DictPlus
 
 
 def test_iterable_squish():
     d = DictPlus({"1": "8", "asdf": "[E]"})
 
-    d.squish(["1", "asdf"], "tt", lambda x: x[0]+x[1])
+    d.squish(["1", "asdf"], "tt", lambda x: x[0] + x[1])
     assert d == {"tt": "8[E]"}
 
 
@@ -387,7 +389,7 @@ def test_iterable_expand():
     o2 = {"1": "8", "asdf": "[E]"}
 
     d = DictPlus({"1": "8", "asdf": "[E]"})
-    d.squish(["1", "asdf"], "tt", lambda x: x[0]+x[1])
+    d.squish(["1", "asdf"], "tt", lambda x: x[0] + x[1])
     assert d == o
 
     d.expand("tt", ["1", "asdf"], lambda x: (x[0], x[1:]))
@@ -396,7 +398,62 @@ def test_iterable_expand():
 
 
 def test_iterable_funcmap():
-    raise NotImplementedError
+    o = {a: a for a in range(0, 100)}
+    o2 = {a: a for a in range(0, 100)}
+    # Basic test
+    d = DictPlus(o)
+    d.funcmap(
+        o2,
+        lambda _v1, _v2: _v1,
+        lambda _id: _id
+    )
+    assert d == o
+
+    # Test with nontrivial f
+    d.funcmap(
+        o2,
+        lambda _v1, _v2: _v1*_v2,
+        lambda _id: _id
+    )
+    assert d == {a: a*a for a in range(0, 100)}
+
+    # Test with nontrivial f and g
+    d = DictPlus(o)
+    d.funcmap(
+        o2,
+        lambda _v1, _v2: _v1 * _v2,
+        lambda _id: 99-_id
+    )
+    assert d == {a: a * (99-a) for a in range(0, 100)}
+
+    # Test with scaled g
+    d = DictPlus(o)
+    d.funcmap(
+        {a*2: 1/a if a else 0 for a in range(0, 100)},
+        lambda _v1, _v2: round(_v1 * _v2),
+        lambda _id: _id*2
+    )
+    assert d == {a: 1 if a else 0 for a in range(0, 100)}
+
+    # Test with len(d) > len(other)
+    d = DictPlus(o)
+    d.funcmap(
+        {a: " % 50 = " + str(a) for a in range(0, 50)},
+        lambda _v1, _v2: str(_v1) + _v2,
+        lambda _id: _id % 50
+    )
+
+    assert d == {a: "{} % 50 = {}".format(a, a % 50) for a in range(0, 100)}
+
+    # Test with len(d) < len(other)
+    d = DictPlus(o)
+    d.funcmap(
+        {a: a for a in range(0, 200)},
+        lambda _v1, _v2: (_v1*2)/_v2 if _v2 else 1,
+        lambda _id: _id*2
+    )
+    tt = {a: 1 for a in range(0, 100)}
+    assert d == tt
 
 
 def subtest_iterable_fold(fold_func):
@@ -444,6 +501,7 @@ def test_iterable_fold_right():
 
 
 def test_iterable_multiply():
+
     raise NotImplementedError
 
 
@@ -604,7 +662,6 @@ def test_ordereddictplus___eq__():
 def test_ordereddictplus_fromkeys():
     assert dict.fromkeys(["a", "b", "c"]) == DictPlus.fromkeys(["a", "b", "c"])
     assert dict.fromkeys(["a", "b", "c"], 10) == DictPlus.fromkeys(["a", "b", "c"], 10)
-
 
 
 # KeyValuePair tests

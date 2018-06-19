@@ -235,7 +235,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             if idx in data:
                 data[idx][el.id] = el.value
             else:
-                data[idx] = {el.id: el.value}
+                data[idx] = self.__class__({el.id: el.value})
         for k, v in data.items():
             chopped.insert(k, v)
 
@@ -244,11 +244,15 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     # Combine self and other with function 'f' using mapping 'g'
     def funcmap(self, other, f, g):
         if not isinstance(other, Iterable):
-            other = self.__init__(other)
+            other = self.__class__(other)
 
-        for el in self._elements:
-            pass
-        raise NotImplementedError
+        for idx in range(0, len(self)):
+            el = self._elements[idx]
+            val1 = el.value
+            gval = g(el.id)
+            val2 = other[gval]
+            fval = f(val1, val2)
+            self._elements[idx].value = fval
 
     def fold_left(self, func):
         if len(self._elements) < 2:
