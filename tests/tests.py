@@ -168,6 +168,24 @@ def test_iterable___setitem__():
     assert d == {"asdf": "asdf", "AAA": "AAA"}
 
 
+def test_iterable___contains__():
+    d = DictPlus({"a": 1, "b": 2})
+    assert "a" in d
+    assert "b" in d
+    assert "c" not in d
+
+
+def test_iterable___iter__():
+    o = {str(a): a for a in range(0, 10)}
+    d = DictPlus(o)
+
+    keys = []
+    for k in d:
+        keys.append(k)
+    assert set(keys) == d.keys()
+    assert set(keys) == o.keys()
+
+
 def test_iterable___len__():
     assert len(DictPlus()) == 0
     assert len(DictPlus(a="b")) == 1
@@ -339,19 +357,20 @@ def test_iterable_plus():
     o1 = {"a": 1, "b": 2}
     o2 = {"c": 3, "d": 4}
     o3 = {"a": 1, "b": 2, "c": 3, "d": 4}
-    d1 = DictPlus(o1)
-    d2 = DictPlus(o2)
-    d3 = DictPlus(o3)
+    d1 = OrderedDictPlus(o1)
+    d2 = OrderedDictPlus(o2)
+    d3 = OrderedDictPlus(o3)
 
     def func_ee2e(e1, e2):
         return e1.id + e2.id, e1.value + e2.value
 
-    assert d1.plus(d2) == d3
+    tt = d1.plus(d2)
+    assert tt == d3
     assert d1 == d3
-    d1 = DictPlus(o1)
+    d1 = OrderedDictPlus(o1)
     assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6}
-    d1 = DictPlus(o1)
-    d1.insert(-1, ("g", 6))
+    d1 = OrderedDictPlus(o1)
+    d1.insert(len(d1), ("g", 6))
     assert d1.plus(o2, func_ee2e) == {"ac": 4, "bd": 6, "g": 6}
 
 
@@ -359,9 +378,9 @@ def test_iterable_minus():
     o1 = {"a": 1, "b": 2}
     o2 = {"c": 3, "d": 4}
     o3 = {"a": 1, "b": 2, "c": 3, "d": 4}
-    d1 = DictPlus(o1)
-    d2 = DictPlus(o2)
-    d3 = DictPlus(o3)
+    d1 = OrderedDictPlus(o1)
+    d2 = OrderedDictPlus(o2)
+    d3 = OrderedDictPlus(o3)
 
     def func_ee2e(e1, e2):
         return e1.id + e2.id, e1.value + e2.value
@@ -370,14 +389,14 @@ def test_iterable_minus():
         return e1.id[:-1], e1.value - e2.value
 
     assert d3.minus(d2) == d1
-    d3 = DictPlus(o3)
+    d3 = OrderedDictPlus(o3)
     assert d3.minus(d1) == d2
     assert d2 == d3
     assert d3.plus(d1) == o3
 
     assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6}
     assert d1.minus(d2, func_inv_ee2e) == o1
-    d1.insert(-1, ("g", 6))
+    d1.insert(len(d1), ("g", 6))
     assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6, "g": 6}
     assert d1.minus(d2, func_inv_ee2e) == {"a": 1, "b": 2, "g": 6}
     d1.pop("g")
@@ -443,26 +462,26 @@ def test_iterable_funcmap():
     # Test with nontrivial f
     d.funcmap(
         o2,
-        lambda _v1, _v2: _v1*_v2,
+        lambda _v1, _v2: _v1 * _v2,
         lambda _id: _id
     )
-    assert d == {a: a*a for a in range(0, 100)}
+    assert d == {a: a * a for a in range(0, 100)}
 
     # Test with nontrivial f and g
     d = DictPlus(o)
     d.funcmap(
         o2,
         lambda _v1, _v2: _v1 * _v2,
-        lambda _id: 99-_id
+        lambda _id: 99 - _id
     )
-    assert d == {a: a * (99-a) for a in range(0, 100)}
+    assert d == {a: a * (99 - a) for a in range(0, 100)}
 
     # Test with scaled g
     d = DictPlus(o)
     d.funcmap(
-        {a*2: 1/a if a else 0 for a in range(0, 100)},
+        {a * 2: 1 / a if a else 0 for a in range(0, 100)},
         lambda _v1, _v2: round(_v1 * _v2),
-        lambda _id: _id*2
+        lambda _id: _id * 2
     )
     assert d == {a: 1 if a else 0 for a in range(0, 100)}
 
@@ -480,8 +499,8 @@ def test_iterable_funcmap():
     d = DictPlus(o)
     d.funcmap(
         {a: a for a in range(0, 200)},
-        lambda _v1, _v2: (_v1*2)/_v2 if _v2 else 1,
-        lambda _id: _id*2
+        lambda _v1, _v2: (_v1 * 2) / _v2 if _v2 else 1,
+        lambda _id: _id * 2
     )
     tt = {a: 1 for a in range(0, 100)}
     assert d == tt
@@ -532,7 +551,6 @@ def test_iterable_fold_right():
 
 
 def test_iterable_multiply():
-
     raise NotImplementedError
 
 
@@ -586,7 +604,7 @@ def test_iterable___sub__():
 
     assert d3 - d2 == d1
     assert d3 - o2 == o1
-    assert d3 - o2 - o1 == {}
+    assert (d3 - o2) - o1 == {}
     ex(d3.__sub__, KeyError, {"g": 5})
     ex(d3.__sub__, KeyError, {"a": 20})
 
@@ -695,6 +713,9 @@ def test_ordereddictplus_fromkeys():
     assert dict.fromkeys(["a", "b", "c"], 10) == DictPlus.fromkeys(["a", "b", "c"], 10)
 
 
+###############
+
+
 tests = [
     # IterableIndex tests
     test_iterableindex,
@@ -718,6 +739,8 @@ tests = [
     test_iterable_atindex,
     test_iterable___setitem__,
     test_iterable___getitem__,
+    test_iterable___contains__,
+    test_iterable___iter__,
     test_iterable___len__,
     test_iterable___str__,
     test_iterable_fromkeys,
@@ -746,6 +769,8 @@ tests = [
     test_iterable___lt__,
     test_iterable___ge__,
     test_iterable___gt__,
+    test_iterable___sub__,
+    test_iterable___add__,
 
     # OrderedIterable tests
     test_orderediterable_insert,

@@ -8,6 +8,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         """
         Index object to keep track of 'unhashable' types
         """
+
         def __make_hash(self, o):
             if o.__hash__:
                 return hash(o)
@@ -83,7 +84,8 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             for k, v in kwargs.items():
                 self[k] = v
 
-    def _update_indexes(self, from_idx):  # TODO Use from_idx to optimize
+    # TODO Use from_idx to optimize
+    def _update_indexes(self, from_idx):
         self._indexes = Iterable.IterableIndex()
         for idx, el in enumerate(self._elements):
             self._indexes.set(el.id, idx)
@@ -241,7 +243,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         vals = []
         for key in keys:
             vals.append(self.pop(key))
-        self.insert(-1, (new_key, func(vals)))
+        self.insert(len(self), (new_key, func(vals)))
 
     # expand any number of keys into a larger amount of keypairs
     def expand(self, key, new_keys, func_inv):
@@ -249,25 +251,45 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         if len(vals) != len(new_keys):
             raise IndexError("Number of values returned from the function != number of keys given!")
         for idx in range(0, len(new_keys)):
-            self.insert(-1, (new_keys[idx], vals[idx]))
+            self.insert(len(self), (new_keys[idx], vals[idx]))
 
     def plus(self, other, func=None):
         if not isinstance(other, Iterable):
             other = self.__class__(other)
         if not func:
             def func(e1, e2):
-                self.insert(-1, e2)
+                self.insert(len(self), e2)
                 return e1
-        for i in range(0, min(len(self), len(other))):
-            ep = func(self._elements[i], other.atindex(i))
-            if ep:  # If the func returns 'None' don't set anything
-                self._elements[i] = self._eltype(ep)
+
+        done = False
+        it1 = iter(self)
+        it2 = iter(other)
+
+        while not done:
+            try:
+                el1 = next(it1)
+                el2 = next(it2)
+                elp = func(self.getitem(el1), other.getitem(el2))
+                if elp:
+                    elp = self._eltype(elp)
+                    idx = self._indexes.pop(el1)
+                    self._indexes.set(elp.id, idx)
+                    self._elements[idx] = elp
+            except StopIteration:
+                done = True
+        #
+        # for i in range(0, min(len(self), len(other))):
+        #     ep = func(self._elements[i], other.atindex(i))
+        #     if ep:  # If the func returns 'None' don't set anything
+        #         self._elements[i] = self._eltype(ep)
 
         return self
 
     def minus(self, other, func_inv=None):
         if not func_inv:
-            def func_inv(e1, e2):
+            def func_inv(_, e2):
+                if e2 != self.getitem(e2.id):
+                    raise KeyError("Cannot pop '{}'".format(e2))
                 self.pop(e2.id)
                 return None  # Explicitly return None for example purposes
         return self.plus(other, func_inv)
@@ -369,10 +391,10 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return True
 
     def __add__(self, other):
-        raise NotImplementedError
+        return self.copy().plus(other, func=None)
 
     def __sub__(self, other):
-        raise NotImplementedError
+        return self.copy().minus(other,  func_inv=None)
 
     def __mul__(self, other):
         raise NotImplementedError
@@ -386,8 +408,12 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     #     raise NotImplementedError
     #
 
-    # TODO: when checked for 'a in self', under 'object' superclass, it will call this method
-    # TODO over and over with keys '0, 1, 2, ...' without bound?
+    def __iter__(self):
+        return iter(self.keys())
+
+    def __contains__(self, item):
+        return self._indexes.has(item)
+
     def __getitem__(self, k):
         """ x.__getitem__(y) <==> x[y] """
         return self.get(k)
@@ -482,6 +508,9 @@ class Element(object):
         elif isinstance(other, tuple) and self.id == other[0] and self.value == other[1]:
             return True
         return False
+
+    def __str__(self):
+        return "<{}, {}>".format(self.id, self.value)
 
 
 class KeyValuePair(Element):
