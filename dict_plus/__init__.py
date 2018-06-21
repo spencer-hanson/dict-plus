@@ -65,21 +65,26 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         """
 
         super().__init__()
-        if not element_type:
-            element_type = Element
+        if isinstance(data, Iterable):
+            self._elements = data._elements.copy()
+            self._indexes = data._indexes.copy()
+            self._eltype = data._eltype
+        else:
+            if not element_type:
+                element_type = Element
 
-        self._elements = []
-        self._eltype = element_type
-        self._indexes = Iterable.IterableIndex()
+            self._elements = []
+            self._eltype = element_type
+            self._indexes = Iterable.IterableIndex()
 
-        if isinstance(data, dict):
-            self.update(data)
-        elif isinstance(data, list):
-            for idx, el in enumerate(data):
-                self.insert(len(self), (idx, el))
-        elif data:
-            for k, v in data:
-                self.insert(len(self), (k, v))
+            if isinstance(data, dict):
+                self.update(data)
+            elif isinstance(data, list):
+                for idx, el in enumerate(data):
+                    self.insert(len(self), el)
+            elif data:
+                for k, v in data:
+                    self.insert(len(self), (k, v))
         if kwargs:
             for k, v in kwargs.items():
                 self[k] = v
@@ -232,10 +237,10 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             return d
 
     def todict(self):
-        d = {}
-        for el in self._elements:
-            d[el.id] = el.value
-        return d
+        return {el.id: el.value for el in self._elements}
+
+    def tolist(self):
+        return [el.parts() for el in self._elements]
 
     def swap(self, k1, k2):
         tmp_val = self._elements[self._indexes.get(k1)]
@@ -265,17 +270,17 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
                 return e1
 
         done = False
-        it1 = iter(self)
-        it2 = iter(other)
+        it1 = iter(self.elements())
+        it2 = iter(other.elements())
 
         while not done:
             try:
                 el1 = next(it1)
                 el2 = next(it2)
-                elp = func(self.getitem(el1), other.getitem(el2))
+                elp = func(el1, el2)
                 if elp:
                     elp = self._eltype(elp)
-                    idx = self._indexes.pop(el1)
+                    idx = self._indexes.pop(el1.id)
                     self._indexes.set(elp.id, idx)
                     self._elements[idx] = elp
             except StopIteration:
@@ -289,6 +294,8 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return self
 
     def minus(self, other, func_inv=None):
+        if not isinstance(other, Iterable):
+            other = self.__class__(other)
         if not func_inv:
             def func_inv(_, e2):
                 if e2 != self.getitem(e2.id):
@@ -358,8 +365,16 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
                 self[el3.id] = el3.value
         return self
 
-    def divide(self, other, func_inv):
-        raise NotImplementedError
+    def divide(self, other, func_inv=None):
+        if not isinstance(other, Iterable):
+            other = self.__class__(other)
+        if not func_inv:
+            def func_inv(e1, e2):
+                if e1.id[0] == e2.id:
+                    return e1.id[1], e1.value[1]
+                else:
+                    return e1.id[0], e1.value[1]
+        return self.multiply(other, func_inv)
 
     def __le__(self, other):
         raise NotImplementedError
@@ -410,10 +425,10 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return self.copy().minus(other,  func_inv=None)
 
     def __mul__(self, other):
-        raise NotImplementedError
+        return self.copy().multiply(other, func=None)
 
-    def __divmod__(self, other):  # TODO ???
-        raise NotImplementedError
+    def __truediv__(self, other):
+        return self.copy().divide(other, func_inv=None)
 
     #
     # def __getattribute__(self, *args, **kwargs):  # real signature unknown

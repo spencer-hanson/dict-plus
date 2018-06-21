@@ -217,6 +217,7 @@ def test_iterable_elements():
     d = DictPlus({"a": 1, "b": 2})
     assert d.elements() == [KeyValuePair("a", 1), KeyValuePair("b", 2)]
 
+
 def test_iterable_keys():
     d = DictPlus()
     assert d.keys() == {}.keys()
@@ -244,10 +245,21 @@ def test_iterable_setdefault():
 
 def test_iterable_todict():
     d = DictPlus()
+    assert d.todict() == {}
     d.insert(0, ("1", "2"))
     assert d.todict() == {"1": "2"}
     assert d == d.todict()
     assert d == d.copy().todict()
+
+
+def test_iterable_tolist():
+    d = DictPlus()
+    assert d.tolist() == []
+    d.insert(0, ("1", "2"))
+    assert d.tolist() == [("1", "2")]
+    tt = DictPlus(d.tolist()).tolist()
+    assert d.tolist() == tt
+    assert d.tolist() == d.copy().tolist()
 
 
 def test_iterable_swap():
@@ -558,6 +570,10 @@ def test_iterable_multiply():
     o = {"a": 1, "b": 2, "c": 3}
     d = OrderedDictPlus(o)
 
+    d.multiply({})
+    assert d == {}
+    d = OrderedDictPlus(o)
+
     d.multiply(o)
     assert d == {
         ("a", "a"): (1, 1), ("a", "b"): (1, 2), ("a", "c"): (1, 3),
@@ -573,10 +589,49 @@ def test_iterable_multiply():
         "ba": (2, 1), "bb": (2, 2), "bc": (2, 3),
         "ca": (3, 1), "cb": (3, 2), "cc": (3, 3)
     }
-    tw = 2
+
+
+def test_iterable___mul__():
+    o = {"a": 1, "b": 2, "c": 3}
+    d = OrderedDictPlus(o)
+
+    assert d*{} == {}
+    assert d == o
+
+    assert d*o == {
+        ("a", "a"): (1, 1), ("a", "b"): (1, 2), ("a", "c"): (1, 3),
+        ("b", "a"): (2, 1), ("b", "b"): (2, 2), ("b", "c"): (2, 3),
+        ("c", "a"): (3, 1), ("c", "b"): (3, 2), ("c", "c"): (3, 3)
+    }
+
 
 def test_iterable_divide():
-    raise NotImplementedError
+    o = {
+        ("a", "a"): (1, 1), ("a", "b"): (1, 2), ("a", "c"): (1, 3),
+        ("b", "a"): (2, 1), ("b", "b"): (2, 2), ("b", "c"): (2, 3),
+        ("c", "a"): (3, 1), ("c", "b"): (3, 2), ("c", "c"): (3, 3)
+    }
+    o2 = {"a": 1, "b": 2, "c": 3}
+    d = OrderedDictPlus(o)
+    d.divide(o, lambda el, e2: (el.id[0], el.value[0]))
+    assert d == o2
+
+    d.multiply(o2)
+    assert d == o
+    d.divide(o2)
+    assert d == o2
+
+
+def test_iterable___truediv__():
+    o = {
+        ("a", "a"): (1, 1), ("a", "b"): (1, 2), ("a", "c"): (1, 3),
+        ("b", "a"): (2, 1), ("b", "b"): (2, 2), ("b", "c"): (2, 3),
+        ("c", "a"): (3, 1), ("c", "b"): (3, 2), ("c", "c"): (3, 3)
+    }
+    o2 = {"a": 1, "b": 2, "c": 3}
+    d = OrderedDictPlus(o2)
+    assert d * d == o
+    assert (d * d) / d == d
 
 
 def test_iterable___le__():
@@ -606,7 +661,7 @@ def test_iterable___add__():
     d2 = DictPlus(o2)
     d3 = d1 + d2
 
-    assert d1 + d3 == d3
+    assert d1 + d2 == d3
     assert d1 + d2 == o3
     assert d1 + o2 == o3
     assert d2 + o1 == o3
@@ -703,6 +758,11 @@ def test_ordereddictplus___init__():
 
     assert OrderedDictPlus() != []
     assert OrderedDictPlus() == {}
+    assert OrderedDictPlus([]) == {}
+    assert OrderedDictPlus({}) == {}
+    assert OrderedDictPlus(OrderedDictPlus()) == {}
+    assert OrderedDictPlus([("a", 1), ("b", 2)]) == {"a": 1, "b": 2}
+    subtest_ordereddictplus__init__(OrderedDictPlus())
     subtest_ordereddictplus__init__({})
     subtest_ordereddictplus__init__({"a": 1, "b": 2})
 
@@ -771,28 +831,31 @@ tests = [
     test_iterable_values,
     test_iterable_setdefault,
     test_iterable_todict,
+    test_iterable_tolist,
     test_iterable_swap,
     test_iterable_clear,
     test_iterable_update,
     test_iterable_unupdate,
     test_iterable_map,
     test_iterable_rekey,
-    test_iterable_plus,
-    test_iterable_minus,
     test_iterable_chop,
     test_iterable_squish,
     test_iterable_expand,
     test_iterable_funcmap,
     test_iterable_fold_left,
     test_iterable_fold_right,
+    test_iterable_plus,
+    test_iterable___add__,
+    test_iterable_minus,
+    test_iterable___sub__,
     test_iterable_multiply,
+    test_iterable___mul__,
     test_iterable_divide,
+    test_iterable___truediv__,
     test_iterable___le__,
     test_iterable___lt__,
     test_iterable___ge__,
     test_iterable___gt__,
-    test_iterable___sub__,
-    test_iterable___add__,
 
     # OrderedIterable tests
     test_orderediterable_insert,
@@ -820,8 +883,8 @@ for test in tests:
         pass_count = pass_count + 1
     except Exception as e:
         results[name] = "{}: {}".format(e.__class__.__name__, str(e))
-        # if e.__class__ != NotImplementedError:
-        raise e
+        if e.__class__ != NotImplementedError:
+            raise e
     total_count = total_count + 1
 
 for k, v in results.items():
