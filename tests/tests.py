@@ -25,10 +25,11 @@ def assert_neq(val1, val2):
     assert_op(val1, val2, operator.ne)
 
 
-def assert_nn(val):
+def assert_t(val):
     assert val
 
-
+def assert_f(val):
+    assert not val
 ##################
 
 
@@ -131,7 +132,7 @@ def test_iterable_getitem():
 
 def test_iterable_insert():
     d = DictPlus()
-    assert_nn(d.insert(12345, ("a", "g")))
+    assert_t(d.insert(12345, ("a", "g")))
     ex(d.insert, KeyError, 12345, ("a", "b"))
     assert_eq(d._indexes.get("a"), 0)
     assert_eq(d._elements[0], ("a", "g"))
@@ -173,13 +174,20 @@ def test_iterable_atindex():
     assert_eq(d.atindex(1), ("b", 2))
 
 
+def test_iterable_indexof():
+    d = DictPlus()
+    ex(d.indexof, KeyError, "a")
+    d.insert(0, ("a", 1))
+    assert_eq(d.indexof("a"), 0)
+
+
 def test_iterable___getitem__():
     d = OrderedDictPlus()
     d.insert(0, ("1", "2"))
     assert_eq(d.get("1"), d["1"])
     assert_eq(d["1"], "2")
-    # assert_eq("1" in d
-    # assert_eq("5" not in d  # TODO: Fix 'in' bug
+    assert_t("1" in d)
+    assert_t("5" not in d)
     ex(d.__getitem__, KeyError, "5")
 
 
@@ -194,9 +202,9 @@ def test_iterable___setitem__():
 
 def test_iterable___contains__():
     d = DictPlus({"a": 1, "b": 2})
-    assert_nn("a" in d)
-    assert_nn("b" in d)
-    assert_nn("c" not in d)
+    assert_t("a" in d)
+    assert_t("b" in d)
+    assert_t("c" not in d)
 
 
 def test_iterable___iter__():
@@ -707,8 +715,20 @@ def test_iterable_le():
     bo = {2: 2, 3: 3}
 
     ad = OrderedDictPlus(ao)
-    bo = OrderedDictPlus(bo)
+    bd = OrderedDictPlus(bo)
 
+    assert_op(ad, bd, operator.le)
+    assert_eq(ad, ao)
+    assert_eq(bd, bo)
+
+    assert_op(ad, ad, operator.le)
+    assert_op(bd, bd, operator.le)
+    assert_eq(ad, ao)
+    assert_eq(bd, bo)
+
+    assert_f(bd.__le__(ad))
+
+    # assert_op(ad, bo, operator.le)
 
 
     raise NotImplementedError
@@ -871,6 +891,7 @@ tests = [
     test_iterable_popitem,
     test_iterable_copy,
     test_iterable_atindex,
+    test_iterable_indexof,
     test_iterable___setitem__,
     test_iterable___getitem__,
     test_iterable___contains__,

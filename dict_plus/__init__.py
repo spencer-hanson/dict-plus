@@ -1,5 +1,6 @@
 from dict_plus.exceptions import *
 from dict_plus.funcs import Functions as dfuncs
+import functools
 
 
 class Iterable(object):  # TODO CHANGE ME TO dict after debug
@@ -31,7 +32,11 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             self.__data = {} if not data else data.copy()
 
         def get(self, key):
-            return self.__data[self.__make_hash(key)]
+            key_hash = self.__make_hash(key)
+            if key_hash in self.__data:
+                return self.__data[key_hash]
+            else:
+                raise KeyError(" '{}' ".format(key))
 
         def set(self, key, value):
             self.__data[self.__make_hash(key)] = value
@@ -210,6 +215,9 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     def atindex(self, int_val):
         return self.getitem(self._elements[int_val].id)
 
+    def indexof(self, key):
+        return self._indexes.get(key)
+
     @staticmethod
     def fromkeys(sequence, value=None):
         raise NotImplementedError("Can't call .fromkeys() on Iterator!")
@@ -236,6 +244,12 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         else:
             self[k] = d
             return d
+
+    @staticmethod
+    def getfunc(name, *args, **kwargs):
+        def func(inst):
+            return getattr(inst, name)(*args, **kwargs)
+        return func
 
     def todict(self):
         return {el.id: el.value for el in self._elements}
@@ -378,12 +392,41 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
                     return e1.id[0], e1.value[1]
         return self.multiply(other, func_inv)
 
-    # Check if self <= other using compairon func 'f' and mapping 'g'
-    def le(self, other, f=dfuncs.LE, g=dfuncs.AND):
-        return g(self.funcmap(other, f, lambda x: x))
+    # Compare self to other using
+    # comparison func 'f'
+    # aggregate func 'g'
+    # and mapping func 'h'
 
+    def compare(self, other, f, g, h=None, inplace=False):
+        if not h:
+            def h(x):
+                return other.atindex(self.indexof(x)).id
+
+        a = self.funcmap(
+            other,
+            f,
+            h,
+            inplace=inplace
+        )
+        b = g(a)
+
+        return b
+
+    # Check if self <= other using comparison func 'f' and aggerate func 'g'
     def __le__(self, other):
-        raise NotImplementedError
+        functools.partial(self.__class__.getfunc("fold_left")
+        a = dfuncs.AND
+        return self.compare(other, dfuncs.LE)
+        # ap = self.compare(other, dfuncs.LE)
+        # a = self.funcmap(
+        #     other,
+        #     dfuncs.LE,
+        #     lambda x: other.atindex(self.indexof(x)).id,
+        #     inplace=False
+        # )
+        #
+        # b = a.fold_left(dfuncs.AND)
+        # return b
 
     def __lt__(self, other):
         raise NotImplementedError
@@ -548,6 +591,7 @@ class Element(object):
 
     def copy(self):
         return self.__class__(self.id, self.value)
+
 
 class KeyValuePair(Element):
     @staticmethod
