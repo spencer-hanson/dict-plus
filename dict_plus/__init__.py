@@ -1,4 +1,5 @@
 from dict_plus.exceptions import *
+from dict_plus.funcs import Functions as dfuncs
 
 
 class Iterable(object):  # TODO CHANGE ME TO dict after debug
@@ -202,7 +203,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     def copy(self):
         """ D.copy() -> a shallow copy of D """
         i = self.__class__(element_type=self._eltype)
-        i._elements = self._elements.copy()
+        i._elements = [el.copy() for el in self.elements()]
         i._indexes = self._indexes.copy()
         return i
 
@@ -261,7 +262,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         for idx in range(0, len(new_keys)):
             self.insert(len(self), (new_keys[idx], vals[idx]))
 
-    def plus(self, other, func=None):
+    def add(self, other, func=None):
         if not isinstance(other, Iterable):
             other = self.__class__(other)
         if not func:
@@ -285,15 +286,9 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
                     self._elements[idx] = elp
             except StopIteration:
                 done = True
-        #
-        # for i in range(0, min(len(self), len(other))):
-        #     ep = func(self._elements[i], other.atindex(i))
-        #     if ep:  # If the func returns 'None' don't set anything
-        #         self._elements[i] = self._eltype(ep)
-
         return self
 
-    def minus(self, other, func_inv=None):
+    def sub(self, other, func_inv=None):
         if not isinstance(other, Iterable):
             other = self.__class__(other)
         if not func_inv:
@@ -302,7 +297,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
                     raise KeyError("Cannot pop '{}'".format(e2))
                 self.pop(e2.id)
                 return None  # Explicitly return None for example purposes
-        return self.plus(other, func_inv)
+        return self.add(other, func_inv)
 
     def chop(self, func):
         chopped = []
@@ -319,17 +314,24 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return chopped
 
     # Combine self and other with function 'f' using mapping 'g'
-    def funcmap(self, other, f, g):
+    def funcmap(self, other, f, g, inplace=True):
         if not isinstance(other, Iterable):
             other = self.__class__(other)
 
+        if inplace:
+            d = self
+        else:
+            d = self.copy()
+
         for idx in range(0, len(self)):
-            el = self._elements[idx]
+            el = d._elements[idx]
             val1 = el.value
             gval = g(el.id)
             val2 = other[gval]
             fval = f(val1, val2)
-            self._elements[idx].value = fval
+            d._elements[idx].value = fval
+
+        return d
 
     def fold_left(self, func):
         if len(self._elements) < 2:
@@ -376,6 +378,10 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
                     return e1.id[0], e1.value[1]
         return self.multiply(other, func_inv)
 
+    # Check if self <= other using compairon func 'f' and mapping 'g'
+    def le(self, other, f=dfuncs.LE, g=dfuncs.AND):
+        return g(self.funcmap(other, f, lambda x: x))
+
     def __le__(self, other):
         raise NotImplementedError
 
@@ -419,10 +425,10 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return True
 
     def __add__(self, other):
-        return self.copy().plus(other, func=None)
+        return self.copy().add(other, func=None)
 
     def __sub__(self, other):
-        return self.copy().minus(other,  func_inv=None)
+        return self.copy().sub(other, func_inv=None)
 
     def __mul__(self, other):
         return self.copy().multiply(other, func=None)
@@ -486,7 +492,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     # f = (e_list) -> (new_e_list)
 
 
-class OrderedIterable(Iterable):
+class OrderedIterableMixin(Iterable):
 
     def insert(self, index, obj):
         element = self._eltype(obj)
@@ -540,6 +546,8 @@ class Element(object):
     def __str__(self):
         return "<{}, {}>".format(self.id, self.value)
 
+    def copy(self):
+        return self.__class__(self.id, self.value)
 
 class KeyValuePair(Element):
     @staticmethod

@@ -1,6 +1,7 @@
 from dict_plus.dictplus import *
 from dict_plus import *
 from dict_plus.exceptions import *
+import operator
 
 
 def ex(f, ex_class, *args, **kwargs):
@@ -11,14 +12,22 @@ def ex(f, ex_class, *args, **kwargs):
     else:
         raise AssertionError("Didn't throw expected '{}'".format(ex_class.__name__))
 
+
+def assert_op(val1, val2, op):
+    assert op(val1, val2)
+
+
 def assert_eq(val1, val2):
-    assert val1 == val2
+    assert_op(val1, val2, operator.eq)
+
 
 def assert_neq(val1, val2):
-    assert val1 != val2
+    assert_op(val1, val2, operator.ne)
+
 
 def assert_nn(val):
     assert val
+
 
 ##################
 
@@ -75,6 +84,8 @@ def test_keyvaluepair___eq__():
     assert_eq(KeyValuePair("a", "b"), {"a": "b"})
     assert_eq(KeyValuePair("a", "b"), ("a", "b"))
     assert_neq(KeyValuePair("a", "b"), ("b", "a"))
+    kvp = KeyValuePair("a", "b")
+    assert_eq(kvp, kvp.copy())
 
 
 ##################
@@ -148,7 +159,11 @@ def test_iterable_copy():
     d.insert(0, ("1", "2"))
     c = d.copy()
     assert_eq(d, c)
-    d.insert(-1, ("[E}", "no u"))
+
+    d.insert(-1, ("[E]", "no u"))
+    assert_neq(d, c)
+    d.pop("[E]")
+    d["1"] = "1"
     assert_neq(d, c)
 
 
@@ -312,8 +327,7 @@ def test_iterable_unupdate():
 
         ex(d.unupdate, KeyError, e, **kwargs)
         d.update(e, **kwargs)
-        ex(d.unupdate, InvalidElementValueException,ee, **kwargs)
-
+        ex(d.unupdate, InvalidElementValueException, ee, **kwargs)
 
     subtest_iterable_unupdate({"gg": "ez"}, {"gg": "wp"}, a="meow", b="cat")
     subtest_iterable_unupdate({"gg": "ez"}, {"gg": "wp"})
@@ -364,58 +378,6 @@ def test_iterable_rekey():
     assert_eq(d, o)
 
 
-def test_iterable_plus():
-    o1 = {"a": 1, "b": 2}
-    o2 = {"c": 3, "d": 4}
-    o3 = {"a": 1, "b": 2, "c": 3, "d": 4}
-    d1 = OrderedDictPlus(o1)
-    d2 = OrderedDictPlus(o2)
-    d3 = OrderedDictPlus(o3)
-
-    def func_ee2e(e1, e2):
-        return e1.id + e2.id, e1.value + e2.value
-
-    tt = d1.plus(d2)
-    assert_eq(tt, d3)
-    assert_eq(d1, d3)
-    d1 = OrderedDictPlus(o1)
-    assert_eq(d1.plus(d2, func_ee2e), {"ac": 4, "bd": 6})
-    d1 = OrderedDictPlus(o1)
-    d1.insert(len(d1), ("g", 6))
-    assert_eq(d1.plus(o2, func_ee2e), {"ac": 4, "bd": 6, "g": 6})
-
-
-def test_iterable_minus():
-    o1 = {"a": 1, "b": 2}
-    o2 = {"c": 3, "d": 4}
-    o3 = {"a": 1, "b": 2, "c": 3, "d": 4}
-    d1 = OrderedDictPlus(o1)
-    d2 = OrderedDictPlus(o2)
-    d3 = OrderedDictPlus(o3)
-
-    def func_ee2e(e1, e2):
-        return e1.id + e2.id, e1.value + e2.value
-
-    def func_inv_ee2e(e1, e2):
-        return e1.id[:-1], e1.value - e2.value
-
-    assert_eq(d3.minus(d2), d1)
-    d3 = OrderedDictPlus(o3)
-    assert_eq(d3.minus(d1), d2)
-    assert_eq(d2, d3)
-    assert_eq(d3.plus(d1), o3)
-
-    assert_eq(d1.plus(d2, func_ee2e), {"ac": 4, "bd": 6})
-    assert_eq(d1.minus(d2, func_inv_ee2e), o1)
-    d1.insert(len(d1), ("g", 6))
-    assert_eq(d1.plus(d2, func_ee2e), {"ac": 4, "bd": 6, "g": 6})
-    assert_eq(d1.minus(d2, func_inv_ee2e), {"a": 1, "b": 2, "g": 6})
-    d1.pop("g")
-    assert_eq(d1, o1)
-    assert_eq(d2, o2)
-    assert_eq(d3, o3)
-
-
 def test_iterable_chop():
     o = {
         0: "a", 1: "b", 2: "c",
@@ -461,60 +423,80 @@ def test_iterable_expand():
 def test_iterable_funcmap():
     o = {a: a for a in range(0, 100)}
     o2 = {a: a for a in range(0, 100)}
-    # Basic test
-    d = DictPlus(o)
-    d.funcmap(
-        o2,
-        lambda _v1, _v2: _v1,
-        lambda _id: _id
-    )
-    assert_eq(d, o)
 
-    # Test with nontrivial f
-    d.funcmap(
-        o2,
-        lambda _v1, _v2: _v1 * _v2,
-        lambda _id: _id
-    )
-    assert_eq(d, {a: a * a for a in range(0, 100)})
+    def subtest_funcmap(inplace):
+        def subsubtest_funcmap(result, expected, returned):
+            if inplace:
+                assert_eq(result, expected)
+                assert_eq(result, returned)
+            else:
+                assert_eq(result, o)
+                assert_eq(returned, expected)
 
-    # Test with nontrivial f and g
-    d = DictPlus(o)
-    d.funcmap(
-        o2,
-        lambda _v1, _v2: _v1 * _v2,
-        lambda _id: 99 - _id
-    )
-    assert_eq(d, {a: a * (99 - a) for a in range(0, 100)})
+        # Basic test
+        d = DictPlus(o)
+        dp = d.funcmap(
+            o2,
+            lambda _v1, _v2: _v1,
+            lambda _id: _id,
+            inplace=inplace
+        )
+        subsubtest_funcmap(d, o, dp)
 
-    # Test with scaled g
-    d = DictPlus(o)
-    d.funcmap(
-        {a * 2: 1 / a if a else 0 for a in range(0, 100)},
-        lambda _v1, _v2: round(_v1 * _v2),
-        lambda _id: _id * 2
-    )
-    assert_eq(d, {a: 1 if a else 0 for a in range(0, 100)})
+        # Test with nontrivial f
+        d = DictPlus(o)
+        dp = d.funcmap(
+            o2,
+            lambda _v1, _v2: _v1 * _v2,
+            lambda _id: _id,
+            inplace=inplace
+        )
+        subsubtest_funcmap(d, {a: a * a for a in range(0, 100)}, dp)
 
-    # Test with len(d) > len(other)
-    d = DictPlus(o)
-    d.funcmap(
-        {a: " % 50 = " + str(a) for a in range(0, 50)},
-        lambda _v1, _v2: str(_v1) + _v2,
-        lambda _id: _id % 50
-    )
+        # Test with nontrivial f and g
+        d = DictPlus(o)
+        dp = d.funcmap(
+            o2,
+            lambda _v1, _v2: _v1 * _v2,
+            lambda _id: 99 - _id,
+            inplace=inplace
+        )
+        subsubtest_funcmap(d, {a: a * (99 - a) for a in range(0, 100)}, dp)
 
-    assert_eq(d, {a: "{} % 50 = {}".format(a, a % 50) for a in range(0, 100)})
+        # Test with scaled g
+        d = DictPlus(o)
+        dp = d.funcmap(
+            {a * 2: 1 / a if a else 0 for a in range(0, 100)},
+            lambda _v1, _v2: round(_v1 * _v2),
+            lambda _id: _id * 2,
+            inplace=inplace
+        )
+        subsubtest_funcmap(d, {a: 1 if a else 0 for a in range(0, 100)}, dp)
 
-    # Test with len(d) < len(other)
-    d = DictPlus(o)
-    d.funcmap(
-        {a: a for a in range(0, 200)},
-        lambda _v1, _v2: (_v1 * 2) / _v2 if _v2 else 1,
-        lambda _id: _id * 2
-    )
-    tt = {a: 1 for a in range(0, 100)}
-    assert_eq(d, tt)
+        # Test with len(d) > len(other)
+        d = DictPlus(o)
+        dp = d.funcmap(
+            {a: " % 50 = " + str(a) for a in range(0, 50)},
+            lambda _v1, _v2: str(_v1) + _v2,
+            lambda _id: _id % 50,
+            inplace=inplace
+        )
+
+        subsubtest_funcmap(d, {a: "{} % 50 = {}".format(a, a % 50) for a in range(0, 100)}, dp)
+
+        # Test with len(d) < len(other)
+        d = DictPlus(o)
+        dp = d.funcmap(
+            {a: a for a in range(0, 200)},
+            lambda _v1, _v2: (_v1 * 2) / _v2 if _v2 else 1,
+            lambda _id: _id * 2,
+            inplace=inplace
+        )
+
+        subsubtest_funcmap(d, {a: 1 for a in range(0, 100)}, dp)
+
+    subtest_funcmap(True)
+    subtest_funcmap(False)
 
 
 def subtest_iterable_fold(fold_func):
@@ -561,6 +543,97 @@ def test_iterable_fold_right():
     assert_eq(r, {3: "cba"})
 
 
+def test_iterable_add():
+    o1 = {"a": 1, "b": 2}
+    o2 = {"c": 3, "d": 4}
+    o3 = {"a": 1, "b": 2, "c": 3, "d": 4}
+    d1 = OrderedDictPlus(o1)
+    d2 = OrderedDictPlus(o2)
+    d3 = OrderedDictPlus(o3)
+
+    def func_ee2e(e1, e2):
+        return e1.id + e2.id, e1.value + e2.value
+
+    tt = d1.add(d2)
+    assert_eq(tt, d3)
+    assert_eq(d1, d3)
+    d1 = OrderedDictPlus(o1)
+    assert_eq(d1.add(d2, func_ee2e), {"ac": 4, "bd": 6})
+    d1 = OrderedDictPlus(o1)
+    d1.insert(len(d1), ("g", 6))
+    assert_eq(d1.add(o2, func_ee2e), {"ac": 4, "bd": 6, "g": 6})
+
+
+def test_iterable___add__():
+    o1 = {"a": 1, "b": 2}
+    o2 = {"c": 3, "d": 4}
+
+    o3 = o1.copy()
+    o3.update(o2)
+
+    d1 = DictPlus(o1)
+    d2 = DictPlus(o2)
+    d3 = d1 + d2
+
+    assert_eq(d1 + d2, d3)
+    assert_eq(d1 + d2, o3)
+    assert_eq(d1 + o2, o3)
+    assert_eq(d2 + o1, o3)
+
+
+def test_iterable_sub():
+    o1 = {"a": 1, "b": 2}
+    o2 = {"c": 3, "d": 4}
+    o3 = {"a": 1, "b": 2, "c": 3, "d": 4}
+    d1 = OrderedDictPlus(o1)
+    d2 = OrderedDictPlus(o2)
+    d3 = OrderedDictPlus(o3)
+
+    def func_ee2e(e1, e2):
+        return e1.id + e2.id, e1.value + e2.value
+
+    def func_inv_ee2e(e1, e2):
+        return e1.id[:-1], e1.value - e2.value
+
+    assert_eq(d3.sub(d2), d1)
+    d3 = OrderedDictPlus(o3)
+    assert_eq(d3.sub(d1), d2)
+    assert_eq(d2, d3)
+    assert_eq(d3.add(d1), o3)
+
+    assert_eq(d1.add(d2, func_ee2e), {"ac": 4, "bd": 6})
+    assert_eq(d1.sub(d2, func_inv_ee2e), o1)
+    d1.insert(len(d1), ("g", 6))
+    assert_eq(d1.add(d2, func_ee2e), {"ac": 4, "bd": 6, "g": 6})
+    assert_eq(d1.sub(d2, func_inv_ee2e), {"a": 1, "b": 2, "g": 6})
+    d1.pop("g")
+    assert_eq(d1, o1)
+    assert_eq(d2, o2)
+    assert_eq(d3, o3)
+
+
+def test_iterable___sub__():
+    o1 = {"a": 1, "b": 2}
+    o2 = {"c": 3, "d": 4}
+
+    o3 = o1.copy()
+    o3.update(o2)
+
+    d3 = DictPlus(o3)
+    d2 = DictPlus(o2)
+    d1 = DictPlus(o1)
+
+    assert_eq(d3 - d2, d1)
+    assert_eq(d3 - o2, o1)
+    assert_eq((d3 - o2) - o1, {})
+    ex(d3.__sub__, KeyError, {"g": 5})
+    ex(d3.__sub__, KeyError, {"a": 20})
+
+    assert_eq(d1, o1)
+    assert_eq(d2, o2)
+    assert_eq(d3, o3)
+
+
 def test_iterable_multiply():
     o = {"a": 1, "b": 2, "c": 3}
     d = OrderedDictPlus(o)
@@ -590,10 +663,10 @@ def test_iterable___mul__():
     o = {"a": 1, "b": 2, "c": 3}
     d = OrderedDictPlus(o)
 
-    assert_eq(d*{}, {})
+    assert_eq(d * {}, {})
     assert_eq(d, o)
 
-    assert_eq(d*o, {
+    assert_eq(d * o, {
         ("a", "a"): (1, 1), ("a", "b"): (1, 2), ("a", "c"): (1, 3),
         ("b", "a"): (2, 1), ("b", "b"): (2, 2), ("b", "c"): (2, 3),
         ("c", "a"): (3, 1), ("c", "b"): (3, 2), ("c", "c"): (3, 3)
@@ -629,7 +702,23 @@ def test_iterable___truediv__():
     assert_eq((d * d) / d, d)
 
 
+def test_iterable_le():
+    ao = {0: 0, 1: 1}
+    bo = {2: 2, 3: 3}
+
+    ad = OrderedDictPlus(ao)
+    bo = OrderedDictPlus(bo)
+
+
+
+    raise NotImplementedError
+
+
 def test_iterable___le__():
+    raise NotImplementedError
+
+
+def test_iterable_lt():
     raise NotImplementedError
 
 
@@ -637,51 +726,20 @@ def test_iterable___lt__():
     raise NotImplementedError
 
 
+def test_iterable_ge():
+    raise NotImplementedError
+
+
 def test_iterable___ge__():
+    raise NotImplementedError
+
+
+def test_iterable_gt():
     raise NotImplementedError
 
 
 def test_iterable___gt__():
     raise NotImplementedError
-
-
-def test_iterable___add__():
-    o1 = {"a": 1, "b": 2}
-    o2 = {"c": 3, "d": 4}
-
-    o3 = o1.copy()
-    o3.update(o2)
-
-    d1 = DictPlus(o1)
-    d2 = DictPlus(o2)
-    d3 = d1 + d2
-
-    assert_eq(d1 + d2, d3)
-    assert_eq(d1 + d2, o3)
-    assert_eq(d1 + o2, o3)
-    assert_eq(d2 + o1, o3)
-
-
-def test_iterable___sub__():
-    o1 = {"a": 1, "b": 2}
-    o2 = {"c": 3, "d": 4}
-
-    o3 = o1.copy()
-    o3.update(o2)
-
-    d3 = DictPlus(o3)
-    d2 = DictPlus(o2)
-    d1 = DictPlus(o1)
-
-    assert_eq(d3 - d2, d1)
-    assert_eq(d3 - o2, o1)
-    assert_eq((d3 - o2) - o1, {})
-    ex(d3.__sub__, KeyError, {"g": 5})
-    ex(d3.__sub__, KeyError, {"a": 20})
-
-    assert_eq(d1, o1)
-    assert_eq(d2, o2)
-    assert_eq(d3, o3)
 
 
 ##################
@@ -839,17 +897,21 @@ tests = [
     test_iterable_funcmap,
     test_iterable_fold_left,
     test_iterable_fold_right,
-    test_iterable_plus,
+    test_iterable_add,
     test_iterable___add__,
-    test_iterable_minus,
+    test_iterable_sub,
     test_iterable___sub__,
     test_iterable_multiply,
     test_iterable___mul__,
     test_iterable_divide,
     test_iterable___truediv__,
+    test_iterable_le,
     test_iterable___le__,
+    test_iterable_lt,
     test_iterable___lt__,
+    test_iterable_ge,
     test_iterable___ge__,
+    test_iterable_gt,
     test_iterable___gt__,
 
     # OrderedIterable tests
@@ -878,8 +940,8 @@ for test in tests:
         pass_count = pass_count + 1
     except Exception as e:
         results[name] = "{}: {}".format(e.__class__.__name__, str(e))
-        if e.__class__ != NotImplementedError:
-            raise e
+        # if e.__class__ != NotImplementedError:
+        raise e
     total_count = total_count + 1
 
 for k, v in results.items():

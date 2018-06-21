@@ -1,4 +1,4 @@
-from dict_plus import Iterable, OrderedIterable, KeyValuePair
+from dict_plus import Iterable, OrderedIterableMixin, KeyValuePair
 from dict_plus.exceptions import InvalidElementTypeException
 
 
@@ -32,7 +32,7 @@ class DictPlus(Iterable):
         return True
 
 
-class OrderedDictPlus(OrderedIterable):
+class OrderedDictPlus(OrderedIterableMixin):
     def __init__(self, data=None, element_type=None, **kwargs):
         super(OrderedDictPlus, self).__init__(data, element_type or KeyValuePair, **kwargs)
 
