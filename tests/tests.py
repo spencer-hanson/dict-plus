@@ -3,14 +3,22 @@ from dict_plus import *
 from dict_plus.exceptions import *
 
 
-def ex(f, ex_class, *args):
+def ex(f, ex_class, *args, **kwargs):
     try:
-        f(*args)
+        f(*args, **kwargs)
     except Exception as _e:
-        assert _e.__class__ == ex_class
+        assert_eq(_e.__class__, ex_class)
     else:
-        assert 8 != 8
+        raise AssertionError("Didn't throw expected '{}'".format(ex_class.__name__))
 
+def assert_eq(val1, val2):
+    assert val1 == val2
+
+def assert_neq(val1, val2):
+    assert val1 != val2
+
+def assert_nn(val):
+    assert val
 
 ##################
 
@@ -39,6 +47,7 @@ def test_iterableindex():
 
     for idx, thing in enumerate(things_to_hash):
         ii.set(thing, idx)
+        ii.get(thing)
 
 
 ##################
@@ -51,11 +60,11 @@ def test_keyvaluepair_parse_object():
         ex(parse, InvalidElementTypeException, (_id, _id, _id))
         ex(parse, InvalidElementTypeException, (val, val, val))
 
-        assert parse((_id, val)) == (_id, val)
-        assert parse((val, _id)) == (val, _id)
+        assert_eq(parse((_id, val)), (_id, val))
+        assert_eq(parse((val, _id)), (val, _id))
 
-        assert parse(KeyValuePair(_id, val)) == (_id, val)
-        assert parse(KeyValuePair(val, _id)) == (val, _id)
+        assert_eq(parse(KeyValuePair(_id, val)), (_id, val))
+        assert_eq(parse(KeyValuePair(val, _id)), (val, _id))
 
     subtest_keyvaluepair_parse_object("a", "b")
     subtest_keyvaluepair_parse_object("a", 1)
@@ -63,9 +72,9 @@ def test_keyvaluepair_parse_object():
 
 
 def test_keyvaluepair___eq__():
-    assert KeyValuePair("a", "b") == {"a": "b"}
-    assert KeyValuePair("a", "b") == ("a", "b")
-    assert KeyValuePair("a", "b") != ("b", "a")
+    assert_eq(KeyValuePair("a", "b"), {"a": "b"})
+    assert_eq(KeyValuePair("a", "b"), ("a", "b"))
+    assert_neq(KeyValuePair("a", "b"), ("b", "a"))
 
 
 ##################
@@ -74,24 +83,24 @@ def test_keyvaluepair___eq__():
 def test_element___init__():
     ex(KeyValuePair, InvalidElementTypeException, "id", None)
     ex(KeyValuePair, TypeError, None, "value")
-    assert KeyValuePair(0, 1) == KeyValuePair((0, 1))
-    assert KeyValuePair(KeyValuePair(0, 1)) == KeyValuePair((0, 1))
+    assert_eq(KeyValuePair(0, 1), KeyValuePair((0, 1)))
+    assert_eq(KeyValuePair(KeyValuePair(0, 1)), KeyValuePair((0, 1)))
 
 
 def test_element_parts():
-    assert Element(0, 1) == (0, 1)
+    assert_eq(Element(0, 1), (0, 1))
 
 
 def test_element___eq__():
     d = OrderedDictPlus()
     d.insert(0, ("4", "3"))
-    assert d.getitem("4") == KeyValuePair("4", "3")
-    assert ("4", "3") == KeyValuePair("4", "3")
-    assert KeyValuePair("a", "b") == KeyValuePair("a", "b")
-    assert KeyValuePair("1", "2") == ("1", "2")
-    assert KeyValuePair("1", "2") != ["1", "2"]
-    assert KeyValuePair("a", "b") == {"a": "b"}
-    assert KeyValuePair("c", "d") != {"a": "b", "c": "d"}
+    assert_eq(d.getitem("4"), KeyValuePair("4", "3"))
+    assert_eq(("4", "3"), KeyValuePair("4", "3"))
+    assert_eq(KeyValuePair("a", "b"), KeyValuePair("a", "b"))
+    assert_eq(KeyValuePair("1", "2"), ("1", "2"))
+    assert_neq(KeyValuePair("1", "2"), ["1", "2"])
+    assert_eq(KeyValuePair("a", "b"), {"a": "b"})
+    assert_neq(KeyValuePair("c", "d"), {"a": "b", "c": "d"})
 
 
 ##################
@@ -99,38 +108,38 @@ def test_element___eq__():
 def test_iterable_get():
     d = DictPlus()
     d.insert(0, ("1", "2"))
-    assert d.get("1") == "2"
+    assert_eq(d.get("1"), "2")
 
 
 def test_iterable_getitem():
     d = DictPlus()
     d.insert(0, ("1", "2"))
-    assert d.getitem("1") != 8
-    assert d.getitem("1") == KeyValuePair("1", "2")
+    assert_neq(d.getitem("1"), 8)
+    assert_eq(d.getitem("1"), KeyValuePair("1", "2"))
 
 
 def test_iterable_insert():
     d = DictPlus()
-    assert d.insert(12345, ("a", "g"))
+    assert_nn(d.insert(12345, ("a", "g")))
     ex(d.insert, KeyError, 12345, ("a", "b"))
-    assert d._indexes.get("a") == 0
-    assert d._elements[0] == ("a", "g")
+    assert_eq(d._indexes.get("a"), 0)
+    assert_eq(d._elements[0], ("a", "g"))
 
 
 def test_iterable_pop():
     d = DictPlus({"a": "b", "c": "d"})
-    assert d.pop("a") == "b"
-    assert d == {"c": "d"}
+    assert_eq(d.pop("a"), "b")
+    assert_eq(d, {"c": "d"})
     d.insert(1, ("a", "b"))
-    assert d.pop("a") == "b"
-    assert d.pop("c") == "d"
+    assert_eq(d.pop("a"), "b")
+    assert_eq(d.pop("c"), "d")
     ex(d.pop, KeyError, "a")
 
 
 def test_iterable_popitem():
     d = DictPlus({"a": "b"})
     t = d.popitem()
-    assert t == ("a", "b")
+    assert_eq(t, ("a", "b"))
     ex(d.popitem, KeyError)
 
 
@@ -138,24 +147,24 @@ def test_iterable_copy():
     d = DictPlus()
     d.insert(0, ("1", "2"))
     c = d.copy()
-    assert d == c
+    assert_eq(d, c)
     d.insert(-1, ("[E}", "no u"))
-    assert d != c
+    assert_neq(d, c)
 
 
 def test_iterable_atindex():
     d = DictPlus({"a": 1, "b": 2})
-    assert d.atindex(0) == ("a", 1)
-    assert d.atindex(1) == ("b", 2)
+    assert_eq(d.atindex(0), ("a", 1))
+    assert_eq(d.atindex(1), ("b", 2))
 
 
 def test_iterable___getitem__():
     d = OrderedDictPlus()
     d.insert(0, ("1", "2"))
-    assert d.get("1") == d["1"]
-    assert d["1"] == "2"
-    # assert "1" in d
-    # assert "5" not in d  # TODO: Fix 'in' bug
+    assert_eq(d.get("1"), d["1"])
+    assert_eq(d["1"], "2")
+    # assert_eq("1" in d
+    # assert_eq("5" not in d  # TODO: Fix 'in' bug
     ex(d.__getitem__, KeyError, "5")
 
 
@@ -163,16 +172,16 @@ def test_iterable___setitem__():
     d = OrderedDictPlus()
     d.insert(0, ("AAA", "AAA"))
     d["asdf"] = "ghjkl;"
-    assert d == {"asdf": "ghjkl;", "AAA": "AAA"}
+    assert_eq(d, {"asdf": "ghjkl;", "AAA": "AAA"})
     d["asdf"] = "asdf"
-    assert d == {"asdf": "asdf", "AAA": "AAA"}
+    assert_eq(d, {"asdf": "asdf", "AAA": "AAA"})
 
 
 def test_iterable___contains__():
     d = DictPlus({"a": 1, "b": 2})
-    assert "a" in d
-    assert "b" in d
-    assert "c" not in d
+    assert_nn("a" in d)
+    assert_nn("b" in d)
+    assert_nn("c" not in d)
 
 
 def test_iterable___iter__():
@@ -182,24 +191,24 @@ def test_iterable___iter__():
     keys = []
     for k in d:
         keys.append(k)
-    assert set(keys) == d.keys()
-    assert set(keys) == o.keys()
+    assert_eq(set(keys), d.keys())
+    assert_eq(set(keys), o.keys())
 
 
 def test_iterable___len__():
-    assert len(DictPlus()) == 0
-    assert len(DictPlus(a="b")) == 1
+    assert_eq(len(DictPlus()), 0)
+    assert_eq(len(DictPlus(a="b")), 1)
     d = DictPlus(a="1", b="2")
-    assert len(d) == 2
+    assert_eq(len(d), 2)
     d.popitem()
-    assert len(d) == 1
+    assert_eq(len(d), 1)
     d.insert(0, ("c", 3))
-    assert len(d) == 2
+    assert_eq(len(d), 2)
 
 
 def test_iterable___str__():
-    assert str(DictPlus()) == str({})
-    assert str(DictPlus({"a": "b"})) == str({"a": "b"})
+    assert_eq(str(DictPlus()), str({}))
+    assert_eq(str(DictPlus({"a": "b"})), str({"a": "b"}))
 
 
 def test_iterable_fromkeys():
@@ -208,72 +217,71 @@ def test_iterable_fromkeys():
 
 def test_iterable_items():
     d = DictPlus()
-    assert d.items() == {}.items()
+    assert_eq(d.items(), {}.items())
     d.insert(0, ("a", "b"))
-    assert d.items() == {"a": "b"}.items()
+    assert_eq(d.items(), {"a": "b"}.items())
 
 
 def test_iterable_elements():
     d = DictPlus({"a": 1, "b": 2})
-    assert d.elements() == [KeyValuePair("a", 1), KeyValuePair("b", 2)]
+    assert_eq(d.elements(), [KeyValuePair("a", 1), KeyValuePair("b", 2)])
 
 
 def test_iterable_keys():
     d = DictPlus()
-    assert d.keys() == {}.keys()
+    assert_eq(d.keys(), {}.keys())
     d.insert(0, ("a", 1))
     d.insert(1, ("b", 2))
-    assert d.keys() == {"a": 1, "b": 2}.keys()
+    assert_eq(d.keys(), {"a": 1, "b": 2}.keys())
 
 
 def test_iterable_values():
     d = DictPlus()
-    assert d.values() == list({}.values())
+    assert_eq(d.values(), list({}.values()))
     d.insert(0, ("a", 1))
     d.insert(1, ("b", 2))
-    assert d.values() == list({"a": 1, "b": 2}.values())
+    assert_eq(d.values(), list({"a": 1, "b": 2}.values()))
 
 
 def test_iterable_setdefault():
     d = DictPlus()
     d2 = {}
-    assert d.setdefault("a", 1) == d2.setdefault("a", 1)
-    assert d == d2
-    assert d.setdefault("b") == d2.setdefault("b")
-    assert d == d2
+    assert_eq(d.setdefault("a", 1), d2.setdefault("a", 1))
+    assert_eq(d, d2)
+    assert_eq(d.setdefault("b"), d2.setdefault("b"))
+    assert_eq(d, d2)
 
 
 def test_iterable_todict():
     d = DictPlus()
-    assert d.todict() == {}
+    assert_eq(d.todict(), {})
     d.insert(0, ("1", "2"))
-    assert d.todict() == {"1": "2"}
-    assert d == d.todict()
-    assert d == d.copy().todict()
+    assert_eq(d.todict(), {"1": "2"})
+    assert_eq(d, d.todict())
+    assert_eq(d, d.copy().todict())
 
 
 def test_iterable_tolist():
     d = DictPlus()
-    assert d.tolist() == []
+    assert_eq(d.tolist(), [])
     d.insert(0, ("1", "2"))
-    assert d.tolist() == [("1", "2")]
-    tt = DictPlus(d.tolist()).tolist()
-    assert d.tolist() == tt
-    assert d.tolist() == d.copy().tolist()
+    assert_eq(d.tolist(), [("1", "2")])
+    assert_eq(d.tolist(), DictPlus(d.tolist()).tolist())
+    assert_eq(d.tolist(), d.copy().tolist())
 
 
 def test_iterable_swap():
     d = DictPlus({"a": {"aa": 1}, "b": {"bb": 2}})
     d.swap("a", "b")
-    assert d.get("a") == {"bb": 2}
-    assert d.get("b") == {"aa": 1}
+    assert_eq(d.get("a"), {"bb": 2})
+    assert_eq(d.get("b"), {"aa": 1})
 
 
 def test_iterable_clear():
     d = DictPlus({"a": 1})
-    assert d == {"a": 1}
+    assert_eq(d, {"a": 1})
     d.clear()
-    assert d == {}
+    assert_eq(d, {})
 
 
 def test_iterable_update():
@@ -281,11 +289,11 @@ def test_iterable_update():
         d = DictPlus()
         d.insert(0, ("1", "2"))
         d.update(e, **kwargs)
-        assert d == {"1": "2", **dict(e), **kwargs}
+        assert_eq(d, {"1": "2", **dict(e), **kwargs})
         d.update({"1": "asdf"})
-        assert d == {"1": "asdf", **dict(e), **kwargs}
-        assert d.keys() == set(["1"] + list(dict(e).keys()) + list(kwargs.keys()))
-        assert d.values() == ["asdf"] + list(dict(e).values()) + list(kwargs.values())
+        assert_eq(d, {"1": "asdf", **dict(e), **kwargs})
+        assert_eq(d.keys(), set(["1"] + list(dict(e).keys()) + list(kwargs.keys())))
+        assert_eq(d.values(), ["asdf"] + list(dict(e).values()) + list(kwargs.values()))
 
     subtest_iterable_update({"21": "12", "Y": "YZ"})
     subtest_iterable_update([("21", "12"), ("Y", "YZ")])
@@ -298,38 +306,25 @@ def test_iterable_unupdate():
         d = OrderedDictPlus()
         d.insert(0, ("1", "2"))
         d.update(e, **kwargs)
-        assert d == {"1": "2", **dict(e), **kwargs}
+        assert_eq(d, {"1": "2", **dict(e), **kwargs})
         d.unupdate(e, **kwargs)
-        assert d == {"1": "2"}
+        assert_eq(d, {"1": "2"})
 
-        try:
-            d.unupdate(e, **kwargs)
-        except Exception as ex:
-            assert ex.__class__ == KeyError
-        else:
-            assert False
-
+        ex(d.unupdate, KeyError, e, **kwargs)
         d.update(e, **kwargs)
-        try:
-            d.unupdate(ee, **kwargs)
-        except Exception as ex:
-            assert ex.__class__ == InvalidElementValueException
-        else:
-            assert False
+        ex(d.unupdate, InvalidElementValueException,ee, **kwargs)
+
 
     subtest_iterable_unupdate({"gg": "ez"}, {"gg": "wp"}, a="meow", b="cat")
     subtest_iterable_unupdate({"gg": "ez"}, {"gg": "wp"})
     subtest_iterable_unupdate([("gg", "ez")], [("gg", "wp")], a="meow", b="cat")
     subtest_iterable_unupdate([("gg", "ez")], [("gg", "wp")])
-    try:
-        d = OrderedDictPlus()
-        d.insert(0, ("1", "2"))
-        d.insert(-1, ("A", "B"))
-        d.unupdate(("A", "B"))
-    except Exception as ex:
-        assert ex.__class__ == ValueError
-    else:
-        assert False
+
+    d = OrderedDictPlus()
+    d.insert(0, ("1", "2"))
+    d.insert(-1, ("A", "B"))
+
+    ex(d.unupdate, ValueError, ("A", "B"))
 
 
 def test_iterable_map():
@@ -345,11 +340,11 @@ def test_iterable_map():
 
     od = d.copy()
     d.map(func_e2e)
-    assert d == {"aa": 2, "ba": 4, "ca": 6}
-    assert d.get("aa") == 2
+    assert_eq(d, {"aa": 2, "ba": 4, "ca": 6})
+    assert_eq(d.get("aa"), 2)
     d.map(invfunc_e2e)
-    assert d == od
-    assert d.get("a") == 1
+    assert_eq(d, od)
+    assert_eq(d.get("a"), 1)
 
 
 def test_iterable_rekey():
@@ -362,11 +357,11 @@ def test_iterable_rekey():
     o = {"a": 1, "b": 2}
     d = DictPlus(o)
     d.rekey(func_k2k)
-    assert d == {"aa": 1, "ba": 2}
-    assert d.get("aa") == 1
+    assert_eq(d, {"aa": 1, "ba": 2})
+    assert_eq(d.get("aa"), 1)
     d.rekey(invfunc_k2k)
-    assert d.get("a") == 1
-    assert d == o
+    assert_eq(d.get("a"), 1)
+    assert_eq(d, o)
 
 
 def test_iterable_plus():
@@ -381,13 +376,13 @@ def test_iterable_plus():
         return e1.id + e2.id, e1.value + e2.value
 
     tt = d1.plus(d2)
-    assert tt == d3
-    assert d1 == d3
+    assert_eq(tt, d3)
+    assert_eq(d1, d3)
     d1 = OrderedDictPlus(o1)
-    assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6}
+    assert_eq(d1.plus(d2, func_ee2e), {"ac": 4, "bd": 6})
     d1 = OrderedDictPlus(o1)
     d1.insert(len(d1), ("g", 6))
-    assert d1.plus(o2, func_ee2e) == {"ac": 4, "bd": 6, "g": 6}
+    assert_eq(d1.plus(o2, func_ee2e), {"ac": 4, "bd": 6, "g": 6})
 
 
 def test_iterable_minus():
@@ -404,21 +399,21 @@ def test_iterable_minus():
     def func_inv_ee2e(e1, e2):
         return e1.id[:-1], e1.value - e2.value
 
-    assert d3.minus(d2) == d1
+    assert_eq(d3.minus(d2), d1)
     d3 = OrderedDictPlus(o3)
-    assert d3.minus(d1) == d2
-    assert d2 == d3
-    assert d3.plus(d1) == o3
+    assert_eq(d3.minus(d1), d2)
+    assert_eq(d2, d3)
+    assert_eq(d3.plus(d1), o3)
 
-    assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6}
-    assert d1.minus(d2, func_inv_ee2e) == o1
+    assert_eq(d1.plus(d2, func_ee2e), {"ac": 4, "bd": 6})
+    assert_eq(d1.minus(d2, func_inv_ee2e), o1)
     d1.insert(len(d1), ("g", 6))
-    assert d1.plus(d2, func_ee2e) == {"ac": 4, "bd": 6, "g": 6}
-    assert d1.minus(d2, func_inv_ee2e) == {"a": 1, "b": 2, "g": 6}
+    assert_eq(d1.plus(d2, func_ee2e), {"ac": 4, "bd": 6, "g": 6})
+    assert_eq(d1.minus(d2, func_inv_ee2e), {"a": 1, "b": 2, "g": 6})
     d1.pop("g")
-    assert d1 == o1
-    assert d2 == o2
-    assert d3 == o3
+    assert_eq(d1, o1)
+    assert_eq(d2, o2)
+    assert_eq(d3, o3)
 
 
 def test_iterable_chop():
@@ -433,21 +428,21 @@ def test_iterable_chop():
         return int(k % 2 != 0)
 
     chopped = d.chop(func_chop)
-    assert chopped[0] == {0: "a", 2: "c", 4: "e", 6: "g"}
-    assert chopped[1] == {1: "b", 3: "d", 5: "f", 7: "h"}
+    assert_eq(chopped[0], {0: "a", 2: "c", 4: "e", 6: "g"})
+    assert_eq(chopped[1], {1: "b", 3: "d", 5: "f", 7: "h"})
     d2 = DictPlus()
     d2.update(chopped[0])
     d2.update(chopped[1])
-    assert d2 == o
-    assert chopped[0].__class__ == DictPlus
-    assert chopped[1].__class__ == DictPlus
+    assert_eq(d2, o)
+    assert_eq(chopped[0].__class__, DictPlus)
+    assert_eq(chopped[1].__class__, DictPlus)
 
 
 def test_iterable_squish():
     d = DictPlus({"1": "8", "asdf": "[E]"})
 
     d.squish(["1", "asdf"], "tt", lambda x: x[0] + x[1])
-    assert d == {"tt": "8[E]"}
+    assert_eq(d, {"tt": "8[E]"})
 
 
 def test_iterable_expand():
@@ -456,10 +451,10 @@ def test_iterable_expand():
 
     d = DictPlus({"1": "8", "asdf": "[E]"})
     d.squish(["1", "asdf"], "tt", lambda x: x[0] + x[1])
-    assert d == o
+    assert_eq(d, o)
 
     d.expand("tt", ["1", "asdf"], lambda x: (x[0], x[1:]))
-    assert d == o2
+    assert_eq(d, o2)
     ex(d.expand, IndexError, "asdf", ["a", "sdf"], lambda x: x)
 
 
@@ -473,7 +468,7 @@ def test_iterable_funcmap():
         lambda _v1, _v2: _v1,
         lambda _id: _id
     )
-    assert d == o
+    assert_eq(d, o)
 
     # Test with nontrivial f
     d.funcmap(
@@ -481,7 +476,7 @@ def test_iterable_funcmap():
         lambda _v1, _v2: _v1 * _v2,
         lambda _id: _id
     )
-    assert d == {a: a * a for a in range(0, 100)}
+    assert_eq(d, {a: a * a for a in range(0, 100)})
 
     # Test with nontrivial f and g
     d = DictPlus(o)
@@ -490,7 +485,7 @@ def test_iterable_funcmap():
         lambda _v1, _v2: _v1 * _v2,
         lambda _id: 99 - _id
     )
-    assert d == {a: a * (99 - a) for a in range(0, 100)}
+    assert_eq(d, {a: a * (99 - a) for a in range(0, 100)})
 
     # Test with scaled g
     d = DictPlus(o)
@@ -499,7 +494,7 @@ def test_iterable_funcmap():
         lambda _v1, _v2: round(_v1 * _v2),
         lambda _id: _id * 2
     )
-    assert d == {a: 1 if a else 0 for a in range(0, 100)}
+    assert_eq(d, {a: 1 if a else 0 for a in range(0, 100)})
 
     # Test with len(d) > len(other)
     d = DictPlus(o)
@@ -509,7 +504,7 @@ def test_iterable_funcmap():
         lambda _id: _id % 50
     )
 
-    assert d == {a: "{} % 50 = {}".format(a, a % 50) for a in range(0, 100)}
+    assert_eq(d, {a: "{} % 50 = {}".format(a, a % 50) for a in range(0, 100)})
 
     # Test with len(d) < len(other)
     d = DictPlus(o)
@@ -519,7 +514,7 @@ def test_iterable_funcmap():
         lambda _id: _id * 2
     )
     tt = {a: 1 for a in range(0, 100)}
-    assert d == tt
+    assert_eq(d, tt)
 
 
 def subtest_iterable_fold(fold_func):
@@ -532,15 +527,15 @@ def subtest_iterable_fold(fold_func):
     def subsubtest_iterable_fold(di):
         g = getattr(di, fold_func)(func_ee2e)
         gp = getattr(di, fold_func)(func2_ee2e)
-        assert gp == g
+        assert_eq(gp, g)
         return g
 
     d = DictPlus()
-    assert subsubtest_iterable_fold(d) == {}
+    assert_eq(subsubtest_iterable_fold(d), {})
     d.insert(0, (1, 1))
-    assert subsubtest_iterable_fold(d) == {1: 1}
+    assert_eq(subsubtest_iterable_fold(d), {1: 1})
     d.insert(1, (2, 2))
-    assert subsubtest_iterable_fold(d) == {3: 3}
+    assert_eq(subsubtest_iterable_fold(d), {3: 3})
 
 
 def test_iterable_fold_left():
@@ -551,8 +546,8 @@ def test_iterable_fold_left():
     d = DictPlus()
     d.update([(0, "a"), (1, "b"), (2, "c")])
     r = d.fold_left(func_ee2e)
-    assert r != d.fold_right(func_ee2e)
-    assert r == {3: "abc"}
+    assert_neq(r, d.fold_right(func_ee2e))
+    assert_eq(r, {3: "abc"})
 
 
 def test_iterable_fold_right():
@@ -563,7 +558,7 @@ def test_iterable_fold_right():
     d = DictPlus()
     d.update([(0, "a"), (1, "b"), (2, "c")])
     r = d.fold_right(func_ee2e)
-    assert r == {3: "cba"}
+    assert_eq(r, {3: "cba"})
 
 
 def test_iterable_multiply():
@@ -571,38 +566,38 @@ def test_iterable_multiply():
     d = OrderedDictPlus(o)
 
     d.multiply({})
-    assert d == {}
+    assert_eq(d, {})
     d = OrderedDictPlus(o)
 
     d.multiply(o)
-    assert d == {
+    assert_eq(d, {
         ("a", "a"): (1, 1), ("a", "b"): (1, 2), ("a", "c"): (1, 3),
         ("b", "a"): (2, 1), ("b", "b"): (2, 2), ("b", "c"): (2, 3),
         ("c", "a"): (3, 1), ("c", "b"): (3, 2), ("c", "c"): (3, 3)
-    }
+    })
     d = OrderedDictPlus(o)
     d.multiply(o, lambda e1, e2: e1)
-    assert d == o
+    assert_eq(d, o)
     d.multiply(o, lambda e1, e2: (e1.id + e2.id, (e1.value, e2.value)))
-    assert d == {
+    assert_eq(d, {
         "aa": (1, 1), "ab": (1, 2), "ac": (1, 3),
         "ba": (2, 1), "bb": (2, 2), "bc": (2, 3),
         "ca": (3, 1), "cb": (3, 2), "cc": (3, 3)
-    }
+    })
 
 
 def test_iterable___mul__():
     o = {"a": 1, "b": 2, "c": 3}
     d = OrderedDictPlus(o)
 
-    assert d*{} == {}
-    assert d == o
+    assert_eq(d*{}, {})
+    assert_eq(d, o)
 
-    assert d*o == {
+    assert_eq(d*o, {
         ("a", "a"): (1, 1), ("a", "b"): (1, 2), ("a", "c"): (1, 3),
         ("b", "a"): (2, 1), ("b", "b"): (2, 2), ("b", "c"): (2, 3),
         ("c", "a"): (3, 1), ("c", "b"): (3, 2), ("c", "c"): (3, 3)
-    }
+    })
 
 
 def test_iterable_divide():
@@ -614,12 +609,12 @@ def test_iterable_divide():
     o2 = {"a": 1, "b": 2, "c": 3}
     d = OrderedDictPlus(o)
     d.divide(o, lambda el, e2: (el.id[0], el.value[0]))
-    assert d == o2
+    assert_eq(d, o2)
 
     d.multiply(o2)
-    assert d == o
+    assert_eq(d, o)
     d.divide(o2)
-    assert d == o2
+    assert_eq(d, o2)
 
 
 def test_iterable___truediv__():
@@ -630,8 +625,8 @@ def test_iterable___truediv__():
     }
     o2 = {"a": 1, "b": 2, "c": 3}
     d = OrderedDictPlus(o2)
-    assert d * d == o
-    assert (d * d) / d == d
+    assert_eq(d * d, o)
+    assert_eq((d * d) / d, d)
 
 
 def test_iterable___le__():
@@ -661,10 +656,10 @@ def test_iterable___add__():
     d2 = DictPlus(o2)
     d3 = d1 + d2
 
-    assert d1 + d2 == d3
-    assert d1 + d2 == o3
-    assert d1 + o2 == o3
-    assert d2 + o1 == o3
+    assert_eq(d1 + d2, d3)
+    assert_eq(d1 + d2, o3)
+    assert_eq(d1 + o2, o3)
+    assert_eq(d2 + o1, o3)
 
 
 def test_iterable___sub__():
@@ -678,15 +673,15 @@ def test_iterable___sub__():
     d2 = DictPlus(o2)
     d1 = DictPlus(o1)
 
-    assert d3 - d2 == d1
-    assert d3 - o2 == o1
-    assert (d3 - o2) - o1 == {}
+    assert_eq(d3 - d2, d1)
+    assert_eq(d3 - o2, o1)
+    assert_eq((d3 - o2) - o1, {})
     ex(d3.__sub__, KeyError, {"g": 5})
     ex(d3.__sub__, KeyError, {"a": 20})
 
-    assert d1 == o1
-    assert d2 == o2
-    assert d3 == o3
+    assert_eq(d1, o1)
+    assert_eq(d2, o2)
+    assert_eq(d3, o3)
 
 
 ##################
@@ -694,21 +689,21 @@ def test_iterable___sub__():
 
 def test_orderediterable_insert():
     d = OrderedDictPlus()
-    assert d.insert(0, ("a", "b")) == KeyValuePair("a", "b")
-    assert d.insert(1, ("b", "c")) == ("b", "c")
-    assert d.insert(5, KeyValuePair("g", "h")) == KeyValuePair("g", "h")
-    assert d.insert(0, KeyValuePair("e", "f")) == ("e", "f")
-    assert d == {"a": "b", "b": "c", "g": "h", "e": "f"}
-    assert d.values() == ["f", "b", "c", "h"]
-    assert d.keys() == ["e", "a", "b", "g"]
+    assert_eq(d.insert(0, ("a", "b")), KeyValuePair("a", "b"))
+    assert_eq(d.insert(1, ("b", "c")), ("b", "c"))
+    assert_eq(d.insert(5, KeyValuePair("g", "h")), KeyValuePair("g", "h"))
+    assert_eq(d.insert(0, KeyValuePair("e", "f")), ("e", "f"))
+    assert_eq(d, {"a": "b", "b": "c", "g": "h", "e": "f"})
+    assert_eq(d.values(), ["f", "b", "c", "h"])
+    assert_eq(d.keys(), ["e", "a", "b", "g"])
     ex(d.insert, InvalidElementTypeException, 0, "meow")
 
 
 def test_orderediterable_pop():
     d = OrderedDictPlus()
     d.insert(0, ("1", "2"))
-    assert d.pop("1") == "2"
-    assert d.pop("1", "2") == "2"
+    assert_eq(d.pop("1"), "2")
+    assert_eq(d.pop("1", "2"), "2")
 
 
 #################
@@ -723,28 +718,28 @@ def test_dictplus___eq__():
     d2.insert(0, (1, "fdsa"))
     d2.insert(1, (0, "asdf"))
 
-    assert d != 8
-    assert d2 != 8
-    assert d == {1: "fdsa", 0: "asdf"}
-    assert d2 == {1: "fdsa", 0: "asdf"}
-    assert d == d2
-    assert DictPlus() == {}
-    assert DictPlus() != []
+    assert_neq(d, 8)
+    assert_neq(d2, 8)
+    assert_eq(d, {1: "fdsa", 0: "asdf"})
+    assert_eq(d2, {1: "fdsa", 0: "asdf"})
+    assert_eq(d, d2)
+    assert_eq(DictPlus(), {})
+    assert_neq(DictPlus(), [])
 
     d3 = OrderedDictPlus({1: "fdsa", 0: "asdf"})
-    assert d == d3
-    assert d3 != d
+    assert_eq(d, d3)  # DictPlus doesn't care about order
+    assert_neq(d3, d)  # OrderedDictPlus does
 
     d4 = OrderedDictPlus()
     d4.insert(0, (0, "asdf"))
     d4.insert(1, (1, "fdsa"))
-    assert d == d4
-    assert d4 == d
+    assert_eq(d, d4)
+    assert_eq(d4, d)
 
 
 def test_dictplus_fromkeys():
-    assert dict.fromkeys(["a", "b", "c"]) == DictPlus.fromkeys(["a", "b", "c"])
-    assert dict.fromkeys(["a", "b", "c"], 10) == DictPlus.fromkeys(["a", "b", "c"], 10)
+    assert_eq(dict.fromkeys(["a", "b", "c"]), DictPlus.fromkeys(["a", "b", "c"]))
+    assert_eq(dict.fromkeys(["a", "b", "c"], 10), DictPlus.fromkeys(["a", "b", "c"], 10))
 
 
 ##################
@@ -753,15 +748,15 @@ def test_dictplus_fromkeys():
 def test_ordereddictplus___init__():
     def subtest_ordereddictplus__init__(data):
         d = OrderedDictPlus(data=data)
-        assert d == data
-        assert OrderedDictPlus(data={"v": data}) == {"v": data}
+        assert_eq(d, data)
+        assert_eq(OrderedDictPlus(data={"v": data}), {"v": data})
 
-    assert OrderedDictPlus() != []
-    assert OrderedDictPlus() == {}
-    assert OrderedDictPlus([]) == {}
-    assert OrderedDictPlus({}) == {}
-    assert OrderedDictPlus(OrderedDictPlus()) == {}
-    assert OrderedDictPlus([("a", 1), ("b", 2)]) == {"a": 1, "b": 2}
+    assert_neq(OrderedDictPlus(), [])
+    assert_eq(OrderedDictPlus(), {})
+    assert_eq(OrderedDictPlus([]), {})
+    assert_eq(OrderedDictPlus({}), {})
+    assert_eq(OrderedDictPlus(OrderedDictPlus()), {})
+    assert_eq(OrderedDictPlus([("a", 1), ("b", 2)]), {"a": 1, "b": 2})
     subtest_ordereddictplus__init__(OrderedDictPlus())
     subtest_ordereddictplus__init__({})
     subtest_ordereddictplus__init__({"a": 1, "b": 2})
@@ -777,21 +772,21 @@ def test_ordereddictplus___eq__():
     d2.insert(0, (1, "fdsa"))
     d2.insert(1, (0, "asdf"))
 
-    assert d != 8
-    assert d == {1: "fdsa", 0: "asdf"}
-    assert d2 == {1: "fdsa", 0: "asdf"}
-    assert d != d2
-    assert OrderedDictPlus() == {}
-    assert OrderedDictPlus() != []
+    assert_neq(d, 8)
+    assert_eq(d, {1: "fdsa", 0: "asdf"})
+    assert_eq(d2, {1: "fdsa", 0: "asdf"})
+    assert_neq(d, d2)
+    assert_eq(OrderedDictPlus(), {})
+    assert_neq(OrderedDictPlus(), [])
 
     d3 = DictPlus({1: "fdsa", 0: "asdf"})
-    assert d != d3
-    assert d3 == d
+    assert_neq(d, d3)
+    assert_eq(d3, d)
 
 
 def test_ordereddictplus_fromkeys():
-    assert dict.fromkeys(["a", "b", "c"]) == DictPlus.fromkeys(["a", "b", "c"])
-    assert dict.fromkeys(["a", "b", "c"], 10) == DictPlus.fromkeys(["a", "b", "c"], 10)
+    assert_eq(dict.fromkeys(["a", "b", "c"]), DictPlus.fromkeys(["a", "b", "c"]))
+    assert_eq(dict.fromkeys(["a", "b", "c"], 10), DictPlus.fromkeys(["a", "b", "c"], 10))
 
 
 ###############
