@@ -213,6 +213,10 @@ def test_iterable_items():
     assert d.items() == {"a": "b"}.items()
 
 
+def test_iterable_elements():
+    d = DictPlus({"a": 1, "b": 2})
+    assert d.elements() == [KeyValuePair("a", 1), KeyValuePair("b", 2)]
+
 def test_iterable_keys():
     d = DictPlus()
     assert d.keys() == {}.keys()
@@ -551,8 +555,25 @@ def test_iterable_fold_right():
 
 
 def test_iterable_multiply():
-    raise NotImplementedError
+    o = {"a": 1, "b": 2, "c": 3}
+    d = OrderedDictPlus(o)
 
+    d.multiply(o)
+    assert d == {
+        ("a", "a"): (1, 1), ("a", "b"): (1, 2), ("a", "c"): (1, 3),
+        ("b", "a"): (2, 1), ("b", "b"): (2, 2), ("b", "c"): (2, 3),
+        ("c", "a"): (3, 1), ("c", "b"): (3, 2), ("c", "c"): (3, 3)
+    }
+    d = OrderedDictPlus(o)
+    d.multiply(o, lambda e1, e2: e1)
+    assert d == o
+    d.multiply(o, lambda e1, e2: (e1.id + e2.id, (e1.value, e2.value)))
+    assert d == {
+        "aa": (1, 1), "ab": (1, 2), "ac": (1, 3),
+        "ba": (2, 1), "bb": (2, 2), "bc": (2, 3),
+        "ca": (3, 1), "cb": (3, 2), "cc": (3, 3)
+    }
+    tw = 2
 
 def test_iterable_divide():
     raise NotImplementedError
@@ -745,6 +766,7 @@ tests = [
     test_iterable___str__,
     test_iterable_fromkeys,
     test_iterable_items,
+    test_iterable_elements,
     test_iterable_keys,
     test_iterable_values,
     test_iterable_setdefault,
@@ -798,8 +820,8 @@ for test in tests:
         pass_count = pass_count + 1
     except Exception as e:
         results[name] = "{}: {}".format(e.__class__.__name__, str(e))
-        if e.__class__ != NotImplementedError:
-            raise e
+        # if e.__class__ != NotImplementedError:
+        raise e
     total_count = total_count + 1
 
 for k, v in results.items():

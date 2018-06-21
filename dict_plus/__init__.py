@@ -212,6 +212,9 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         """ D.items() -> a set-like object providing a view on D's items """
         return set([el.parts() for el in self._elements])
 
+    def elements(self):
+        return self._elements.copy()
+
     def keys(self):
         """ D.keys() -> a set-like object providing a view on D's keys """
         return set([el.id for el in self._elements])
@@ -341,9 +344,19 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             tmp_el = self._eltype(result)
         return tmp_el
 
-    def multiply(self, other, func):
-
-        raise NotImplementedError
+    def multiply(self, other, func=None):
+        if not isinstance(other, Iterable):
+            other = self.__class__(other)
+        if not func:
+            def func(e1, e2):
+                return (e1.id, e2.id), (e1.value, e2.value)
+        els = self._elements.copy()
+        self.clear()
+        for el1 in els:
+            for el2 in other.elements():
+                el3 = self._eltype(func(el1, el2))
+                self[el3.id] = el3.value
+        return self
 
     def divide(self, other, func_inv):
         raise NotImplementedError
