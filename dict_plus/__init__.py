@@ -393,49 +393,39 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return self.multiply(other, func_inv)
 
     # Compare self to other using
-    # comparison func 'f'
-    # aggregate func 'g'
-    # and mapping func 'h'
+    # comparison func 'comp'
+    # aggregate func 'agg'
+    # and mapping func 'mapp'
 
-    def compare(self, other, f, g, h=None, inplace=False):
-        if not h:
+    def compare(self, other, comp, agg, mapp=None, inplace=False):
+        if not mapp:
             def h(x):
                 return other.atindex(self.indexof(x)).id
 
-        a = self.funcmap(
+        result = self.funcmap(
             other,
-            f,
-            h,
+            comp,
+            mapp,
             inplace=inplace
         )
-        b = g(a)
+        return agg(result)
 
-        return b
 
-    # Check if self <= other using comparison func 'f' and aggerate func 'g'
     def __le__(self, other):
-        functools.partial(self.__class__.getfunc("fold_left")
-        a = dfuncs.AND
-        return self.compare(other, dfuncs.LE)
-        # ap = self.compare(other, dfuncs.LE)
-        # a = self.funcmap(
-        #     other,
-        #     dfuncs.LE,
-        #     lambda x: other.atindex(self.indexof(x)).id,
-        #     inplace=False
-        # )
-        #
-        # b = a.fold_left(dfuncs.AND)
-        # return b
+        agg = self.getfunc("fold_left", dfuncs.AND)
+        return self.compare(other, dfuncs.LE, agg).value
 
     def __lt__(self, other):
-        raise NotImplementedError
+        agg = self.getfunc("fold_left", dfuncs.AND)
+        return self.compare(other, dfuncs.LT, agg).value
 
     def __ge__(self, other):
-        raise NotImplementedError
+        agg = self.getfunc("fold_left", dfuncs.AND)
+        return self.compare(other, dfuncs.GE, agg).value
 
     def __gt__(self, other):
-        raise NotImplementedError
+        agg = self.getfunc("fold_left", dfuncs.AND)
+        return self.compare(other, dfuncs.GT, agg).value
 
     ##
     # @staticmethod  # known case of __new__

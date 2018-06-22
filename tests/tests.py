@@ -16,6 +16,8 @@ def ex(f, ex_class, *args, **kwargs):
 def assert_op(val1, val2, op):
     assert op(val1, val2)
 
+def assert_nop(val1, val2, op):
+    assert not op(val1, val2)
 
 def assert_eq(val1, val2):
     assert_op(val1, val2, operator.eq)
@@ -27,6 +29,7 @@ def assert_neq(val1, val2):
 
 def assert_t(val):
     assert val
+
 
 def assert_f(val):
     assert not val
@@ -710,7 +713,7 @@ def test_iterable___truediv__():
     assert_eq((d * d) / d, d)
 
 
-def test_iterable_le():
+def test_iterable___le__():
     ao = {0: 0, 1: 1}
     bo = {2: 2, 3: 3}
 
@@ -726,40 +729,59 @@ def test_iterable_le():
     assert_eq(ad, ao)
     assert_eq(bd, bo)
 
-    assert_f(bd.__le__(ad))
-
-    # assert_op(ad, bo, operator.le)
-
-
-    raise NotImplementedError
-
-
-def test_iterable___le__():
-    raise NotImplementedError
-
-
-def test_iterable_lt():
-    raise NotImplementedError
-
 
 def test_iterable___lt__():
-    raise NotImplementedError
+    ao = {0: 0, 1: 1}
+    bo = {2: 2, 3: 3}
 
+    ad = OrderedDictPlus(ao)
+    bd = OrderedDictPlus(bo)
 
-def test_iterable_ge():
-    raise NotImplementedError
+    assert_op(ad, bd, operator.lt)
+    assert_nop(bd, ad, operator.lt)
+    assert_eq(ad, ao)
+    assert_eq(bd, bo)
+
+    assert_nop(ad, ad, operator.lt)
+    assert_nop(bd, bd, operator.lt)
+    assert_eq(ad, ao)
+    assert_eq(bd, bo)
 
 
 def test_iterable___ge__():
-    raise NotImplementedError
+    ao = {0: 0, 1: 1}
+    bo = {2: 2, 3: 3}
 
+    ad = OrderedDictPlus(ao)
+    bd = OrderedDictPlus(bo)
 
-def test_iterable_gt():
-    raise NotImplementedError
+    assert_op(bd, ad, operator.ge)
+    assert_nop(ad, bd, operator.ge)
+    assert_eq(ad, ao)
+    assert_eq(bd, bo)
+
+    assert_op(ad, ad, operator.ge)
+    assert_op(bd, bd, operator.ge)
+    assert_eq(ad, ao)
+    assert_eq(bd, bo)
 
 
 def test_iterable___gt__():
-    raise NotImplementedError
+    ao = {0: 0, 1: 1}
+    bo = {2: 2, 3: 3}
+
+    ad = OrderedDictPlus(ao)
+    bd = OrderedDictPlus(bo)
+
+    assert_op(bd, ad, operator.gt)
+    assert_nop(ad, bd, operator.gt)
+    assert_eq(ad, ao)
+    assert_eq(bd, bo)
+
+    assert_nop(ad, ad, operator.gt)
+    assert_nop(bd, bd, operator.gt)
+    assert_eq(ad, ao)
+    assert_eq(bd, bo)
 
 
 ##################
@@ -926,13 +948,9 @@ tests = [
     test_iterable___mul__,
     test_iterable_divide,
     test_iterable___truediv__,
-    test_iterable_le,
     test_iterable___le__,
-    test_iterable_lt,
     test_iterable___lt__,
-    test_iterable_ge,
     test_iterable___ge__,
-    test_iterable_gt,
     test_iterable___gt__,
 
     # OrderedIterable tests
