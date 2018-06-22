@@ -3,6 +3,15 @@ from dict_plus import *
 from dict_plus.exceptions import *
 import operator
 
+assertions = {
+    "op": 0,
+    "nop": 0,
+    "eq": 0,
+    "neq": 0,
+    "t": 0,
+    "f": 0
+}
+
 
 def ex(f, ex_class, *args, **kwargs):
     try:
@@ -15,24 +24,34 @@ def ex(f, ex_class, *args, **kwargs):
 
 def assert_op(val1, val2, op):
     assert op(val1, val2)
+    assertions["op"] = assertions["op"] + 1
+
 
 def assert_nop(val1, val2, op):
     assert not op(val1, val2)
+    assertions["nop"] = assertions["nop"] + 1
+
 
 def assert_eq(val1, val2):
     assert_op(val1, val2, operator.eq)
+    assertions["eq"] = assertions["eq"] + 1
 
 
 def assert_neq(val1, val2):
     assert_op(val1, val2, operator.ne)
+    assertions["neq"] = assertions["neq"] + 1
 
 
 def assert_t(val):
     assert val
+    assertions["t"] = assertions["t"] + 1
 
 
 def assert_f(val):
     assert not val
+    assertions["f"] = assertions["f"] + 1
+
+
 ##################
 
 
@@ -987,3 +1006,9 @@ for k, v in results.items():
     print("{}:\n{}\n".format(k, v))
 
 print("Passed: {} Total: {} - {}%".format(pass_count, total_count, round((pass_count / total_count), 4)))
+
+total = 0
+for k, v in assertions.items():
+    print("-- {}: {}".format(k, v))
+    total = total + v
+print("Total: {}".format(total))

@@ -249,6 +249,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     def getfunc(name, *args, **kwargs):
         def func(inst):
             return getattr(inst, name)(*args, **kwargs)
+
         return func
 
     def todict(self):
@@ -327,8 +328,8 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
         return chopped
 
-    # Combine self and other with function 'f' using mapping 'g'
-    def funcmap(self, other, f, g, inplace=True):
+    # Combine self and other with function 'comp' using mapping 'mapp'
+    def funcmap(self, other, comp, mapp, inplace=True):
         if not isinstance(other, Iterable):
             other = self.__class__(other)
 
@@ -340,9 +341,9 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         for idx in range(0, len(self)):
             el = d._elements[idx]
             val1 = el.value
-            gval = g(el.id)
+            gval = mapp(el.id)
             val2 = other[gval]
-            fval = f(val1, val2)
+            fval = comp(val1, val2)
             d._elements[idx].value = fval
 
         return d
@@ -399,17 +400,16 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     def compare(self, other, comp, agg, mapp=None, inplace=False):
         if not mapp:
-            def h(x):
+            def mapp(x):
                 return other.atindex(self.indexof(x)).id
 
         result = self.funcmap(
-            other,
-            comp,
-            mapp,
+            other=other,
+            comp=comp,
+            mapp=mapp,
             inplace=inplace
         )
         return agg(result)
-
 
     def __le__(self, other):
         agg = self.getfunc("fold_left", dfuncs.AND)
@@ -441,6 +441,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     #     """ Delete self[key]. """
     #     raise NotImplementedError
     #
+
     def __eq__(self, other):
         if other == {} and self._elements == []:
             return True
