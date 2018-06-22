@@ -230,15 +230,11 @@ def test_iterable___contains__():
 
 
 def test_iterable___iter__():
-    o = {str(a): a for a in range(0, 10)}
-    d = DictPlus(o)
-
-    keys = []
-    for k in d:
-        keys.append(k)
-    assert_eq(set(keys), d.keys())
-    assert_eq(set(keys), o.keys())
-
+    d = DictPlus({a: a for a in range(0, 10)})
+    ii = iter(d)
+    iid = iter(d.keys())
+    for i in range(0, len(d)):
+        assert_eq(next(ii), next(iid))
 
 def test_iterable___len__():
     assert_eq(len(DictPlus()), 0)
@@ -278,6 +274,15 @@ def test_iterable_keys():
     d.insert(0, ("a", 1))
     d.insert(1, ("b", 2))
     assert_eq(d.keys(), {"a": 1, "b": 2}.keys())
+
+    o = {str(a): a for a in range(0, 10)}
+    d = DictPlus(o)
+
+    keys = []
+    for k in d:
+        keys.append(k)
+    assert_eq(set(keys), d.keys())
+    assert_eq(set(keys), o.keys())
 
 
 def test_iterable_values():

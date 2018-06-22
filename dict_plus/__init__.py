@@ -494,14 +494,6 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             self.insert(len(self), (key, value))
 
     #
-    # def __ge__(self, *args, **kwargs):  # real signature unknown
-    #     """ Return self>=value. """
-    #     raise NotImplementedError
-    #
-    # def __gt__(self, *args, **kwargs):  # real signature unknown
-    #     """ Return self>value. """
-    #     raise NotImplementedError
-    #
     # def __iter__(self, *args, **kwargs):  # real signature unknown
     #     """ Implement iter(self). """
     #     # raise NotImplementedError
