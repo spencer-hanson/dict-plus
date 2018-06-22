@@ -252,6 +252,10 @@ def test_iterable___str__():
     assert_eq(str(DictPlus({"a": "b"})), str({"a": "b"}))
 
 
+def test_iterable___repr__():
+    d = DictPlus({a: a**3 for a in range(0, 50, 3)})
+    assert_eq(eval(repr(d)), d)
+
 def test_iterable_fromkeys():
     ex(Iterable.fromkeys, NotImplementedError, ["a"], 5)
 
@@ -944,6 +948,7 @@ tests = [
     test_iterable___iter__,
     test_iterable___len__,
     test_iterable___str__,
+    test_iterable___repr__,
     test_iterable_fromkeys,
     test_iterable_items,
     test_iterable_elements,

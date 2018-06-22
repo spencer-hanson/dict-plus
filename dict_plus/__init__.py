@@ -470,12 +470,6 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     def __truediv__(self, other):
         return self.copy().divide(other, func_inv=None)
 
-    #
-    # def __getattribute__(self, *args, **kwargs):  # real signature unknown
-    #     """ Return getattr(self, name). """
-    #     raise NotImplementedError
-    #
-
     def __iter__(self):
         return iter(self.keys())
 
@@ -493,20 +487,17 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         else:
             self.insert(len(self), (key, value))
 
-    #
-    # def __iter__(self, *args, **kwargs):  # real signature unknown
-    #     """ Implement iter(self). """
-    #     # raise NotImplementedError
-    #     return super(Iterable, self).__iter__()
-    #
-
     def __len__(self):
         return len(self._elements)
 
-    # def __repr__(self, *args, **kwargs):  # real signature unknown
-    #     return super(Iterable, self).__repr__(*args, **kwargs)
-    #     # raise NotImplementedError
-    #
+    def __repr__(self, *args, **kwargs):  # real signature unknown
+        return "{cls}({data})".format(
+        cls=str(self.__class__.__name__),
+            data=str(self)
+        )
+
+        return super(Iterable, self).__repr__(*args, **kwargs)
+
     def __str__(self):
         return str(self.todict())
 
