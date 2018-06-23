@@ -33,12 +33,12 @@ def assert_nop(val1, val2, op):
 
 
 def assert_eq(val1, val2):
-    assert_op(val1, val2, operator.eq)
+    assert val1 == val2
     assertions["eq"] = assertions["eq"] + 1
 
 
 def assert_neq(val1, val2):
-    assert_op(val1, val2, operator.ne)
+    assert val1 != val2
     assertions["neq"] = assertions["neq"] + 1
 
 
@@ -236,6 +236,7 @@ def test_iterable___iter__():
     for i in range(0, len(d)):
         assert_eq(next(ii), next(iid))
 
+
 def test_iterable___len__():
     assert_eq(len(DictPlus()), 0)
     assert_eq(len(DictPlus(a="b")), 1)
@@ -253,8 +254,9 @@ def test_iterable___str__():
 
 
 def test_iterable___repr__():
-    d = DictPlus({a: a**3 for a in range(0, 50, 3)})
+    d = DictPlus({a: a ** 3 for a in range(0, 50, 3)})
     assert_eq(eval(repr(d)), d)
+
 
 def test_iterable_fromkeys():
     ex(Iterable.fromkeys, NotImplementedError, ["a"], 5)
@@ -262,9 +264,9 @@ def test_iterable_fromkeys():
 
 def test_iterable_items():
     d = DictPlus()
-    assert_eq(d.items(), {}.items())
+    assert_eq(d.items(), list({}.items()))
     d.insert(0, ("a", "b"))
-    assert_eq(d.items(), {"a": "b"}.items())
+    assert_eq(d.items(), list({"a": "b"}.items()))
 
 
 def test_iterable_elements():
@@ -274,10 +276,10 @@ def test_iterable_elements():
 
 def test_iterable_keys():
     d = DictPlus()
-    assert_eq(d.keys(), {}.keys())
+    assert_eq(d.keys(), list({}.keys()))
     d.insert(0, ("a", 1))
     d.insert(1, ("b", 2))
-    assert_eq(d.keys(), {"a": 1, "b": 2}.keys())
+    assert_eq(d.keys(), list({"a": 1, "b": 2}.keys()))
 
     o = {str(a): a for a in range(0, 10)}
     d = DictPlus(o)
@@ -285,8 +287,8 @@ def test_iterable_keys():
     keys = []
     for k in d:
         keys.append(k)
-    assert_eq(set(keys), d.keys())
-    assert_eq(set(keys), o.keys())
+    assert_eq(keys, list(d.keys()))
+    assert_eq(keys, list(o.keys()))
 
 
 def test_iterable_values():
@@ -346,7 +348,7 @@ def test_iterable_update():
         assert_eq(d, {"1": "2", **dict(e), **kwargs})
         d.update({"1": "asdf"})
         assert_eq(d, {"1": "asdf", **dict(e), **kwargs})
-        assert_eq(d.keys(), set(["1"] + list(dict(e).keys()) + list(kwargs.keys())))
+        assert_eq(d.keys(), ["1"] + list(dict(e).keys()) + list(kwargs.keys()))
         assert_eq(d.values(), ["asdf"] + list(dict(e).values()) + list(kwargs.values()))
 
     subtest_iterable_update({"21": "12", "Y": "YZ"})

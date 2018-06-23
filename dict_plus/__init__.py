@@ -12,6 +12,11 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         """
 
         def __make_hash(self, o):
+            """
+            Makes a hash for a given object, doesn't guarantee collisions won't happen.
+            :param o: Object to get a hash for
+            :return: The hash of the object
+            """
             if o.__hash__:
                 return hash(o)
             elif isinstance(o, list):
@@ -29,45 +34,87 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
                 raise TypeError("Can't hash, submit an issue!")
 
         def __init__(self, data=None):
+            """
+            :param data: Internal data dict to create the index from, optional
+            """
             self.__data = {} if not data else data.copy()
 
         def get(self, key):
+            """
+            Get a value from the index
+            :param key: Key to get the value of
+            :return: Integer index of the key's location in the element list
+            """
             key_hash = self.__make_hash(key)
             if key_hash in self.__data:
                 return self.__data[key_hash]
             else:
-                raise KeyError(" '{}' ".format(key))
+                raise KeyError("Key '{}' not in index ".format(key))
 
         def set(self, key, value):
+            """
+            Set a key's location in the index
+            :param key: Key to get the location of
+            :param value: Integer value to set in the index
+            :return: None
+            """
+            if not isinstance(value, int):
+                raise ValueError("Can't set index value to non-integer value!")
+
             self.__data[self.__make_hash(key)] = value
 
         def has(self, key):
+            """
+            Check whether the index has a given key in it
+            :param key: Key to check for
+            :return: True if the key exists, else False
+            """
             if self.__make_hash(key) in self.__data:
                 return True
             else:
                 return False
 
         def pop(self, key):
+            """
+            Remove and get the value of the given key
+            :param key: Key to get the value of
+            :return: Integer index value of the key in the element list
+            """
             return self.__data.pop(self.__make_hash(key))
 
         def isempty(self):
+            """
+            Check whether the index is empty
+            :return: True if index is empty else False
+            """
             return self.__data == {}
 
         def copy(self):
+            """
+            Copy this index
+            :return: A copy of the index
+            """
             return Iterable.IterableIndex(self.__data)
 
     def __init__(self, data=None, element_type=None, **kwargs):
         """
-        dict() -> new empty dictionary
-        dict(mapping) -> new dictionary initialized from a mapping object's
+        Initialize a new Iterable
+
+        Iterable() -> new empty Iterable
+        Iterable(mapping) -> new Iterable initialized from a mapping object's
             (key, value) pairs
-        dict(iterable) -> new dictionary initialized as if via:
+        Iterable(iterable) -> new Iterable initialized as if via:
             d = {}
             for k, v in iterable:
                 d[k] = v
-        dict(**kwargs) -> new dictionary initialized with the name=value pairs
+        Iterable(**kwargs) -> new Iterable initialized with the name=value pairs
             in the keyword argument list.  For example:  dict(one=1, two=2)
-        # (copied from class doc)
+
+        :param data: Optional data to be inserted into the Iterable, can be a dict, list of tuples,
+        or another Iterable instance
+        :param element_type: Element container for the data, must inherit from Element
+        Contains an id and a value
+        :param kwargs: Additional data to initialize with
         """
 
         super().__init__()
@@ -97,11 +144,26 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     # TODO Use from_idx to optimize
     def _update_indexes(self, from_idx):
+        """
+        Update the internal index after an operation that messes with the index
+        Not meant to be used after every operation, as it completely reinitializes the index from
+        a given spot
+        :param from_idx: Parameter to help make the re-indexing faster, will only update the indexes after
+        from_idx, as to not have to update any index < from_idx
+        :return: None
+        """
         self._indexes = Iterable.IterableIndex()
         for idx, el in enumerate(self._elements):
             self._indexes.set(el.id, idx)
 
     def insert(self, index, obj):
+        """
+        Insert an object into the Iterable, raises a KeyError if the key already exists
+        Index value is ignored in the Iterable superclass, as order is not preserved anyways
+        :param index: Value to insert element to, unless ordered, the index always will be the last
+        :param obj: Object to insert into the Iterable. Must conform with the element type of the iterable
+        :return: return the element (of element type) that was inserted
+        """
         element = self._eltype(obj)
         if self._indexes.has(element.id):
             raise KeyError("Key '{}' already exists!".format(element.id))
@@ -111,10 +173,24 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return element
 
     def get(self, k, v_alt=None):
-        """ D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None. """
+        """
+        I.get(k[, v_alt]) -> I[k] if k in I, else v_alt.
+        v_alt defaults to None.
+        If no such key is found, will throw a KeyError
+        :param k: key to get the value of
+        :param v_alt: alternate value to return if key doesn't exist
+        :return: The value stored with the key
+        """
         return self.getitem(k, v_alt).value
 
     def getitem(self, k, v_alt=None):
+        """
+        Get the full element from key 'k'
+        if no key or value is present, Element(k, v_alt) will be returned
+        :param k:
+        :param v_alt:
+        :return: Element with key 'k'
+        """
         if self._indexes.has(k):
             return self._elements[self._indexes.get(k)]
         elif v_alt:
@@ -124,11 +200,15 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     def pop(self, k, v_alt=None):
         """
-        D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
-        If key is not found, d is returned if given, otherwise KeyError is raised
+        Don't care about order, so we move the last element to the position of the removed
+        element, remove the index to the popped element
+
+        I.pop(k[,v_alt]) -> v, remove specified key and return the corresponding value.
+        If key is not found, v_alt is returned if given, otherwise KeyError is raised
+        :param k: key to pop
+        :param v_alt: alternate value if k doesn't exist
+        :return: The retrieved value from key k
         """
-        # Don't care about order, so we move the last element to the position of the removed
-        # element, remove the index to the popped element
         if self._indexes.has(k):
             last_el = self._elements.pop(-1)
             el_idx = self._indexes.get(k)
@@ -146,17 +226,26 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     def popitem(self):
         """
-        D.popitem() -> (k, v), remove and return some (key, value) pair as a
-        2-tuple; but raise KeyError if D is empty.
+        I.popitem() -> (k, v), remove and return some (key, value) pair as a
+        2-tuple; but raise KeyError if I is empty.
+        Pops from the last index
+        :return: (key, value)
         """
         if self._indexes.isempty():
             raise KeyError("Can't .popitem, dict is empty!")
         k, v = self._elements.pop(-1).parts()
         self._indexes.pop(k)
-
         return k, v
 
     def unupdate(self, e=None, **kwargs):
+        """
+        Undo a .update operation, essentially the same as popping a list of keys,
+        except will raise an InvalidElementValueException if the key-value pair doesn't match what is to be popped
+
+        :param e: dict or iterable to unupdate with
+        :param kwargs: keyword args to unupdate from
+        :return: None
+        """
         if hasattr(e, "keys"):
             for k in e.keys():
                 if self.pop(k) != e[k]:
@@ -171,10 +260,14 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     def update(self, e=None, **kwargs):
         """
-        D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+        I.update([E, ]**F) -> None.  Update I from dict/iterable E and F.
         If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
         If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
         In either case, this is followed by: for k in F:  D[k] = F[k]
+
+        :param e: iterable/dict to update from
+        :param kwargs: other keyword args to update from
+        :return: None
         """
         if hasattr(e, "keys"):
             for k in e.keys():
@@ -189,88 +282,179 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             self.insert(len(self), (k, kwargs[k]))
 
     def map(self, func):
+        """
+        Map each element in the Iterable to another using function 'func'
+        :param func: func(key, value) -> (new_key, new_value)
+        :return: None
+        """
         for i in range(0, len(self)):
             idx = self._indexes.pop(self._elements[i].id)
             self._elements[i] = self._eltype(func(*self._elements[i].parts()))
             self._indexes.set(self._elements[i].id, idx)
 
     def rekey(self, func):
+        """
+        Re-key the Iterable with function 'func'
+        Changes keys in place, values untouched
+        :param func: func(key1) -> key2
+        :return: None
+        """
         for i in range(0, len(self)):
             idx = self._indexes.pop(self._elements[i].id)
             self._elements[i].id = func(self._elements[i].id)
             self._indexes.set(self._elements[i].id, idx)
 
     def clear(self):
-        """ D.clear() -> None.  Remove all items from D. """
+        """
+        I.clear() -> None.  Remove all items from I.
+        :return: None
+        """
         self._elements = []
         self._indexes = Iterable.IterableIndex()
 
     def copy(self):
-        """ D.copy() -> a shallow copy of D """
+        """
+        I.copy() -> a shallow copy of I
+        :return: Copied instance
+        """
         i = self.__class__(element_type=self._eltype)
         i._elements = [el.copy() for el in self.elements()]
         i._indexes = self._indexes.copy()
         return i
 
     def atindex(self, int_val):
+        """
+        Get the element at index 'int_val'
+        :param int_val: Integer value to fetch the element from
+        :return: Element instance
+        """
         return self.getitem(self._elements[int_val].id)
 
     def indexof(self, key):
+        """
+        Get the integer index value of a given key
+        raises KeyError if key doesn't exist
+        :param key: Key to get the index of
+        :return: Integer index
+        """
         return self._indexes.get(key)
 
     @staticmethod
     def fromkeys(sequence, value=None):
+        """
+        Create an Iterable instance using a list, each element will be used as a key,
+        with each with value 'value'
+        :param sequence: List of keys to use
+        :param value: Value to set for each key
+        :return: Instance with keys from 'sequence' with value 'value'
+        """
         raise NotImplementedError("Can't call .fromkeys() on Iterator!")
 
     def items(self):
-        """ D.items() -> a set-like object providing a view on D's items """
-        return set([el.parts() for el in self._elements])
+        """
+        Returns a list of the items in the Iterable instance, in form (key, value)
+        :return: a list providing a view on I's items
+        """
+        return [el.parts() for el in self._elements]
 
     def elements(self):
+        """
+        Returns a copy of the elements in the Iterable instance
+        :return: List of Elements
+        """
         return self._elements.copy()
 
     def keys(self):
-        """ D.keys() -> a set-like object providing a view on D's keys """
-        return set([el.id for el in self._elements])
+        """
+        A list providing a view on I's keys
+        :return: List of keys in I
+        """
+        return [el.id for el in self._elements]
 
     def values(self):
-        """ D.values() -> an object providing a view on D's values """
+        """
+        I.values() -> an object providing a view on I's values
+        :return: List of values in I
+        """
         return [el.value for el in self._elements]
 
-    def setdefault(self, k, d=None):
-        """ D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D """
+    def setdefault(self, k, v_alt=None):
+        """
+        Same as I.get(k,d), also set I[k]=d if k not in I
+        :param k: key to use
+        :param v_alt: Alternate value to set and return if k isn't in I
+        :return: Element value
+        """
         if self._indexes.has(k):
             return self._elements[self._indexes.get(k)]
         else:
-            self[k] = d
-            return d
+            self[k] = v_alt
+            return v_alt
 
     @staticmethod
     def getfunc(name, *args, **kwargs):
+        """
+        Get a wrapped static version of an Iterable function, with signature func(inst)
+        Providing arguments and keyword arguments for the function.
+
+        :param name: Name of the function to get
+        :param args: Arguments to use for the function
+        :param kwargs: Keyword arguments to use for the function
+        :return: A function with signature f(instance)
+        """
         def func(inst):
             return getattr(inst, name)(*args, **kwargs)
 
         return func
 
     def todict(self):
+        """
+        Convert the Iterable to a pure python dictionary
+        :return: dict
+        """
         return {el.id: el.value for el in self._elements}
 
     def tolist(self):
+        """
+        Convert the Iterable to a pure python list
+        :return: list
+        """
         return [el.parts() for el in self._elements]
 
     def swap(self, k1, k2):
+        """
+        Swap two keys in the Iterable, works in place
+        :param k1: first key
+        :param k2: second key
+        :return: None
+        """
         tmp_val = self._elements[self._indexes.get(k1)]
         self._elements[self._indexes.get(k1)] = self._elements[self._indexes.get(k2)]
         self._elements[self._indexes.get(k2)] = tmp_val
 
     def squish(self, keys, new_key, func):
+        """
+        Squish elements into another new element, using function 'func'
+        Works in place.
+        :param keys: List of keys to squish
+        :param new_key: Name of the new key
+        :param func: func([value1, value2, ...]) -> new_value
+        :return: None
+        """
         vals = []
         for key in keys:
             vals.append(self.pop(key))
         self.insert(len(self), (new_key, func(vals)))
 
-    # expand any number of keys into a larger amount of keypairs
     def expand(self, key, new_keys, func_inv):
+        """
+        Expand a key into a larger amount of keys
+        Works in place
+        :param key: Key to expand on
+        :param new_keys: List of keys that will be set
+        :param func_inv: func(value) -> [value1, value2, ..]
+        :return: None
+        """
         vals = func_inv(self.pop(key))
         if len(vals) != len(new_keys):
             raise IndexError("Number of values returned from the function != number of keys given!")
@@ -278,6 +462,15 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             self.insert(len(self), (new_keys[idx], vals[idx]))
 
     def add(self, other, func=None):
+        """
+        Add this Iterable with another Iterable-like
+        combine with function 'func'
+        If no function is given, the default function will concatenate the two Iterables
+        Works in place, allows for concurrent modification
+        :param other: Iterable-like to add to
+        :param func: func(element1, element2) -> new_element
+        :return: self
+        """
         if not isinstance(other, Iterable):
             other = self.__class__(other)
         if not func:
@@ -304,6 +497,13 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return self
 
     def sub(self, other, func_inv=None):
+        """
+        Inverse of I.add(), combines with another Iterable-like with function 'func'
+        If no function is given will default to removing the 'other's elements from self
+        :param other: Iterable-like to subtrace from
+        :param func_inv: func(element1, element2) -> new_element
+        :return: self
+        """
         if not isinstance(other, Iterable):
             other = self.__class__(other)
         if not func_inv:
@@ -315,6 +515,13 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return self.add(other, func_inv)
 
     def chop(self, func):
+        """
+        Chop the Iterable into other Iterables using a binning function 'func'
+        Each keypair is assigned a value -infinity to +infinity, and put into other iterables
+        with the same number. These 'bins' are then ordered relatively to each other and returned in a list
+        :param func: func(k, v) -> number
+        :return: List of Iterables
+        """
         chopped = []
         data = {}
         for el in self._elements:
@@ -328,8 +535,17 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
         return chopped
 
-    # Combine self and other with function 'comp' using mapping 'mapp'
-    def funcmap(self, other, comp, mapp, inplace=True):
+    def funcmap(self, other, comb, mapp, inplace=True):
+        """
+        Combine self and Iterable-like 'other' with function 'comb'
+        Using mapping 'mapp' Can be in-place or not.
+
+        :param other: Iterable-like to combine with
+        :param comb: combine function with signature comb(value1, value2) -> new_value
+        :param mapp: mapping function with signature mapp(self_key) -> other_key
+        :param inplace: Boolean to change self, or return a modified copy
+        :return: Iterable
+        """
         if not isinstance(other, Iterable):
             other = self.__class__(other)
 
@@ -343,12 +559,19 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
             val1 = el.value
             gval = mapp(el.id)
             val2 = other[gval]
-            fval = comp(val1, val2)
+            fval = comb(val1, val2)
             d._elements[idx].value = fval
 
         return d
 
     def fold_left(self, func):
+        """
+        Reduce the Iterable using function 'func' and the 'left' grouping pattern
+        Like (((1 + 2) + 3) + 4) so
+        func(func(func(element1, element2), element3), element4)
+        :param func: func(element1, element2) -> new_element
+        :return: Element
+        """
         if len(self._elements) < 2:
             return self  # Can't fold unless we have at least 2 elements
 
@@ -359,6 +582,13 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return tmp_el
 
     def fold_right(self, func):
+        """
+        Reduce the Iterable using function 'func' and the 'right' grouping pattern
+        Like (1 + (2 + (3 + 4))) so
+        func(element1, func(element2, func(element3, element4)))
+        :param func: func(element1, element2) -> new_element
+        :return: Element
+        """
         if len(self._elements) < 2:
             return self  # Can't fold unless we have at least 2 elements
 
@@ -369,6 +599,14 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return tmp_el
 
     def multiply(self, other, func=None):
+        """
+        Multiply self with Iterable-like 'other' using function 'func'
+        If func is None, will default to func(element1, element2) -> ((key1, key2), (value1, value2))
+        Every element of self is applied to every element of 'other'
+        :param other: Iterable-like to multiply by
+        :param func: func(element1, element2) -> new_element
+        :return: self
+        """
         if not isinstance(other, Iterable):
             other = self.__class__(other)
         if not func:
@@ -383,6 +621,14 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return self
 
     def divide(self, other, func_inv=None):
+        """
+        Divide self with Iterable-like 'other' using function 'func'
+        If func is None, will default to func(element1, element2) -> ((key1, key2), (value1, value2))
+        Every element of self is applied to every element of 'other'
+        :param other: Iterable-like to multiply by
+        :param func: func(element1, element2) -> new_element
+        :return: self
+        """
         if not isinstance(other, Iterable):
             other = self.__class__(other)
         if not func_inv:
@@ -405,7 +651,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
         result = self.funcmap(
             other=other,
-            comp=comp,
+            comb=comp,
             mapp=mapp,
             inplace=inplace
         )
@@ -492,7 +738,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     def __repr__(self, *args, **kwargs):  # real signature unknown
         return "{cls}({data})".format(
-        cls=str(self.__class__.__name__),
+            cls=str(self.__class__.__name__),
             data=str(self)
         )
 
@@ -500,13 +746,6 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     def __str__(self):
         return str(self.todict())
-
-    # def __sizeof__(self):
-    #     """ D.__sizeof__() -> size of D in memory, in bytes """
-    #     raise NotImplementedError
-
-    # squish any number of keys into a smaller amount of keypairs
-    # f = (e_list) -> (new_e_list)
 
 
 class OrderedIterableMixin(Iterable):
