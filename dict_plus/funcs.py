@@ -17,29 +17,29 @@ class Functions(object):
         return False
 
     @staticmethod
-    def LE(e1, e2):
-        if e1 <= e2:
+    def LE(v1, v2):
+        if v1 <= v2:
             return True
         else:
             return False
 
     @staticmethod
-    def LT(e1, e2):
-        if e1 < e2:
+    def LT(v1, v2):
+        if v1 < v2:
             return True
         else:
             return False
 
     @staticmethod
-    def GE(e1, e2):
-        if e1 >= e2:
+    def GE(v1, v2):
+        if v1 >= v2:
             return True
         else:
             return False
 
     @staticmethod
-    def GT(e1, e2):
-        if e1 > e2:
+    def GT(v1, v2):
+        if v1 > v2:
             return True
         else:
             return False

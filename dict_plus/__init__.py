@@ -645,6 +645,18 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     # and mapping func 'mapp'
 
     def compare(self, other, comp, agg, mapp=None, inplace=False):
+        """
+        Compare self with other using comparison func 'comp' aggregate function 'agg' and mapping function 'mapp'
+        If no mapping function is given, the default mapping function maps each element at index i in self to an element
+        at index i in other. This can cause problems if other and self don't have the same length
+
+        :param other: Iterable-like to compare against
+        :param comp: comp(element1, element2) -> new_value
+        :param agg: agg([element1, element2, ..]) -> new_value
+        :param mapp: mapp(self_key) -> other_key
+        :param inplace: Boolean to modify self or use a copy
+        :return: Result from the aggregate function
+        """
         if not mapp:
             def mapp(x):
                 return other.atindex(self.indexof(x)).id
@@ -658,10 +670,20 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return agg(result)
 
     def __le__(self, other):
+        """
+        Compare each element in self to other with <= operator
+        :param other: Iterable-like to compare against
+        :return: True if self <= other
+        """
         agg = self.getfunc("fold_left", dfuncs.AND)
         return self.compare(other, dfuncs.LE, agg).value
 
     def __lt__(self, other):
+        """
+        Compare self to other using the  '<' operator
+        :param other: Iterable-like to compare against
+        :return: True if self < other
+        """
         agg = self.getfunc("fold_left", dfuncs.AND)
         return self.compare(other, dfuncs.LT, agg).value
 
