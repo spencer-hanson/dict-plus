@@ -4,16 +4,34 @@ from dict_plus.exceptions import InvalidElementTypeException
 
 class DictPlus(Iterable):
     def __init__(self, data=None, element_type=None, **kwargs):
+        """
+        Create a new DictPlus
+        Default element_type is KeyValuePair
+        :param data: data to use initially in the DictPlus. Can be a tuple list or a dict, or an object with .keys()
+        :param element_type: Element type to store the data with, defaults to KeyValuePair
+        :param kwargs: keyword args to include in the dict
+        """
         super(DictPlus, self).__init__(data, element_type or KeyValuePair, **kwargs)
 
     @staticmethod
     def fromkeys(sequence, value=None):
+        """
+        Create a new DictPlus from a sequence of keys, all with value 'value'
+        :param sequence: iterable of keys
+        :param value: value to set each key to, defaults to None
+        :return: DictPlus with populated data
+        """
         d = DictPlus()
         for item in sequence:
             d.insert(-1, (item, value))
         return d
 
     def __eq__(self, other):
+        """
+        Check if self == other, for each key and value
+        :param other: Iterable-like to compare to
+        :return: Boolean True or False
+        """
         result = super(DictPlus, self).__eq__(other)
         if not result:
             return False
@@ -34,19 +52,34 @@ class DictPlus(Iterable):
 
 class OrderedDictPlus(OrderedIterableMixin):
     def __init__(self, data=None, element_type=None, **kwargs):
+        """
+        Create a new OrderedDictPlus, with inital data and element_type defaulting to KeyValuePair,
+        and other keyword args to include in the dict upon creation
+        :param data: data to use initially in the OrderedDictPlus. Can be a tuple list or a dict, or an object with .keys()
+        :param element_type: Element type to store the data with, defaults to KeyValuePair
+        :param kwargs: keyword args to include in the dict
+        """
         super(OrderedDictPlus, self).__init__(data, element_type or KeyValuePair, **kwargs)
 
     @staticmethod
     def fromkeys(sequence, value=None):
+        """
+        Create a new DictPlus from a sequence of keys, all with value 'value'
+        :param sequence: iterable of keys
+        :param value: value to set each key to, defaults to None
+        :return: DictPlus with populated data
+        """
         d = OrderedDictPlus()
         for item in sequence:
             d.insert(len(d), (item, value))
         return d
 
-    def keys(self):
-        return [el.id for el in self._elements]
-
     def __eq__(self, other):
+        """
+        Check if self == other, for each key and value
+        :param other: Iterable-like to compare to
+        :return: Boolean True or False
+        """
         result = super(OrderedDictPlus, self).__eq__(other)
         if not result:
             return False
@@ -59,6 +92,7 @@ class OrderedDictPlus(OrderedIterableMixin):
             return False
         return True
 
+# TODO use for __eq__ in ListPlus
     # def __eq__(self, other):
     #     result = True
     #     if isinstance(other, list):
