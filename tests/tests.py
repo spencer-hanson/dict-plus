@@ -122,7 +122,7 @@ def test_element___init__():
 
 
 def test_element_parts():
-    assert_eq(Element(0, 1), (0, 1))
+    assert_eq(Element(0, 1).parts(), (0, 1))
 
 
 def test_element___eq__():

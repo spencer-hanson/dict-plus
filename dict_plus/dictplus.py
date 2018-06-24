@@ -40,7 +40,7 @@ class OrderedDictPlus(OrderedIterableMixin):
     def fromkeys(sequence, value=None):
         d = OrderedDictPlus()
         for item in sequence:
-            d.insert(-1, (item, value))
+            d.insert(len(d), (item, value))
         return d
 
     def keys(self):

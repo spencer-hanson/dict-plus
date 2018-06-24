@@ -1,9 +1,8 @@
 from dict_plus.exceptions import *
-from dict_plus.funcs import Functions as dfuncs
-import functools
+from dict_plus.funcs import Functions as DFuncs
 
 
-class Iterable(object):  # TODO CHANGE ME TO dict after debug
+class Iterable(object):
     # __hash__ = None  # TODO ?
 
     class IterableIndex(object):
@@ -162,7 +161,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         Index value is ignored in the Iterable superclass, as order is not preserved anyways
         :param index: Value to insert element to, unless ordered, the index always will be the last
         :param obj: Object to insert into the Iterable. Must conform with the element type of the iterable
-        :return: return the element (of element type) that was inserted
+        :return: Element that was inserted
         """
         element = self._eltype(obj)
         if self._indexes.has(element.id):
@@ -201,7 +200,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     def pop(self, k, v_alt=None):
         """
         Don't care about order, so we move the last element to the position of the removed
-        element, remove the index to the popped element
+        element, remove the index to the popped element, to keep the time complexity constant
 
         I.pop(k[,v_alt]) -> v, remove specified key and return the corresponding value.
         If key is not found, v_alt is returned if given, otherwise KeyError is raised
@@ -623,10 +622,10 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     def divide(self, other, func_inv=None):
         """
         Divide self with Iterable-like 'other' using function 'func'
-        If func is None, will default to func(element1, element2) -> ((key1, key2), (value1, value2))
+        If func_inv is None, will default to func_inv(element1, element2) -> (key1, value1) or (key2, value2)
         Every element of self is applied to every element of 'other'
         :param other: Iterable-like to multiply by
-        :param func: func(element1, element2) -> new_element
+        :param func_inv: func_inv(element1, element2) -> new_element
         :return: self
         """
         if not isinstance(other, Iterable):
@@ -636,7 +635,7 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
                 if e1.id[0] == e2.id:
                     return e1.id[1], e1.value[1]
                 else:
-                    return e1.id[0], e1.value[1]
+                    return e1.id[0], e1.value[0]
         return self.multiply(other, func_inv)
 
     # Compare self to other using
@@ -671,29 +670,43 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
 
     def __le__(self, other):
         """
-        Compare each element in self to other with <= operator
+        Compare each element in self to other with <= operator,
+        then aggregate the values of each resulting key with AND
         :param other: Iterable-like to compare against
-        :return: True if self <= other
+        :return: True if self <= other else False
         """
-        agg = self.getfunc("fold_left", dfuncs.AND)
-        return self.compare(other, dfuncs.LE, agg).value
+        agg = self.getfunc("fold_left", DFuncs.AND)
+        return self.compare(other, DFuncs.LE, agg).value
 
     def __lt__(self, other):
         """
-        Compare self to other using the  '<' operator
+        Compare each element in self to other with < operator,
+        then aggregate the values of each resulting key with AND
         :param other: Iterable-like to compare against
-        :return: True if self < other
+        :return: True if self < other else False
         """
-        agg = self.getfunc("fold_left", dfuncs.AND)
-        return self.compare(other, dfuncs.LT, agg).value
+        agg = self.getfunc("fold_left", DFuncs.AND)
+        return self.compare(other, DFuncs.LT, agg).value
 
     def __ge__(self, other):
-        agg = self.getfunc("fold_left", dfuncs.AND)
-        return self.compare(other, dfuncs.GE, agg).value
+        """
+        Compare each element in self to other with >= operator,
+        then aggregate the values of each resulting key with AND
+        :param other: Iterable-like to compare against
+        :return: True if self >= other else False
+        """
+        agg = self.getfunc("fold_left", DFuncs.AND)
+        return self.compare(other, DFuncs.GE, agg).value
 
     def __gt__(self, other):
-        agg = self.getfunc("fold_left", dfuncs.AND)
-        return self.compare(other, dfuncs.GT, agg).value
+        """
+        Compare each element in self to other with > operator,
+        then aggregate the values of each resulting key with AND
+        :param other: Iterable-like to compare against
+        :return: True if self > other else False
+        """
+        agg = self.getfunc("fold_left", DFuncs.AND)
+        return self.compare(other, DFuncs.GT, agg).value
 
     ##
     # @staticmethod  # known case of __new__
@@ -711,6 +724,12 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
     #
 
     def __eq__(self, other):
+        """
+        Check if this Iterable is equal to another Iterable-like 'other'
+        Must have the same length, and each key must have the same value, order doesn't matter
+        :param other: Iterable-like to compare equality
+        :return: Boolean
+        """
         if other == {} and self._elements == []:
             return True
 
@@ -727,52 +746,115 @@ class Iterable(object):  # TODO CHANGE ME TO dict after debug
         return True
 
     def __add__(self, other):
+        """
+        Default behavior the same as self.update(other)
+        Returns new instance, doesn't modify self
+        :param other: Iterable-like to add
+        :return: Added Iterables
+        """
         return self.copy().add(other, func=None)
 
     def __sub__(self, other):
+        """
+        Default behavior the same as self.unupdate(other)
+        Returns new instance, doesn't modify self
+        :param other: Iterable-like to sub
+        :return: Difference of Iterables
+        """
         return self.copy().sub(other, func_inv=None)
 
     def __mul__(self, other):
+        """
+        Multiply self by other
+        Returns new instance, doesn't modify self
+        :param other: Iterable-like
+        :return: Multiplied Iterable
+        """
         return self.copy().multiply(other, func=None)
 
     def __truediv__(self, other):
+        """
+        Divide self by other, inverse of multiplication
+        Returns new instance, doesn't modify self
+        :param other: Iterable-like
+        :return: Divided Iterable
+        """
         return self.copy().divide(other, func_inv=None)
 
     def __iter__(self):
+        """
+        Get an iterable instance from I, similar to iter(dict) iterates on the keys
+        :return: iter of the keys
+        """
         return iter(self.keys())
 
     def __contains__(self, item):
+        """
+        Check whether item exists in self, where item is a key in the Iterable
+        :param item: Key to check if it exists
+        :return: True if item in self else False
+        """
         return self._indexes.has(item)
 
     def __getitem__(self, k):
-        """ x.__getitem__(y) <==> x[y] """
+        """
+        Get an item from I
+        x.__getitem__(y) <==> x[y]
+        :param k: Key to retrieve
+        :return: Value at key 'k'
+        """
         return self.get(k)
 
     def __setitem__(self, key, value):
-        """ Set self[key] to value. """
+        """
+        Set self[key] to value. If key doesn't exist, create it
+        :param key: key to set
+        :param value: value to set under key
+        :return: None
+        """
         if self._indexes.has(key):
             self._elements[self._indexes.get(key)].value = value
         else:
             self.insert(len(self), (key, value))
 
     def __len__(self):
+        """
+        Get the number of elements in self
+        :return: Integer length of elements in self
+        """
         return len(self._elements)
 
-    def __repr__(self, *args, **kwargs):  # real signature unknown
+    def __repr__(self):
+        """
+        Get the string-like representation of this object, fit for eval()
+        :return: Constructor to create this instance with the same data
+        """
         return "{cls}({data})".format(
             cls=str(self.__class__.__name__),
             data=str(self)
         )
 
-        return super(Iterable, self).__repr__(*args, **kwargs)
-
     def __str__(self):
+        """
+        Get the string representation of this object, should be the same as str(dict)
+        :return: String representing this Iterable
+        """
         return str(self.todict())
 
 
 class OrderedIterableMixin(Iterable):
-
+    """
+    Mixin of Iterable, specializing in keeping the order of the elements intact
+    through any internal operations.
+    """
     def insert(self, index, obj):
+        """
+        Insert an object into the OrderedIterable, raises a KeyError if the key already exists
+        Index value is used to place the object, and then we must update our indexes dict
+        :param index: Value to insert element to
+        :param obj: Object to insert into the Iterable. Must conform with the element type of the iterable
+        :return: Element that was inserted
+        """
         element = self._eltype(obj)
         if self._indexes.has(element.id):
             raise KeyError("Key '{}' already exists!".format(element.id))
@@ -783,8 +865,12 @@ class OrderedIterableMixin(Iterable):
 
     def pop(self, k, v_alt=None):
         """
-        D.pop(k[,d]) -> v, remove specified key and return the corresponding value.
-        If key is not found, d is returned if given, otherwise KeyError is raised
+        I.pop(k[,v_alt]) -> v, remove specified key and return the corresponding value.
+        If key is not found, v_alt is returned if given, otherwise KeyError is raised.
+        After the pop an indexes update must be performed
+        :param k: key to pop
+        :param v_alt: alternate value if k doesn't exist
+        :return: The retrieved value from key k
         """
         if self._indexes.has(k):
             idx = self._indexes.get(k)
@@ -795,9 +881,32 @@ class OrderedIterableMixin(Iterable):
             return v_alt
         raise KeyError("Key '{}' not found!".format(k))
 
+    @staticmethod
+    def fromkeys(sequence, value=None):
+        """
+        Create an OrderedIterable instance using a list, each element will be used as a key,
+        with each with value 'value'
+        :param sequence: List of keys to use
+        :param value: Value to set for each key
+        :return: Instance with keys from 'sequence' with value 'value'
+        """
+        raise NotImplementedError("Can't call .fromkeys() on OrderedIterator!")
+
 
 class Element(object):
+    """
+    Element superclass of an item in an Iterable
+    Must have an id and value, where id is unique to the Element
+    Subclasses can give other restrictions to what can and can't be used
+    """
     def __init__(self, _id=None, value=None):
+        """
+        Create a new Element, must include either id and value or just id
+        If just id is used, it will attempt to parse it into self.id and self.value
+        Otherwise, self.id = id and self.value = value
+        :param _id: Id of Element, or object to be parsed
+        :param value: Value of the element, required if _id isn't going to be parsed
+        """
         if _id and not value:
             self.id, self.value = self.parse_object(_id)
         else:
@@ -809,26 +918,49 @@ class Element(object):
     # Parse stuff like ("a", 1) -> Element("a", 1)
     @staticmethod
     def parse_object(obj):
-        raise NotImplementedError
+        """
+        Parse an object into an Element type, possibly raising InvalidElementTypeException if the object cannot be
+        parsed
+        :param obj: Element-like object to be parsed
+        :return: Element
+        """
+        raise NotImplementedError("Can't parse object as an Element!")
 
     def parts(self):
+        """
+        Break down the Element into a tuple, with (id, value)
+        :return: (id, value)
+        """
         return self.id, self.value
 
     def __eq__(self, other):
-        if isinstance(other, Element) and other.id == self.id and self.value == other.value:
-            return True
-        elif isinstance(other, tuple) and self.id == other[0] and self.value == other[1]:
-            return True
-        return False
+        """
+        Check if self == other
+        Not implemented for Element
+        :param other: Element-like
+        :return: True or False
+        """
+        raise NotImplementedError("Can't equate superclass Element!")
 
     def __str__(self):
+        """
+        String representation of the Element
+        :return: String representing self
+        """
         return "<{}, {}>".format(self.id, self.value)
 
     def copy(self):
+        """
+        Make a shallow copy of self
+        :return: Copied version of self
+        """
         return self.__class__(self.id, self.value)
 
 
 class KeyValuePair(Element):
+    """
+    Basic Element implementation
+    """
     @staticmethod
     def parse_object(obj):
         if isinstance(obj, KeyValuePair):
@@ -840,8 +972,18 @@ class KeyValuePair(Element):
         return obj[0], obj[1]
 
     def __eq__(self, other):
+        """
+        Check if self == other
+        if other is a KeyValuePair, other.id == self.id and self.value == other.value
+        if other is a tuple, treat it as (id, value) and check for equality there
+        :param other: Element-like
+        :return: True or False
+        """
         if isinstance(other, dict) and len(other) == 1:
             k, v = list(other.items())[0]
             if k == self.id and v == self.value:
                 return True
-        return super(KeyValuePair, self).__eq__(other)
+        elif isinstance(other, KeyValuePair) and other.id == self.id and self.value == other.value:
+            return True
+        elif isinstance(other, tuple) and self.id == other[0] and self.value == other[1]:
+            return True
