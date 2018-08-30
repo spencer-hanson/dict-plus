@@ -1,0 +1,38 @@
+dict\_plus package
+==================
+
+Submodules
+----------
+
+dict\_plus.dictplus module
+--------------------------
+
+.. automodule:: dict_plus.dictplus
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dict\_plus.exceptions module
+----------------------------
+
+.. automodule:: dict_plus.exceptions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dict\_plus.funcs module
+-----------------------
+
+.. automodule:: dict_plus.funcs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: dict_plus
+    :members:
+    :undoc-members:
+    :show-inheritance:

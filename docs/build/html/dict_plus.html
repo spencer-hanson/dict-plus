@@ -1,0 +1,741 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>dict_plus package &#8212; Dictionary Plus 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="dict-plus-package">
+<h1>dict_plus package<a class="headerlink" href="#dict-plus-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dict_plus.dictplus">
+<span id="dict-plus-dictplus-module"></span><h2>dict_plus.dictplus module<a class="headerlink" href="#module-dict_plus.dictplus" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dict_plus.dictplus.DictPlus">
+<em class="property">class </em><code class="descclassname">dict_plus.dictplus.</code><code class="descname">DictPlus</code><span class="sig-paren">(</span><em>data=None</em>, <em>element_type=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/dictplus.html#DictPlus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.dictplus.DictPlus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dict_plus.Iterable" title="dict_plus.Iterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict_plus.Iterable</span></code></a></p>
+<dl class="staticmethod">
+<dt id="dict_plus.dictplus.DictPlus.fromkeys">
+<em class="property">static </em><code class="descname">fromkeys</code><span class="sig-paren">(</span><em>sequence</em>, <em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/dictplus.html#DictPlus.fromkeys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.dictplus.DictPlus.fromkeys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new DictPlus from a sequence of keys, all with value ‘value’
+:param sequence: iterable of keys
+:param value: value to set each key to, defaults to None
+:return: DictPlus with populated data</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dict_plus.dictplus.OrderedDictPlus">
+<em class="property">class </em><code class="descclassname">dict_plus.dictplus.</code><code class="descname">OrderedDictPlus</code><span class="sig-paren">(</span><em>data=None</em>, <em>element_type=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/dictplus.html#OrderedDictPlus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.dictplus.OrderedDictPlus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dict_plus.OrderedIterableMixin" title="dict_plus.OrderedIterableMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict_plus.OrderedIterableMixin</span></code></a></p>
+<dl class="staticmethod">
+<dt id="dict_plus.dictplus.OrderedDictPlus.fromkeys">
+<em class="property">static </em><code class="descname">fromkeys</code><span class="sig-paren">(</span><em>sequence</em>, <em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/dictplus.html#OrderedDictPlus.fromkeys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.dictplus.OrderedDictPlus.fromkeys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new DictPlus from a sequence of keys, all with value ‘value’
+:param sequence: iterable of keys
+:param value: value to set each key to, defaults to None
+:return: DictPlus with populated data</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-dict_plus.exceptions">
+<span id="dict-plus-exceptions-module"></span><h2>dict_plus.exceptions module<a class="headerlink" href="#module-dict_plus.exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="dict_plus.exceptions.InvalidElementTypeException">
+<em class="property">exception </em><code class="descclassname">dict_plus.exceptions.</code><code class="descname">InvalidElementTypeException</code><a class="reference internal" href="_modules/dict_plus/exceptions.html#InvalidElementTypeException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.exceptions.InvalidElementTypeException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="dict_plus.exceptions.InvalidElementValueException">
+<em class="property">exception </em><code class="descclassname">dict_plus.exceptions.</code><code class="descname">InvalidElementValueException</code><a class="reference internal" href="_modules/dict_plus/exceptions.html#InvalidElementValueException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.exceptions.InvalidElementValueException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="dict_plus.exceptions.InvalidIteratorException">
+<em class="property">exception </em><code class="descclassname">dict_plus.exceptions.</code><code class="descname">InvalidIteratorException</code><a class="reference internal" href="_modules/dict_plus/exceptions.html#InvalidIteratorException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.exceptions.InvalidIteratorException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-dict_plus.funcs">
+<span id="dict-plus-funcs-module"></span><h2>dict_plus.funcs module<a class="headerlink" href="#module-dict_plus.funcs" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dict_plus.funcs.Functions">
+<em class="property">class </em><code class="descclassname">dict_plus.funcs.</code><code class="descname">Functions</code><a class="reference internal" href="_modules/dict_plus/funcs.html#Functions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.funcs.Functions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="staticmethod">
+<dt id="dict_plus.funcs.Functions.AND">
+<em class="property">static </em><code class="descname">AND</code><span class="sig-paren">(</span><em>*els</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/funcs.html#Functions.AND"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.funcs.Functions.AND" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="dict_plus.funcs.Functions.GE">
+<em class="property">static </em><code class="descname">GE</code><span class="sig-paren">(</span><em>v1</em>, <em>v2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/funcs.html#Functions.GE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.funcs.Functions.GE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="dict_plus.funcs.Functions.GT">
+<em class="property">static </em><code class="descname">GT</code><span class="sig-paren">(</span><em>v1</em>, <em>v2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/funcs.html#Functions.GT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.funcs.Functions.GT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="dict_plus.funcs.Functions.LE">
+<em class="property">static </em><code class="descname">LE</code><span class="sig-paren">(</span><em>v1</em>, <em>v2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/funcs.html#Functions.LE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.funcs.Functions.LE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="dict_plus.funcs.Functions.LT">
+<em class="property">static </em><code class="descname">LT</code><span class="sig-paren">(</span><em>v1</em>, <em>v2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/funcs.html#Functions.LT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.funcs.Functions.LT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="dict_plus.funcs.Functions.OR">
+<em class="property">static </em><code class="descname">OR</code><span class="sig-paren">(</span><em>*els</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/funcs.html#Functions.OR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.funcs.Functions.OR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-dict_plus">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dict_plus" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dict_plus.Element">
+<em class="property">class </em><code class="descclassname">dict_plus.</code><code class="descname">Element</code><span class="sig-paren">(</span><em>_id=None</em>, <em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Element"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Element superclass of an item in an Iterable
+Must have an id and value, where id is unique to the Element
+Subclasses can give other restrictions to what can and can’t be used</p>
+<dl class="method">
+<dt id="dict_plus.Element.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Element.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Element.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a shallow copy of self
+:return: Copied version of self</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="dict_plus.Element.parse_object">
+<em class="property">static </em><code class="descname">parse_object</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Element.parse_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Element.parse_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse an object into an Element type, possibly raising InvalidElementTypeException if the object cannot be
+parsed
+:param obj: Element-like object to be parsed
+:return: Element</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Element.parts">
+<code class="descname">parts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Element.parts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Element.parts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Break down the Element into a tuple, with (id, value)
+:return: (id, value)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dict_plus.Iterable">
+<em class="property">class </em><code class="descclassname">dict_plus.</code><code class="descname">Iterable</code><span class="sig-paren">(</span><em>data=None</em>, <em>element_type=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="class">
+<dt id="dict_plus.Iterable.IterableIndex">
+<em class="property">class </em><code class="descname">IterableIndex</code><span class="sig-paren">(</span><em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.IterableIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.IterableIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Index object to keep track of ‘unhashable’ types</p>
+<dl class="method">
+<dt id="dict_plus.Iterable.IterableIndex.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.IterableIndex.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.IterableIndex.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy this index
+:return: A copy of the index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.IterableIndex.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.IterableIndex.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.IterableIndex.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a value from the index
+:param key: Key to get the value of
+:return: Integer index of the key’s location in the element list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.IterableIndex.has">
+<code class="descname">has</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.IterableIndex.has"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.IterableIndex.has" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the index has a given key in it
+:param key: Key to check for
+:return: True if the key exists, else False</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.IterableIndex.isempty">
+<code class="descname">isempty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.IterableIndex.isempty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.IterableIndex.isempty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the index is empty
+:return: True if index is empty else False</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.IterableIndex.pop">
+<code class="descname">pop</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.IterableIndex.pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.IterableIndex.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove and get the value of the given key
+:param key: Key to get the value of
+:return: Integer index value of the key in the element list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.IterableIndex.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.IterableIndex.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.IterableIndex.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a key’s location in the index
+:param key: Key to get the location of
+:param value: Integer value to set in the index
+:return: None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>other</em>, <em>func=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add this Iterable with another Iterable-like
+combine with function ‘func’
+If no function is given, the default function will concatenate the two Iterables
+Works in place, allows for concurrent modification
+:param other: Iterable-like to add to
+:param func: func(element1, element2) -&gt; new_element
+:return: self</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.atindex">
+<code class="descname">atindex</code><span class="sig-paren">(</span><em>int_val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.atindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.atindex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the element at index ‘int_val’
+:param int_val: Integer value to fetch the element from
+:return: Element instance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.chop">
+<code class="descname">chop</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.chop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.chop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chop the Iterable into other Iterables using a binning function ‘func’
+Each keypair is assigned a value -infinity to +infinity, and put into other iterables
+with the same number. These ‘bins’ are then ordered relatively to each other and returned in a list
+:param func: func(k, v) -&gt; number
+:return: List of Iterables</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None.  Remove all items from I.<a class="reference internal" href="_modules/dict_plus.html#Iterable.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.clear" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.compare">
+<code class="descname">compare</code><span class="sig-paren">(</span><em>other</em>, <em>comp</em>, <em>agg</em>, <em>mapp=None</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.compare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.compare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare self with other using comparison func ‘comp’ aggregate function ‘agg’ and mapping function ‘mapp’
+If no mapping function is given, the default mapping function maps each element at index i in self to an element
+at index i in other. This can cause problems if other and self don’t have the same length</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> – Iterable-like to compare against</li>
+<li><strong>comp</strong> – comp(element1, element2) -&gt; new_value</li>
+<li><strong>agg</strong> – agg([element1, element2, ..]) -&gt; new_value</li>
+<li><strong>mapp</strong> – mapp(self_key) -&gt; other_key</li>
+<li><strong>inplace</strong> – Boolean to modify self or use a copy</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Result from the aggregate function</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; a shallow copy of I<a class="reference internal" href="_modules/dict_plus.html#Iterable.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.copy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Copied instance</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.divide">
+<code class="descname">divide</code><span class="sig-paren">(</span><em>other</em>, <em>func_inv=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.divide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.divide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divide self with Iterable-like ‘other’ using function ‘func’
+If func_inv is None, will default to func_inv(element1, element2) -&gt; (key1, value1) or (key2, value2)
+Every element of self is applied to every element of ‘other’
+:param other: Iterable-like to multiply by
+:param func_inv: func_inv(element1, element2) -&gt; new_element
+:return: self</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.elements">
+<code class="descname">elements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy of the elements in the Iterable instance
+:return: List of Elements</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.expand">
+<code class="descname">expand</code><span class="sig-paren">(</span><em>key</em>, <em>new_keys</em>, <em>func_inv</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.expand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.expand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expand a key into a larger amount of keys
+Works in place
+:param key: Key to expand on
+:param new_keys: List of keys that will be set
+:param func_inv: func(value) -&gt; [value1, value2, ..]
+:return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.fold_left">
+<code class="descname">fold_left</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.fold_left"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.fold_left" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduce the Iterable using function ‘func’ and the ‘left’ grouping pattern
+Like (((1 + 2) + 3) + 4) so
+func(func(func(element1, element2), element3), element4)
+:param func: func(element1, element2) -&gt; new_element
+:return: Element</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.fold_right">
+<code class="descname">fold_right</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.fold_right"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.fold_right" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduce the Iterable using function ‘func’ and the ‘right’ grouping pattern
+Like (1 + (2 + (3 + 4))) so
+func(element1, func(element2, func(element3, element4)))
+:param func: func(element1, element2) -&gt; new_element
+:return: Element</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="dict_plus.Iterable.fromkeys">
+<em class="property">static </em><code class="descname">fromkeys</code><span class="sig-paren">(</span><em>sequence</em>, <em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.fromkeys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.fromkeys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an Iterable instance using a list, each element will be used as a key,
+with each with value ‘value’
+:param sequence: List of keys to use
+:param value: Value to set for each key
+:return: Instance with keys from ‘sequence’ with value ‘value’</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.funcmap">
+<code class="descname">funcmap</code><span class="sig-paren">(</span><em>other</em>, <em>comb</em>, <em>mapp</em>, <em>inplace=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.funcmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.funcmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine self and Iterable-like ‘other’ with function ‘comb’
+Using mapping ‘mapp’ Can be in-place or not.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> – Iterable-like to combine with</li>
+<li><strong>comb</strong> – combine function with signature comb(value1, value2) -&gt; new_value</li>
+<li><strong>mapp</strong> – mapping function with signature mapp(self_key) -&gt; other_key</li>
+<li><strong>inplace</strong> – Boolean to change self, or return a modified copy</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Iterable</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>k</em><span class="optional">[</span>, <em>v_alt</em><span class="optional">]</span><span class="sig-paren">)</span> &#x2192; I[k] if k in I, else v_alt.<a class="reference internal" href="_modules/dict_plus.html#Iterable.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>v_alt defaults to None.
+If no such key is found, will throw a KeyError
+:param k: key to get the value of
+:param v_alt: alternate value to return if key doesn’t exist
+:return: The value stored with the key</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="dict_plus.Iterable.getfunc">
+<em class="property">static </em><code class="descname">getfunc</code><span class="sig-paren">(</span><em>name</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.getfunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.getfunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a wrapped static version of an Iterable function, with signature func(inst)
+Providing arguments and keyword arguments for the function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> – Name of the function to get</li>
+<li><strong>args</strong> – Arguments to use for the function</li>
+<li><strong>kwargs</strong> – Keyword arguments to use for the function</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A function with signature f(instance)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.getitem">
+<code class="descname">getitem</code><span class="sig-paren">(</span><em>k</em>, <em>v_alt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.getitem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.getitem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the full element from key ‘k’
+if no key or value is present, Element(k, v_alt) will be returned
+:param k:
+:param v_alt:
+:return: Element with key ‘k’</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.indexof">
+<code class="descname">indexof</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.indexof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.indexof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the integer index value of a given key
+raises KeyError if key doesn’t exist
+:param key: Key to get the index of
+:return: Integer index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.insert">
+<code class="descname">insert</code><span class="sig-paren">(</span><em>index</em>, <em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert an object into the Iterable, raises a KeyError if the key already exists
+Index value is ignored in the Iterable superclass, as order is not preserved anyways
+:param index: Value to insert element to, unless ordered, the index always will be the last
+:param obj: Object to insert into the Iterable. Must conform with the element type of the iterable
+:return: Element that was inserted</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.items">
+<code class="descname">items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of the items in the Iterable instance, in form (key, value)
+:return: a list providing a view on I’s items</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.keys">
+<code class="descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list providing a view on I’s keys
+:return: List of keys in I</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map each element in the Iterable to another using function ‘func’
+:param func: func(key, value) -&gt; (new_key, new_value)
+:return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.multiply">
+<code class="descname">multiply</code><span class="sig-paren">(</span><em>other</em>, <em>func=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.multiply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.multiply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply self with Iterable-like ‘other’ using function ‘func’
+If func is None, will default to func(element1, element2) -&gt; ((key1, key2), (value1, value2))
+Every element of self is applied to every element of ‘other’
+:param other: Iterable-like to multiply by
+:param func: func(element1, element2) -&gt; new_element
+:return: self</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.pop">
+<code class="descname">pop</code><span class="sig-paren">(</span><em>k</em>, <em>v_alt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Don’t care about order, so we move the last element to the position of the removed
+element, remove the index to the popped element, to keep the time complexity constant</p>
+<p>I.pop(k[,v_alt]) -&gt; v, remove specified key and return the corresponding value.
+If key is not found, v_alt is returned if given, otherwise KeyError is raised
+:param k: key to pop
+:param v_alt: alternate value if k doesn’t exist
+:return: The retrieved value from key k</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.popitem">
+<code class="descname">popitem</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; (k, v), remove and return some (key, value) pair as a<a class="reference internal" href="_modules/dict_plus.html#Iterable.popitem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.popitem" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-tuple; but raise KeyError if I is empty.
+Pops from the last index
+:return: (key, value)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.rekey">
+<code class="descname">rekey</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.rekey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.rekey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Re-key the Iterable with function ‘func’
+Changes keys in place, values untouched
+:param func: func(key1) -&gt; key2
+:return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.setdefault">
+<code class="descname">setdefault</code><span class="sig-paren">(</span><em>k</em>, <em>v_alt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.setdefault"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.setdefault" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as I.get(k,d), also set I[k]=d if k not in I
+:param k: key to use
+:param v_alt: Alternate value to set and return if k isn’t in I
+:return: Element value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.squish">
+<code class="descname">squish</code><span class="sig-paren">(</span><em>keys</em>, <em>new_key</em>, <em>func</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.squish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.squish" title="Permalink to this definition">¶</a></dt>
+<dd><p>Squish elements into another new element, using function ‘func’
+Works in place.
+:param keys: List of keys to squish
+:param new_key: Name of the new key
+:param func: func([value1, value2, …]) -&gt; new_value
+:return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.sub">
+<code class="descname">sub</code><span class="sig-paren">(</span><em>other</em>, <em>func_inv=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.sub"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.sub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse of I.add(), combines with another Iterable-like with function ‘func’
+If no function is given will default to removing the ‘other’s elements from self
+:param other: Iterable-like to subtrace from
+:param func_inv: func(element1, element2) -&gt; new_element
+:return: self</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.swap">
+<code class="descname">swap</code><span class="sig-paren">(</span><em>k1</em>, <em>k2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.swap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.swap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swap two keys in the Iterable, works in place
+:param k1: first key
+:param k2: second key
+:return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.todict">
+<code class="descname">todict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.todict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.todict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the Iterable to a pure python dictionary
+:return: dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.tolist">
+<code class="descname">tolist</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.tolist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.tolist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the Iterable to a pure python list
+:return: list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.unupdate">
+<code class="descname">unupdate</code><span class="sig-paren">(</span><em>e=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#Iterable.unupdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.unupdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Undo a .update operation, essentially the same as popping a list of keys,
+except will raise an InvalidElementValueException if the key-value pair doesn’t match what is to be popped</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>e</strong> – dict or iterable to unupdate with</li>
+<li><strong>kwargs</strong> – keyword args to unupdate from</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="optional">[</span><em>E</em>, <span class="optional">]</span><em>**F</em><span class="sig-paren">)</span> &#x2192; None.  Update I from dict/iterable E and F.<a class="reference internal" href="_modules/dict_plus.html#Iterable.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+In either case, this is followed by: for k in F:  D[k] = F[k]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>e</strong> – iterable/dict to update from</li>
+<li><strong>kwargs</strong> – other keyword args to update from</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.Iterable.values">
+<code class="descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; an object providing a view on I's values<a class="reference internal" href="_modules/dict_plus.html#Iterable.values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.Iterable.values" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of values in I</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dict_plus.KeyValuePair">
+<em class="property">class </em><code class="descclassname">dict_plus.</code><code class="descname">KeyValuePair</code><span class="sig-paren">(</span><em>_id=None</em>, <em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#KeyValuePair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.KeyValuePair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dict_plus.Element" title="dict_plus.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict_plus.Element</span></code></a></p>
+<p>Basic Element implementation</p>
+<dl class="staticmethod">
+<dt id="dict_plus.KeyValuePair.parse_object">
+<em class="property">static </em><code class="descname">parse_object</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#KeyValuePair.parse_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.KeyValuePair.parse_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse an object into an Element type, possibly raising InvalidElementTypeException if the object cannot be
+parsed
+:param obj: Element-like object to be parsed
+:return: Element</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dict_plus.OrderedIterableMixin">
+<em class="property">class </em><code class="descclassname">dict_plus.</code><code class="descname">OrderedIterableMixin</code><span class="sig-paren">(</span><em>data=None</em>, <em>element_type=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#OrderedIterableMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.OrderedIterableMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dict_plus.Iterable" title="dict_plus.Iterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict_plus.Iterable</span></code></a></p>
+<p>Mixin of Iterable, specializing in keeping the order of the elements intact
+through any internal operations.</p>
+<dl class="staticmethod">
+<dt id="dict_plus.OrderedIterableMixin.fromkeys">
+<em class="property">static </em><code class="descname">fromkeys</code><span class="sig-paren">(</span><em>sequence</em>, <em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#OrderedIterableMixin.fromkeys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.OrderedIterableMixin.fromkeys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an OrderedIterable instance using a list, each element will be used as a key,
+with each with value ‘value’
+:param sequence: List of keys to use
+:param value: Value to set for each key
+:return: Instance with keys from ‘sequence’ with value ‘value’</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.OrderedIterableMixin.insert">
+<code class="descname">insert</code><span class="sig-paren">(</span><em>index</em>, <em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus.html#OrderedIterableMixin.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.OrderedIterableMixin.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert an object into the OrderedIterable, raises a KeyError if the key already exists
+Index value is used to place the object, and then we must update our indexes dict
+:param index: Value to insert element to
+:param obj: Object to insert into the Iterable. Must conform with the element type of the iterable
+:return: Element that was inserted</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dict_plus.OrderedIterableMixin.pop">
+<code class="descname">pop</code><span class="sig-paren">(</span><em>k</em><span class="optional">[</span>, <em>v_alt</em><span class="optional">]</span><span class="sig-paren">)</span> &#x2192; v, remove specified key and return the corresponding value.<a class="reference internal" href="_modules/dict_plus.html#OrderedIterableMixin.pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.OrderedIterableMixin.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>If key is not found, v_alt is returned if given, otherwise KeyError is raised.
+After the pop an indexes update must be performed
+:param k: key to pop
+:param v_alt: alternate value if k doesn’t exist
+:return: The retrieved value from key k</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dictionary Plus</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Spencer Hanson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/dict_plus.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

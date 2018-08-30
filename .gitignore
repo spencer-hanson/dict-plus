@@ -1,3 +1,5 @@
+*.egg-info*
+.python-version
 .idea
 __pycache__
 venv
