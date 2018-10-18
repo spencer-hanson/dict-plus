@@ -1171,9 +1171,9 @@ tests = [
     test_suffixinsensitivedictplus___init__
 ]
 
-results = {}
-pass_count = 0
-total_count = 0
+# results = {}
+# pass_count = 0
+# total_count = 0
 
 # for test in tests:
 #     name = getattr(test, "__name__")
