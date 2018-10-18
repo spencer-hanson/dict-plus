@@ -1,0 +1,287 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Notable and Useful Functions &#8212; Dictionary Plus 0.0.2 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Package overview" href="modules.html" />
+    <link rel="prev" title="Welcome to Dictionary Plus’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="notable-and-useful-functions">
+<h1>Notable and  Useful Functions<a class="headerlink" href="#notable-and-useful-functions" title="Permalink to this headline">¶</a></h1>
+<p>The dict-plus library contains a multitude of interesting and
+useful functions. Here is some documentation on what they are and examples.</p>
+<ul class="simple">
+<li><a class="reference internal" href="#squish">Squish</a></li>
+<li><a class="reference internal" href="#expand">Expand</a></li>
+<li><a class="reference internal" href="#map">Map</a></li>
+<li><a class="reference internal" href="#rekey">ReKey</a></li>
+<li><a class="reference internal" href="#swap">Swap</a></li>
+<li><a class="reference internal" href="#add">Add</a></li>
+<li><a class="reference internal" href="#sub">Sub</a></li>
+</ul>
+<div class="section" id="squish">
+<span id="id1"></span><h2>Squish<a class="headerlink" href="#squish" title="Permalink to this headline">¶</a></h2>
+<p>Combine two keys and their values into one new key, using a given function. Inverse of <a class="reference internal" href="#expand">Expand</a></p>
+<div class="figure">
+<img alt="images/squish.png" src="images/squish.png" />
+</div>
+<p>The function signature looks as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">func(value_list)</span> <span class="pre">-&gt;</span> <span class="pre">new_value</span></code></p>
+<p>This example squishes the keys ‘1’ and ‘asdf’  into a key called  ‘tt’, with a function
+that takes the values, ‘8’  and ‘[E]’ respectively, and combines them.</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">DictPlus</span><span class="p">({</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;asdf&quot;</span><span class="p">:</span> <span class="s2">&quot;[E]&quot;</span><span class="p">})</span>
+<span class="n">d</span><span class="o">.</span><span class="n">squish</span><span class="p">([</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;asdf&quot;</span><span class="p">],</span> <span class="s2">&quot;tt&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">assert_eq</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;tt&quot;</span><span class="p">:</span> <span class="s2">&quot;8[E]&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="expand">
+<span id="id2"></span><h2>Expand<a class="headerlink" href="#expand" title="Permalink to this headline">¶</a></h2>
+<p>Expand a single key into any number of keys. Inverse of <a class="reference internal" href="#squish">Squish</a></p>
+<div class="figure">
+<img alt="images/expand.png" src="images/expand.png" />
+</div>
+<p>The function signature looks as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">func(value)</span> <span class="pre">-&gt;</span> <span class="pre">value_list</span></code></p>
+<p>This example expands the key ‘tt’  into keys ‘1’ and ‘asdf’, with a function that takes the value of ‘tt’
+and splits it into two strings. The output length must match the number of keys.</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">DictPlus</span><span class="p">({</span><span class="s2">&quot;tt&quot;</span><span class="p">:</span> <span class="s2">&quot;8[E]&quot;</span><span class="p">})</span>
+<span class="n">d</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="s2">&quot;tt&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;asdf&quot;</span><span class="p">],</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+<span class="n">assert_eq</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;asdf&quot;</span><span class="p">:</span> <span class="s2">&quot;[E]&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="map">
+<span id="id3"></span><h2>Map<a class="headerlink" href="#map" title="Permalink to this headline">¶</a></h2>
+<p>Map a dictionary to new keys and values.</p>
+<div class="figure">
+<img alt="images/map.png" src="images/map.png" />
+</div>
+<p>The function signature looks as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">func(key,</span> <span class="pre">value)</span> <span class="pre">-&gt;</span> <span class="pre">new_key,</span> <span class="pre">new_value</span></code></p>
+<p>In this example, a simple dictionary is mapped with a function that doubles it’s value and appends ‘a’
+to it’s key. It is then un-done with an inverse function.</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Function element to element</span>
+<span class="k">def</span> <span class="nf">func_e2e</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">v</span> <span class="o">*</span> <span class="mi">2</span>
+
+<span class="k">def</span> <span class="nf">invfunc_e2e</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">v</span> <span class="o">/</span> <span class="mi">2</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">DictPlus</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">})</span>
+
+<span class="n">d</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">func_e2e</span><span class="p">)</span>
+<span class="n">assert_eq</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;aa&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;ba&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;ca&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">})</span>
+
+<span class="n">d</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">invfunc_e2e</span><span class="p">)</span>
+<span class="n">assert_eq</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rekey">
+<span id="id4"></span><h2>ReKey<a class="headerlink" href="#rekey" title="Permalink to this headline">¶</a></h2>
+<p>Change the keys of a dictionary, keeping the values the same. Converse of <a class="reference internal" href="#swap">Swap</a></p>
+<div class="figure">
+<img alt="images/rekey.png" src="images/rekey.png" />
+</div>
+<p>The function signature looks as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">func(key)</span> <span class="pre">-&gt;</span> <span class="pre">new_key</span></code></p>
+<p>In this example, the keys in a dictionary are prepended with ‘a’, and  then removed with an inverse function.</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Function key to key</span>
+<span class="k">def</span> <span class="nf">func_k2k</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">k</span> <span class="o">+</span> <span class="s2">&quot;a&quot;</span>
+
+<span class="k">def</span> <span class="nf">invfunc_k2k</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">DictPlus</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+<span class="n">d</span><span class="o">.</span><span class="n">rekey</span><span class="p">(</span><span class="n">func_k2k</span><span class="p">)</span>
+<span class="n">assert_eq</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;aa&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;ba&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+
+<span class="n">d</span><span class="o">.</span><span class="n">rekey</span><span class="p">(</span><span class="n">invfunc_k2k</span><span class="p">)</span>
+<span class="n">assert_eq</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="swap">
+<span id="id5"></span><h2>Swap<a class="headerlink" href="#swap" title="Permalink to this headline">¶</a></h2>
+<p>Swap two keys, keeping the values the same. Converse of <a class="reference internal" href="#rekey">ReKey</a></p>
+<div class="figure">
+<img alt="images/swap.png" src="images/swap.png" />
+</div>
+<p>In this example, the keys ‘a’ and ‘b’ are swapped</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">DictPlus</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+<span class="n">d</span><span class="o">.</span><span class="n">swap</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">)</span>
+<span class="n">assert_eq</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">assert_eq</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="add">
+<span id="id6"></span><h2>Add<a class="headerlink" href="#add" title="Permalink to this headline">¶</a></h2>
+<p>Add two dictionaries with a function. Inverse of <a class="reference internal" href="#sub">Sub</a></p>
+<p>To ensure the dictionaries add the way you want it to, use an <code class="docutils literal notranslate"><span class="pre">OrderedDictPlus</span></code>
+If no function is given, it’s behavior is similar to <code class="docutils literal notranslate"><span class="pre">update</span></code></p>
+<div class="figure">
+<img alt="images/add.png" src="images/add.png" />
+</div>
+<p>The function signature looks as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">func(key_value_pair1,</span> <span class="pre">key_value_pair2)</span> <span class="pre">-&gt;</span> <span class="pre">new_key_value_pair</span></code></p>
+<p>In this example, two dictionaries are added together using a function that adds their keys and values.
+Also, they are added without a function, and their keys are added, with common keys overriding, giving
+precedence to the right dictionary. Can be added with any dict-like object</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Function element,element to element</span>
+<span class="k">def</span> <span class="nf">func_ee2e</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">e1</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="n">e2</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">e1</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="n">e2</span><span class="o">.</span><span class="n">value</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDictPlus</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>
+
+<span class="n">d3</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">d2</span> <span class="c1"># d3 equals {&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: 3, &quot;d&quot;: 4}</span>
+<span class="n">d</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span> <span class="c1"># d is now {&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: 3, &quot;d&quot;: 4}</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDictPlus</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span> <span class="c1"># reset value of d</span>
+<span class="n">d</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">func_ee2e</span><span class="p">)</span> <span class="c1"># d is now {&quot;ac&quot;: 4, &quot;bd&quot;: 6}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sub">
+<span id="id7"></span><h2>Sub<a class="headerlink" href="#sub" title="Permalink to this headline">¶</a></h2>
+<p>Subtract two dictionaries with a function. Inverse of <a class="reference internal" href="#add">Add</a></p>
+<p>To ensure the dictionaries subtract the way you want it to, use an <code class="docutils literal notranslate"><span class="pre">OrderedDictPlus</span></code>
+If no function is given, it’s behavior is similar to <code class="docutils literal notranslate"><span class="pre">unupdate</span></code></p>
+<div class="figure">
+<img alt="images/sub.png" src="images/sub.png" />
+</div>
+<p>The function signature looks as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">func(key_value_pair1,</span> <span class="pre">key_value_pair2)</span> <span class="pre">-&gt;</span> <span class="pre">new_key_value_pair</span></code></p>
+<p>In this example, two dictionaries are subtracted using a function that subtracts their keys and values.
+Also, they are subtracted without a function, and their keys are removed. Unshared keys are ignored.
+Can be subtracted with any dict-like object</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Function element,element to element</span>
+<span class="k">def</span> <span class="nf">func_ee2e</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">e1</span><span class="o">.</span><span class="n">id</span> <span class="o">-</span> <span class="n">e2</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">e1</span><span class="o">.</span><span class="n">value</span> <span class="o">-</span> <span class="n">e2</span><span class="o">.</span><span class="n">value</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDictPlus</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">})</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>
+
+<span class="n">d3</span> <span class="o">=</span> <span class="n">d</span> <span class="o">-</span> <span class="n">d2</span> <span class="c1"># d3 equals {&quot;a&quot;: 1, &quot;b&quot;: 2}</span>
+<span class="n">d</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span> <span class="c1"># d is now {&quot;a&quot;: 1, &quot;b&quot;: 2}</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDictPlus</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">})</span> <span class="c1"># Reset value of d</span>
+<span class="n">d</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">func_ee2e</span><span class="p">)</span> <span class="c1"># d is now equals {&quot;ac&quot;: 4, &quot;bd&quot;: 6}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dictionary Plus</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Notable and  Useful Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#squish">Squish</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expand">Expand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#map">Map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rekey">ReKey</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#swap">Swap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add">Add</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sub">Sub</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Package overview</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to Dictionary Plus’s documentation!</a></li>
+      <li>Next: <a href="modules.html" title="next chapter">Package overview</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Spencer Hanson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/functions.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

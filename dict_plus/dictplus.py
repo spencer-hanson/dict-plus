@@ -1,4 +1,4 @@
-from dict_plus import Iterable, OrderedIterableMixin, KeyValuePair
+from dict_plus.iterable import Iterable, OrderedIterableMixin, KeyValuePair
 from dict_plus.exceptions import InvalidElementTypeException
 
 

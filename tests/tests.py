@@ -1,4 +1,5 @@
 from dict_plus.dictplus import *
+from dict_plus.insensitive import *
 from dict_plus import *
 from dict_plus.exceptions import *
 import operator
@@ -920,6 +921,158 @@ def test_ordereddictplus_fromkeys():
 
 
 ###############
+def test_functionallyinsensitivedictplus___init__():
+    def comp_func(new_key, old_key):
+        if new_key == "1" + old_key or new_key == old_key:
+            return True
+        else:
+            return False
+
+    d = FunctionallyInsensitiveDictPlus()
+    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d["a"] = 5
+    assert_eq(d["a"], d["1a"])
+
+
+def test_functionallyinsensitivedictplus__find_base_key():
+    def comp_func(new_key, old_key):
+        if new_key == "1" + old_key or new_key == old_key:
+            return True
+        else:
+            return False
+
+    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d["a"] = 5
+    assert_eq(d._find_base_key("1a"), "a")
+
+
+def test_functionallyinsensitivedictplus_getitem():
+    def comp_func(new_key, old_key):
+        if new_key == "1" + old_key or new_key == old_key:
+            return True
+        else:
+            return False
+
+    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d["a"] = 5
+    assert_eq(d.getitem("a"), d.getitem("1a"))
+    ex(d.getitem, KeyError, "asdf")
+
+def test_functionallyinsensitivedictplus_pop():
+    def comp_func(new_key, old_key):
+        if new_key == "1" + old_key or new_key == old_key:
+            return True
+        else:
+            return False
+
+    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d["a"] = 5
+    assert_eq(d.pop("1a"), 5)
+    assert_eq(d.pop("1b", 2), 2)
+    ex(d.pop, KeyError, "a")
+
+
+def test_functionallyinsensitivedictplus_update():
+    def comp_func(new_key, old_key):
+        if new_key == "1" + old_key or new_key == old_key:
+            return True
+        else:
+            return False
+
+    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d["a"] = 5
+    d2 = {"1a": 6, "b": 2}
+    d.update(d2)
+    assert_eq(d["a"], 6)
+    assert_eq(d["b"], 2)
+
+
+def test_functionallyinsensitivedictplus_indexof():
+    def comp_func(new_key, old_key):
+        if new_key == "1" + old_key or new_key == old_key:
+            return True
+        else:
+            return False
+
+    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d["a"] = 5
+    assert_eq(d.indexof("1a"), d.indexof("a"))
+
+
+def test_functionallyinsensitivedictplus_setdefault():
+    def comp_func(new_key, old_key):
+        if new_key == "1" + old_key or new_key == old_key:
+            return True
+        else:
+            return False
+
+    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d["a"] = 5
+    assert_eq(d.setdefault("1a"), ("a", 5))
+    assert_eq(d.setdefault("b", 2),  2)
+
+
+def test_functionallyinsensitivedictplus___contains__():
+    def comp_func(new_key, old_key):
+        if new_key == "1" + old_key or new_key == old_key:
+            return True
+        else:
+            return False
+
+    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d["a"] = 5
+    assert_t("a" in d)
+    assert_t("1a" in d)
+    assert_f("b" in d)
+
+
+def test_functionallyinsensitivedictplus___setitem__():
+    def comp_func(new_key, old_key):
+        if new_key == "1" + old_key or new_key == old_key:
+            return True
+        else:
+            return False
+
+    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d["a"] = 5
+    d["a"] = 4
+    assert_eq(d["a"], 4)
+    assert_eq(d["1a"], 4)
+    d["1a"] = 2
+    assert_eq(d["a"], 2)
+    assert_eq(d["1a"], 2)
+
+
+def test_caseinsensitivedictplus___init__():
+    d = CaseInsensitiveDictPlus()
+    d["a"] = 5
+    assert_eq(d["A"], 5)
+    assert_eq(d["a"], 5)
+    d["A"] = 4
+    assert_eq(d["A"], 4)
+    assert_eq(d["a"], 4)
+
+
+def test_prefixinsensitivedictplus___init__():
+    d = PrefixInsensitiveDictPlus(["http://", "https://"])
+    d["google.com"] = 5
+    assert_eq(d["http://google.com"], 5)
+    assert_eq(d["https://google.com"], 5)
+
+    d["http://google.com"] = 4
+    assert_eq(d["google.com"], 4)
+    assert_eq(d["https://google.com"], 4)
+
+
+def test_suffixinsensitivedictplus___init__():
+    d = SuffixInsensitiveDictPlus([".com",  ".net"])
+    d["google"] = 5
+    assert_eq(d["google.net"], 5)
+    assert_eq(d["google.com"], 5)
+
+    d["google.net"] = 4
+    assert_eq(d["google"], 4)
+    assert_eq(d["google.com"], 4)
 
 
 tests = [
@@ -996,6 +1149,26 @@ tests = [
     test_ordereddictplus___init__,
     test_ordereddictplus___eq__,
     test_ordereddictplus_fromkeys,
+
+    # FunctionallyInsensitiveDictPlus tests
+    test_functionallyinsensitivedictplus___init__,
+    test_functionallyinsensitivedictplus__find_base_key,
+    test_functionallyinsensitivedictplus_getitem,
+    test_functionallyinsensitivedictplus_pop,
+    test_functionallyinsensitivedictplus_update,
+    test_functionallyinsensitivedictplus_indexof,
+    test_functionallyinsensitivedictplus_setdefault,
+    test_functionallyinsensitivedictplus___contains__,
+    test_functionallyinsensitivedictplus___setitem__,
+
+    # CaseInsensitiveDictPlus tests
+    test_caseinsensitivedictplus___init__,
+
+    # PrefixInsensitiveDictPlus tests
+    test_prefixinsensitivedictplus___init__,
+
+    # SuffixInsensitiveDictPlus tests
+    test_suffixinsensitivedictplus___init__
 ]
 
 results = {}
