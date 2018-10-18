@@ -1,0 +1,4 @@
+language: python
+before_script: cd tests
+script:
+  - pytest
