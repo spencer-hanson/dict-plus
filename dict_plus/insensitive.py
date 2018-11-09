@@ -3,7 +3,7 @@ from dict_plus import DictPlus
 
 class FunctionallyInsensitiveDictPlus(DictPlus):
 
-    def __init__(self, compare_func=None, data=None, element_type=None, **kwargs):
+    def __init__(self, data=None, element_type=None, compare_func=None, **kwargs):
         """
         Create a new FunctionallyInsensitiveDictPlus
 
@@ -147,7 +147,7 @@ class CaseInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
 
 
 class PrefixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
-    def __init__(self, prefix_list, data=None, element_type=None, **kwargs):
+    def __init__(self, data=None, element_type=None, prefix_list=[], **kwargs):
         if not isinstance(prefix_list, list):
             prefix_list = [prefix_list]
         compare_func = self._get_compare_func(prefix_list)
@@ -201,7 +201,7 @@ class PrefixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
 
 
 class SuffixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
-    def __init__(self, suffix_list, data=None, element_type=None, **kwargs):
+    def __init__(self, data=None, element_type=None, suffix_list=[], **kwargs):
         if not isinstance(suffix_list, list):
             suffix_list = [suffix_list]
         compare_func = self._get_compare_func(suffix_list)
