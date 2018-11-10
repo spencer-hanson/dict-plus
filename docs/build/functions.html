@@ -46,6 +46,9 @@ useful functions. Here is some documentation on what they are and examples.</p>
 <li><a class="reference internal" href="#swap">Swap</a></li>
 <li><a class="reference internal" href="#add">Add</a></li>
 <li><a class="reference internal" href="#sub">Sub</a></li>
+<li><a class="reference internal" href="#multiply">Multiply</a></li>
+<li><a class="reference internal" href="#chop">Chop</a></li>
+<li><a class="reference internal" href="#divide">Divide</a></li>
 </ul>
 <div class="section" id="squish">
 <span id="id1"></span><h2>Squish<a class="headerlink" href="#squish" title="Permalink to this headline">¶</a></h2>
@@ -149,7 +152,8 @@ to it’s key. It is then un-done with an inverse function.</p>
 <span id="id6"></span><h2>Add<a class="headerlink" href="#add" title="Permalink to this headline">¶</a></h2>
 <p>Add two dictionaries with a function. Inverse of <a class="reference internal" href="#sub">Sub</a></p>
 <p>To ensure the dictionaries add the way you want it to, use an <code class="docutils literal notranslate"><span class="pre">OrderedDictPlus</span></code>
-If no function is given, it’s behavior is similar to <code class="docutils literal notranslate"><span class="pre">update</span></code></p>
+If no function is given, it’s behavior is similar to <code class="docutils literal notranslate"><span class="pre">update</span></code> and can be used with addition
+symbol <code class="docutils literal notranslate"><span class="pre">+</span></code></p>
 <div class="figure">
 <img alt="images/add.png" src="images/add.png" />
 </div>
@@ -170,6 +174,10 @@ precedence to the right dictionary. Can be added with any dict-like object</p>
 
 <span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDictPlus</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span> <span class="c1"># reset value of d</span>
 <span class="n">d</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">func_ee2e</span><span class="p">)</span> <span class="c1"># d is now {&quot;ac&quot;: 4, &quot;bd&quot;: 6}</span>
+
+<span class="c1"># This also works if you use &#39;+&#39;</span>
+<span class="c1"># so d + {} -&gt; result would be d</span>
+<span class="c1"># When using the symbol, the original dictionary is not changed</span>
 </pre></div>
 </div>
 </div>
@@ -177,7 +185,8 @@ precedence to the right dictionary. Can be added with any dict-like object</p>
 <span id="id7"></span><h2>Sub<a class="headerlink" href="#sub" title="Permalink to this headline">¶</a></h2>
 <p>Subtract two dictionaries with a function. Inverse of <a class="reference internal" href="#add">Add</a></p>
 <p>To ensure the dictionaries subtract the way you want it to, use an <code class="docutils literal notranslate"><span class="pre">OrderedDictPlus</span></code>
-If no function is given, it’s behavior is similar to <code class="docutils literal notranslate"><span class="pre">unupdate</span></code></p>
+If no function is given, it’s behavior is similar to <code class="docutils literal notranslate"><span class="pre">unupdate</span></code> and can be used with subtraction
+symbol <code class="docutils literal notranslate"><span class="pre">-</span></code></p>
 <div class="figure">
 <img alt="images/sub.png" src="images/sub.png" />
 </div>
@@ -198,6 +207,116 @@ Can be subtracted with any dict-like object</p>
 
 <span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDictPlus</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">})</span> <span class="c1"># Reset value of d</span>
 <span class="n">d</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">func_ee2e</span><span class="p">)</span> <span class="c1"># d is now equals {&quot;ac&quot;: 4, &quot;bd&quot;: 6}</span>
+
+<span class="c1"># This also works if you use &#39;-&#39;</span>
+<span class="c1"># so d - {} -&gt; result would be d</span>
+<span class="c1"># When using the symbol, the original dictionary is not changed</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="chop">
+<span id="id8"></span><h2>Chop<a class="headerlink" href="#chop" title="Permalink to this headline">¶</a></h2>
+<p>Chops the dictionary into other dictionaries using a binning function
+Each keypair is assigned an integer value, and put in with other dictionaries with the same number.
+These ‘bins’ are then ordered relatively to each other and returned as a list.</p>
+<p>Function signature looks as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">func(k,</span> <span class="pre">v)</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code></p>
+<div class="figure">
+<img alt="images/chop.png" src="images/chop.png" />
+</div>
+<p>In this example, a dictionary with integer keys and string values is created, and chopped up into
+two other dictionaries where one has only even keys and the other only odd keys.</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">DictPlus</span><span class="p">({</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="s2">&quot;f&quot;</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span> <span class="s2">&quot;h&quot;</span>
+<span class="p">})</span>
+
+<span class="k">def</span> <span class="nf">func_chop</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="c1"># Chops into even and odd keys</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">k</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">chopped</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">chop</span><span class="p">(</span><span class="n">func_chop</span><span class="p">)</span>
+<span class="c1"># chopped[0] is now {0: &quot;a&quot;, 2: &quot;c&quot;, 4: &quot;e&quot;, 6: &quot;g&quot;}</span>
+<span class="c1"># chopped[1] is now {1: &quot;b&quot;, 3: &quot;d&quot;, 5: &quot;f&quot;, 7: &quot;h&quot;}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multiply">
+<span id="id9"></span><h2>Multiply<a class="headerlink" href="#multiply" title="Permalink to this headline">¶</a></h2>
+<p>Multiply two dictionaries. Inverse of <a class="reference internal" href="#divide">Divide</a></p>
+<p>Multiply <code class="docutils literal notranslate"><span class="pre">self</span></code> with Iterable-like <code class="docutils literal notranslate"><span class="pre">other</span></code> using a function, such that every element
+of <code class="docutils literal notranslate"><span class="pre">self</span></code> is applied to every element of <code class="docutils literal notranslate"><span class="pre">other</span></code></p>
+<p>Function signature looks as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">func(element1,</span> <span class="pre">element2)</span> <span class="pre">-&gt;</span> <span class="pre">(newkey1,</span> <span class="pre">newvalue1)</span></code></p>
+<p>If the passed func is None, it defaults to:</p>
+<p><code class="docutils literal notranslate"><span class="pre">func(element1,</span> <span class="pre">element2)</span> <span class="pre">-&gt;</span> <span class="pre">((key1,</span> <span class="pre">key2),</span> <span class="pre">(value1,</span> <span class="pre">value2))</span></code>
+and can be used with the multiplication symbol <code class="docutils literal notranslate"><span class="pre">*</span></code></p>
+<p>In the example below, a simple dictionary is multiplied in different ways with different functions
+and the results are shown in the comments</p>
+<div class="figure">
+<img alt="images/multiply.png" src="images/multiply.png" />
+</div>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDictPlus</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">})</span>
+<span class="n">d</span><span class="o">.</span><span class="n">multiply</span><span class="p">({})</span>  <span class="c1"># Multiplying by an empty dict is like multiplying by zero, so d is now {}</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDictPlus</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+
+<span class="n">d</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+<span class="c1"># d is now:</span>
+<span class="c1">#{</span>
+<span class="c1">#    (&quot;a&quot;, &quot;a&quot;): (1, 1), (&quot;a&quot;, &quot;b&quot;): (1, 2), (&quot;a&quot;, &quot;c&quot;): (1, 3),</span>
+<span class="c1">#    (&quot;b&quot;, &quot;a&quot;): (2, 1), (&quot;b&quot;, &quot;b&quot;): (2, 2), (&quot;b&quot;, &quot;c&quot;): (2, 3),</span>
+<span class="c1">#    (&quot;c&quot;, &quot;a&quot;): (3, 1), (&quot;c&quot;, &quot;b&quot;): (3, 2), (&quot;c&quot;, &quot;c&quot;): (3, 3)</span>
+<span class="c1">#}</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDictPlus</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">})</span>  <span class="c1"># Reset d</span>
+<span class="n">d</span><span class="o">.</span><span class="n">multiply</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span> <span class="k">lambda</span> <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">:</span> <span class="n">e1</span><span class="p">)</span>  <span class="c1"># Now we multiply using a function that always returns the first operand</span>
+<span class="c1"># This is essentially multiplying by 1, we get the original dictionary</span>
+
+<span class="c1"># Now we multiply with a more complex function, adds the keys and makes the values tuples</span>
+<span class="n">d</span><span class="o">.</span><span class="n">multiply</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span> <span class="k">lambda</span> <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">:</span> <span class="p">(</span><span class="n">e1</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="n">e2</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">(</span><span class="n">e1</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">e2</span><span class="o">.</span><span class="n">value</span><span class="p">)))</span>
+<span class="c1"># d is now:</span>
+<span class="c1">#{</span>
+<span class="c1">#    &quot;aa&quot;: (1, 1), &quot;ab&quot;: (1, 2), &quot;ac&quot;: (1, 3),</span>
+<span class="c1">#    &quot;ba&quot;: (2, 1), &quot;bb&quot;: (2, 2), &quot;bc&quot;: (2, 3),</span>
+<span class="c1">#    &quot;ca&quot;: (3, 1), &quot;cb&quot;: (3, 2), &quot;cc&quot;: (3, 3)</span>
+<span class="c1">#}</span>
+
+<span class="c1"># This also works if you use &#39;*&#39;</span>
+<span class="c1"># so d * {}, result would be {}</span>
+<span class="c1"># When using the symbol, the original dictionary is not changed</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="divide">
+<span id="id10"></span><h2>Divide<a class="headerlink" href="#divide" title="Permalink to this headline">¶</a></h2>
+<p>Divide two dictionaries. Inverse of <a class="reference internal" href="#multiply">Multiply</a></p>
+<p>Divide <code class="docutils literal notranslate"><span class="pre">self</span></code> with Iterable-like <code class="docutils literal notranslate"><span class="pre">other</span></code> using a function.</p>
+<p>Function signature looks as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">func(element1,</span> <span class="pre">element2)</span> <span class="pre">-&gt;</span> <span class="pre">(newkey1,</span> <span class="pre">newvalue1)</span></code></p>
+<p>If func_inv is <code class="docutils literal notranslate"><span class="pre">None</span></code>, it defaults to:</p>
+<p><code class="docutils literal notranslate"><span class="pre">func_inv(element1,</span> <span class="pre">element2)</span> <span class="pre">-&gt;</span> <span class="pre">(key1,</span> <span class="pre">value1)</span> <span class="pre">or</span> <span class="pre">(key2,</span> <span class="pre">value2)</span></code></p>
+<p>and can be used with the division symbol <code class="docutils literal notranslate"><span class="pre">/</span></code></p>
+<p>Every element of <code class="docutils literal notranslate"><span class="pre">self</span></code> is applied to every element of <code class="docutils literal notranslate"><span class="pre">other</span></code> This is meant to undo what
+multiply did, it won’t work if you change the order of the dictionary.</p>
+<div class="figure">
+<img alt="images/divide.png" src="images/divide.png" />
+</div>
+<p>In this example, the division is used to undo the result of a multiplication (o1),
+to retrieve the original dictionary (o2)</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">o</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">):</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">):</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">):</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">):</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">):</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">):</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">):</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">):</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">):</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">o2</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">OrderedDictPlus</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">el</span><span class="p">,</span> <span class="n">e2</span><span class="p">:</span> <span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">id</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">el</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="c1"># d is now o2</span>
+
+<span class="c1"># This also works if you use &#39;/&#39;</span>
+<span class="c1"># so d / {}, result would be {}</span>
+<span class="c1"># When using the symbol, the original dictionary is not changed</span>
 </pre></div>
 </div>
 </div>
@@ -230,6 +349,9 @@ Can be subtracted with any dict-like object</p>
 <li class="toctree-l2"><a class="reference internal" href="#swap">Swap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#add">Add</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sub">Sub</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#chop">Chop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiply">Multiply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#divide">Divide</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Package overview</a></li>

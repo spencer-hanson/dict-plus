@@ -441,6 +441,10 @@ def test_iterable_chop():
     assert_eq(chopped[0].__class__, DictPlus)
     assert_eq(chopped[1].__class__, DictPlus)
 
+    def func_chop2(k, v):
+        return "asdf"
+    ex(d.chop, ValueError, func_chop2)
+
 
 def test_iterable_squish():
     d = DictPlus({"1": "8", "asdf": "[E]"})
@@ -1171,29 +1175,29 @@ tests = [
     test_suffixinsensitivedictplus___init__
 ]
 
-# results = {}
-# pass_count = 0
-# total_count = 0
+results = {}
+pass_count = 0
+total_count = 0
 
-# for test in tests:
-#     name = getattr(test, "__name__")
-#     try:
-#         test()
-#         results[name] = "Passed"
-#         pass_count = pass_count + 1
-#     except Exception as e:
-#         results[name] = "{}: {}".format(e.__class__.__name__, str(e))
-#         # if e.__class__ != NotImplementedError:
-#         raise e
-#     total_count = total_count + 1
-#
-# for k, v in results.items():
-#     print("{}:\n{}\n".format(k, v))
-#
-# print("Passed: {} Total: {} - {}%".format(pass_count, total_count, round((pass_count / total_count), 4)))
-#
-# total = 0
-# for k, v in assertions.items():
-#     print("-- {}: {}".format(k, v))
-#     total = total + v
-# print("Total: {}".format(total))
+for test in tests:
+    name = getattr(test, "__name__")
+    try:
+        test()
+        results[name] = "Passed"
+        pass_count = pass_count + 1
+    except Exception as e:
+        results[name] = "{}: {}".format(e.__class__.__name__, str(e))
+        # if e.__class__ != NotImplementedError:
+        raise e
+    total_count = total_count + 1
+
+for k, v in results.items():
+    print("{}:\n{}\n".format(k, v))
+
+print("Passed: {} Total: {} - {}%".format(pass_count, total_count, round((pass_count / total_count), 4)))
+
+total = 0
+for k, v in assertions.items():
+    print("-- {}: {}".format(k, v))
+    total = total + v
+print("Total: {}".format(total))

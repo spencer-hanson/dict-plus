@@ -553,13 +553,15 @@
 <span class="sd">        Chop the Iterable into other Iterables using a binning function &#39;func&#39;</span>
 <span class="sd">        Each keypair is assigned a value -infinity to +infinity, and put into other iterables</span>
 <span class="sd">        with the same number. These &#39;bins&#39; are then ordered relatively to each other and returned in a list</span>
-<span class="sd">        :param func: func(k, v) -&gt; number</span>
+<span class="sd">        :param func: func(k, v) -&gt; int</span>
 <span class="sd">        :return: List of Iterables</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">chopped</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span><span class="p">:</span>
             <span class="n">idx</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">el</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Chop function returned non-integer value&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="n">el</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">el</span><span class="o">.</span><span class="n">value</span>
             <span class="k">else</span><span class="p">:</span>
@@ -672,11 +674,6 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">e1</span><span class="o">.</span><span class="n">id</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">e1</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">func_inv</span><span class="p">)</span></div>
-
-    <span class="c1"># Compare self to other using</span>
-    <span class="c1"># comparison func &#39;comp&#39;</span>
-    <span class="c1"># aggregate func &#39;agg&#39;</span>
-    <span class="c1"># and mapping func &#39;mapp&#39;</span>
 
 <div class="viewcode-block" id="Iterable.compare"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.iterable.Iterable.compare">[docs]</a>    <span class="k">def</span> <span class="nf">compare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">agg</span><span class="p">,</span> <span class="n">mapp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

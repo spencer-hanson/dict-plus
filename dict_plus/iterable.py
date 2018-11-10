@@ -518,13 +518,15 @@ class Iterable(object):
         Chop the Iterable into other Iterables using a binning function 'func'
         Each keypair is assigned a value -infinity to +infinity, and put into other iterables
         with the same number. These 'bins' are then ordered relatively to each other and returned in a list
-        :param func: func(k, v) -> number
+        :param func: func(k, v) -> int
         :return: List of Iterables
         """
         chopped = []
         data = {}
         for el in self._elements:
             idx = func(el.id, el.value)
+            if not isinstance(idx, int):
+                raise ValueError("Chop function returned non-integer value")
             if idx in data:
                 data[idx][el.id] = el.value
             else:
@@ -637,11 +639,6 @@ class Iterable(object):
                 else:
                     return e1.id[0], e1.value[0]
         return self.multiply(other, func_inv)
-
-    # Compare self to other using
-    # comparison func 'comp'
-    # aggregate func 'agg'
-    # and mapping func 'mapp'
 
     def compare(self, other, comp, agg, mapp=None, inplace=False):
         """

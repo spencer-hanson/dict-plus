@@ -16,6 +16,7 @@
     <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Package overview" href="modules.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -134,7 +135,7 @@
 <span id="dict-plus-insensitive-module"></span><h2>dict_plus.insensitive module<a class="headerlink" href="#module-dict_plus.insensitive" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="dict_plus.insensitive.CaseInsensitiveDictPlus">
-<em class="property">class </em><code class="descclassname">dict_plus.insensitive.</code><code class="descname">CaseInsensitiveDictPlus</code><span class="sig-paren">(</span><em>compare_func=None</em>, <em>data=None</em>, <em>element_type=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/insensitive.html#CaseInsensitiveDictPlus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.insensitive.CaseInsensitiveDictPlus" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dict_plus.insensitive.</code><code class="descname">CaseInsensitiveDictPlus</code><span class="sig-paren">(</span><em>data=None</em>, <em>element_type=None</em>, <em>compare_func=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/insensitive.html#CaseInsensitiveDictPlus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.insensitive.CaseInsensitiveDictPlus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dict_plus.insensitive.FunctionallyInsensitiveDictPlus" title="dict_plus.insensitive.FunctionallyInsensitiveDictPlus"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict_plus.insensitive.FunctionallyInsensitiveDictPlus</span></code></a></p>
 <dl class="method">
 <dt id="dict_plus.insensitive.CaseInsensitiveDictPlus.compare_func">
@@ -159,7 +160,7 @@ If you return False, the key doesn’t match, and if no keys match, it will be a
 
 <dl class="class">
 <dt id="dict_plus.insensitive.FunctionallyInsensitiveDictPlus">
-<em class="property">class </em><code class="descclassname">dict_plus.insensitive.</code><code class="descname">FunctionallyInsensitiveDictPlus</code><span class="sig-paren">(</span><em>compare_func=None</em>, <em>data=None</em>, <em>element_type=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/insensitive.html#FunctionallyInsensitiveDictPlus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.insensitive.FunctionallyInsensitiveDictPlus" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dict_plus.insensitive.</code><code class="descname">FunctionallyInsensitiveDictPlus</code><span class="sig-paren">(</span><em>data=None</em>, <em>element_type=None</em>, <em>compare_func=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/insensitive.html#FunctionallyInsensitiveDictPlus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.insensitive.FunctionallyInsensitiveDictPlus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dict_plus.dictplus.DictPlus" title="dict_plus.dictplus.DictPlus"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict_plus.dictplus.DictPlus</span></code></a></p>
 <dl class="method">
 <dt id="dict_plus.insensitive.FunctionallyInsensitiveDictPlus.compare_func">
@@ -247,7 +248,7 @@ In either case, this is followed by: for k in F:  D[k] = F[k]</p>
 
 <dl class="class">
 <dt id="dict_plus.insensitive.PrefixInsensitiveDictPlus">
-<em class="property">class </em><code class="descclassname">dict_plus.insensitive.</code><code class="descname">PrefixInsensitiveDictPlus</code><span class="sig-paren">(</span><em>prefix_list</em>, <em>data=None</em>, <em>element_type=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/insensitive.html#PrefixInsensitiveDictPlus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.insensitive.PrefixInsensitiveDictPlus" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dict_plus.insensitive.</code><code class="descname">PrefixInsensitiveDictPlus</code><span class="sig-paren">(</span><em>data=None</em>, <em>element_type=None</em>, <em>prefix_list=[]</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/insensitive.html#PrefixInsensitiveDictPlus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.insensitive.PrefixInsensitiveDictPlus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dict_plus.insensitive.FunctionallyInsensitiveDictPlus" title="dict_plus.insensitive.FunctionallyInsensitiveDictPlus"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict_plus.insensitive.FunctionallyInsensitiveDictPlus</span></code></a></p>
 <dl class="staticmethod">
 <dt id="dict_plus.insensitive.PrefixInsensitiveDictPlus.fromkeys">
@@ -267,7 +268,7 @@ In either case, this is followed by: for k in F:  D[k] = F[k]</p>
 
 <dl class="class">
 <dt id="dict_plus.insensitive.SuffixInsensitiveDictPlus">
-<em class="property">class </em><code class="descclassname">dict_plus.insensitive.</code><code class="descname">SuffixInsensitiveDictPlus</code><span class="sig-paren">(</span><em>suffix_list</em>, <em>data=None</em>, <em>element_type=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/insensitive.html#SuffixInsensitiveDictPlus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.insensitive.SuffixInsensitiveDictPlus" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dict_plus.insensitive.</code><code class="descname">SuffixInsensitiveDictPlus</code><span class="sig-paren">(</span><em>data=None</em>, <em>element_type=None</em>, <em>suffix_list=[]</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dict_plus/insensitive.html#SuffixInsensitiveDictPlus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dict_plus.insensitive.SuffixInsensitiveDictPlus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dict_plus.insensitive.FunctionallyInsensitiveDictPlus" title="dict_plus.insensitive.FunctionallyInsensitiveDictPlus"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict_plus.insensitive.FunctionallyInsensitiveDictPlus</span></code></a></p>
 <dl class="staticmethod">
 <dt id="dict_plus.insensitive.SuffixInsensitiveDictPlus.fromkeys">
@@ -404,7 +405,7 @@ Works in place, allows for concurrent modification
 <dd><p>Chop the Iterable into other Iterables using a binning function ‘func’
 Each keypair is assigned a value -infinity to +infinity, and put into other iterables
 with the same number. These ‘bins’ are then ordered relatively to each other and returned in a list
-:param func: func(k, v) -&gt; number
+:param func: func(k, v) -&gt; int
 :return: List of Iterables</p>
 </dd></dl>
 
@@ -857,11 +858,31 @@ After the pop an indexes update must be performed
 
 
 <h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Notable and  Useful Functions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Package overview</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">dict_plus package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-dict_plus.dictplus">dict_plus.dictplus module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-dict_plus.exceptions">dict_plus.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-dict_plus.funcs">dict_plus.funcs module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-dict_plus.insensitive">dict_plus.insensitive module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-dict_plus.iterable">dict_plus.iterable module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-dict_plus">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">Package overview</a><ul>
+      <li>Previous: <a href="modules.html" title="previous chapter">Package overview</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>
