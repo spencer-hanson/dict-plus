@@ -402,6 +402,17 @@ def test_iterable_map():
     assert_eq(d, od)
     assert_eq(d.get("a"), 1)
 
+    def func_broke(k, v):
+        return "a", 5
+    ex(d.map, IndexError, func_broke)
+
+
+def test_iterable_filter():
+    d = OrderedDictPlus({"a": 1, "b": 2, "c": 3, "d": 4})
+    d.filter(lambda k, v: bool(v % 2))
+    assert_eq(d, {"a": 1,  "c": 3})
+
+
 
 def test_iterable_rekey():
     def func_k2k(k):
@@ -933,7 +944,7 @@ def test_functionallyinsensitivedictplus___init__():
             return False
 
     d = FunctionallyInsensitiveDictPlus()
-    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d = FunctionallyInsensitiveDictPlus(compare_func=comp_func)
     d["a"] = 5
     assert_eq(d["a"], d["1a"])
 
@@ -945,7 +956,7 @@ def test_functionallyinsensitivedictplus__find_base_key():
         else:
             return False
 
-    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d = FunctionallyInsensitiveDictPlus(compare_func=comp_func)
     d["a"] = 5
     assert_eq(d._find_base_key("1a"), "a")
 
@@ -957,7 +968,7 @@ def test_functionallyinsensitivedictplus_getitem():
         else:
             return False
 
-    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d = FunctionallyInsensitiveDictPlus(compare_func=comp_func)
     d["a"] = 5
     assert_eq(d.getitem("a"), d.getitem("1a"))
     ex(d.getitem, KeyError, "asdf")
@@ -969,7 +980,7 @@ def test_functionallyinsensitivedictplus_pop():
         else:
             return False
 
-    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d = FunctionallyInsensitiveDictPlus(compare_func=comp_func)
     d["a"] = 5
     assert_eq(d.pop("1a"), 5)
     assert_eq(d.pop("1b", 2), 2)
@@ -983,7 +994,7 @@ def test_functionallyinsensitivedictplus_update():
         else:
             return False
 
-    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d = FunctionallyInsensitiveDictPlus(compare_func=comp_func)
     d["a"] = 5
     d2 = {"1a": 6, "b": 2}
     d.update(d2)
@@ -998,7 +1009,7 @@ def test_functionallyinsensitivedictplus_indexof():
         else:
             return False
 
-    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d = FunctionallyInsensitiveDictPlus(compare_func=comp_func)
     d["a"] = 5
     assert_eq(d.indexof("1a"), d.indexof("a"))
 
@@ -1010,7 +1021,7 @@ def test_functionallyinsensitivedictplus_setdefault():
         else:
             return False
 
-    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d = FunctionallyInsensitiveDictPlus(compare_func=comp_func)
     d["a"] = 5
     assert_eq(d.setdefault("1a"), ("a", 5))
     assert_eq(d.setdefault("b", 2),  2)
@@ -1023,7 +1034,7 @@ def test_functionallyinsensitivedictplus___contains__():
         else:
             return False
 
-    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d = FunctionallyInsensitiveDictPlus(compare_func=comp_func)
     d["a"] = 5
     assert_t("a" in d)
     assert_t("1a" in d)
@@ -1037,7 +1048,7 @@ def test_functionallyinsensitivedictplus___setitem__():
         else:
             return False
 
-    d = FunctionallyInsensitiveDictPlus(comp_func)
+    d = FunctionallyInsensitiveDictPlus(compare_func=comp_func)
     d["a"] = 5
     d["a"] = 4
     assert_eq(d["a"], 4)
@@ -1058,7 +1069,7 @@ def test_caseinsensitivedictplus___init__():
 
 
 def test_prefixinsensitivedictplus___init__():
-    d = PrefixInsensitiveDictPlus(["http://", "https://"])
+    d = PrefixInsensitiveDictPlus(prefix_list=["http://", "https://"])
     d["google.com"] = 5
     assert_eq(d["http://google.com"], 5)
     assert_eq(d["https://google.com"], 5)
@@ -1069,7 +1080,7 @@ def test_prefixinsensitivedictplus___init__():
 
 
 def test_suffixinsensitivedictplus___init__():
-    d = SuffixInsensitiveDictPlus([".com",  ".net"])
+    d = SuffixInsensitiveDictPlus(suffix_list=[".com",  ".net"])
     d["google"] = 5
     assert_eq(d["google.net"], 5)
     assert_eq(d["google.com"], 5)
@@ -1121,6 +1132,7 @@ tests = [
     test_iterable_update,
     test_iterable_unupdate,
     test_iterable_map,
+    test_iterable_filter,
     test_iterable_rekey,
     test_iterable_chop,
     test_iterable_squish,

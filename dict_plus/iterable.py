@@ -127,7 +127,7 @@ class Iterable(object):
 
             self._elements = []
             self._eltype = element_type
-            self._indexes = Iterable.IterableIndex()
+            self._indexes = self._make_index()
 
             if isinstance(data, dict):
                 self.update(data)
@@ -141,6 +141,9 @@ class Iterable(object):
             for k, v in kwargs.items():
                 self[k] = v
 
+    def _make_index(self):
+        return Iterable.IterableIndex()
+
     # TODO Use from_idx to optimize
     def _update_indexes(self, from_idx):
         """
@@ -151,8 +154,10 @@ class Iterable(object):
         from_idx, as to not have to update any index < from_idx
         :return: None
         """
-        self._indexes = Iterable.IterableIndex()
+        self._indexes = self._make_index()
         for idx, el in enumerate(self._elements):
+            if self._indexes.has(el.id):
+                raise IndexError("Duplicate key {} found!".format(el.id))
             self._indexes.set(el.id, idx)
 
     def insert(self, index, obj):
@@ -280,6 +285,18 @@ class Iterable(object):
         for k in kwargs:
             self.insert(len(self), (k, kwargs[k]))
 
+    def filter(self, func):
+        """
+        Filter each element in the Iterable to keep if 'func' returns True,
+        otherwise it is removed.
+        :param func: func(k,v) -> True or False
+        :return: True or False
+        """
+        def wrap_func(kvp):
+            return func(kvp.id, kvp.value)
+        self._elements = list(filter(wrap_func, self._elements))
+        self._update_indexes(0)
+
     def map(self, func):
         """
         Map each element in the Iterable to another using function 'func'
@@ -287,9 +304,8 @@ class Iterable(object):
         :return: None
         """
         for i in range(0, len(self)):
-            idx = self._indexes.pop(self._elements[i].id)
             self._elements[i] = self._eltype(func(*self._elements[i].parts()))
-            self._indexes.set(self._elements[i].id, idx)
+        self._update_indexes(0)  # Update indexes
 
     def rekey(self, func):
         """
@@ -299,9 +315,8 @@ class Iterable(object):
         :return: None
         """
         for i in range(0, len(self)):
-            idx = self._indexes.pop(self._elements[i].id)
             self._elements[i].id = func(self._elements[i].id)
-            self._indexes.set(self._elements[i].id, idx)
+        self._update_indexes(0)
 
     def clear(self):
         """
@@ -309,7 +324,7 @@ class Iterable(object):
         :return: None
         """
         self._elements = []
-        self._indexes = Iterable.IterableIndex()
+        self._indexes = self._make_index()
 
     def copy(self):
         """

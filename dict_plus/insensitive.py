@@ -151,7 +151,7 @@ class PrefixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
         if not isinstance(prefix_list, list):
             prefix_list = [prefix_list]
         compare_func = self._get_compare_func(prefix_list)
-        super(PrefixInsensitiveDictPlus, self).__init__(compare_func, data, element_type, **kwargs)
+        super(PrefixInsensitiveDictPlus, self).__init__(data, element_type, compare_func=compare_func, **kwargs)
 
     def set_prefix_list(self, new_prefix_list):
         if not isinstance(new_prefix_list, list):
@@ -205,7 +205,7 @@ class SuffixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
         if not isinstance(suffix_list, list):
             suffix_list = [suffix_list]
         compare_func = self._get_compare_func(suffix_list)
-        super(SuffixInsensitiveDictPlus, self).__init__(compare_func, data, element_type, **kwargs)
+        super(SuffixInsensitiveDictPlus, self).__init__(data, element_type, compare_func=compare_func, **kwargs)
 
     def set_suffix_list(self, new_suffix_list):
         if not isinstance(new_suffix_list, list):
