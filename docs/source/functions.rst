@@ -13,6 +13,17 @@ useful functions. Here is some documentation on what they are and examples.
 - Multiply_
 - Chop_
 - Divide_
+- FuncMap_
+- FoldLeft_
+- FoldRight_
+- Compare_
+- LessThan_
+- GreaterThan_
+- GreaterThanEqual_
+- LessThanEqual_
+- Equal_
+- NotEqual_
+
 
 .. _squish:
 
@@ -359,3 +370,137 @@ to retrieve the original dictionary (o2)
     # This also works if you use '/'
     # so d / {}, result would be {}
     # When using the symbol, the original dictionary is not changed
+
+.. _FuncMap:
+
+FuncMap
+======
+Combine self and Iterable-like 'other' with a combine function and
+using a mapping function. Can be in-place or not.
+
+Combine function signature looks as follows:
+
+``func(value1, value2) -> new_value``
+
+Mapping function signature looks as follows:
+
+``func(key) -> new_key``
+
+The following code combines the values by multiplying, and mapping to the opposite end of the dictionary
+
+.. code:: python
+
+        d = DictPlus({a: a for a in range(0, 100)})
+        dp = d.funcmap(
+            {a: a for a in range(0, 100)},
+            lambda _v1, _v2: _v1 * _v2,
+            lambda _id: 99 - _id,
+            inplace=False
+        )
+        # dp is now = {a: a * (99 - a) for a in range(0, 100)}
+
+.. _FoldLeft:
+
+Fold Left
+=========
+Reduce the Iterable using function 'func' and the 'left' grouping pattern
+Like (((1 + 2) + 3) + 4) so
+func(func(func(element1, element2), element3), element4)
+
+The function signature looks as following:
+``func(element1, element2) -> new_element``
+
+.. code:: python
+
+        d = DictPlus({0: "a", 1: "b", 2: "c"})
+        r = d.fold_left(lambda e1, e2: (e1.id+e2.id,e1.value+e2.value))
+        # r is now {3: "abc"}
+
+
+.. _FoldRight:
+
+Fold Right
+==========
+Reduce the Iterable using function 'func' and the 'right' grouping pattern
+Like (1 + (2 + (3 + 4))) so
+func(element1, func(element2, func(element3, element4)))
+
+The function signature looks as following:
+``func(element1, element2) -> new_element``
+
+.. code:: python
+
+        d = DictPlus({0: "a", 1: "b", 2: "c"})
+        r = d.fold_left(lambda e1, e2: (e1.id+e2.id,e1.value+e2.value))
+        # r is now {3: "cba"}
+
+
+
+
+.. _Compare:
+
+Compare
+=======
+Compare self with other using a comparison function, an aggregate function and a mapping function.
+If no mapping function is given, the default mapping function maps each element at index i in self to an element
+at index i in other.
+This can cause problems if other and self don't have the same length
+
+The compare function signature looks as following:
+``func(element1, element2) -> new_value``
+
+The aggregate function signature looks as following:
+``func([element1, element2, ..]) -> new_value``
+
+The mapping function signature looks as following:
+``func(self_key) -> other_key``
+
+The following example combines the dictionary and simplifies it to find the truthy value of all the keys
+
+.. code:: python
+
+        d = DictPlus({False: "a", True: "b", False: "c"})
+        t = d.compare({False: "a", True: "b", False: "c"},
+                        comp=lambda el1,el2:el1.id,
+                        agg=dict_plus.funcs.Functions.AND,
+                        mapp=None)
+        # t is now false
+
+.. _LessThan:
+
+LessThan
+========
+Less than is a Compare_ call with the function LT
+
+.. _GreaterThan:
+
+GreaterThan
+===========
+Greater than is a Compare_ call with the functino GT
+
+
+.. _GreaterThanEqual:
+
+GreaterThanEqual
+================
+Greater tha equal is a Compare_ call with the functino GTE
+
+
+.. _LessThanEqual:
+
+LessThanEqual
+=============
+Greater than is a Compare_ call with the functino LTE
+
+
+.. _Equal:
+
+Equal
+=====
+Equal is a Compare_ call with the functino EQ
+
+.. _NotEqual::
+
+Not Equal
+=========
+Not Equal is a Compare_ call with the functino NEQ
