@@ -11,3 +11,18 @@ __isub__, __iadd__ etc..
 __rsub__, __radd__ etc..
 Slicing
 make into metaclass?
+
+Subclasses!
+
+    - CaseInsensitiveDict
+    - PrefixInsensitiveDict
+    - SuffixInsensitiveDict
+    - FunctionalInsensitiveDict
+    - FunctionDictPlus
+    - FunctionallyOrderedDictPlus
+    - TwoWayDictPlus
+    - HookedDictPlus
+    - OneWayDictPlus
+    - SerializableDictPlus
+    - ImmutableDictPlus
+    - UniqueDictPlus

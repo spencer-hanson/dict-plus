@@ -29,6 +29,22 @@ dict\_plus.funcs module
     :show-inheritance:
 
 
+dict\_plus.insensitive module
+-----------------------------
+
+.. automodule:: dict_plus.insensitive
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dict\_plus.iterable module
+--------------------------
+
+.. automodule:: dict_plus.iterable
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Module contents
 ---------------
 

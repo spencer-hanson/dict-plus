@@ -31,7 +31,6 @@ Squish
 ======
 Combine two keys and their values into one new key, using a given function. Inverse of Expand_
 
-.. figure:: images/squish.png
 
 The function signature looks as follows:
 
@@ -53,7 +52,7 @@ Expand
 ======
 Expand a single key into any number of keys. Inverse of Squish_
 
-.. figure:: images/expand.png
+
 
 The function signature looks as follows:
 
@@ -76,7 +75,6 @@ Map
 ===
 Map a dictionary to new keys and values.
 
-.. figure:: images/map.png
 
 The function signature looks as follows:
 
@@ -110,7 +108,7 @@ ReKey
 =====
 Change the keys of a dictionary, keeping the values the same. Converse of Swap_
 
-.. figure:: images/rekey.png
+
 
 The function signature looks as follows:
 
@@ -142,7 +140,7 @@ Swap
 ====
 Swap two keys, keeping the values the same. Converse of ReKey_
 
-.. figure:: images/swap.png
+
 
 
 
@@ -167,7 +165,7 @@ To ensure the dictionaries add the way you want it to, use an ``OrderedDictPlus`
 If no function is given, it's behavior is similar to ``update`` and can be used with addition
 symbol ``+``
 
-.. figure:: images/add.png
+
 
 The function signature looks as follows:
 
@@ -207,7 +205,7 @@ To ensure the dictionaries subtract the way you want it to, use an ``OrderedDict
 If no function is given, it's behavior is similar to ``unupdate`` and can be used with subtraction
 symbol ``-``
 
-.. figure:: images/sub.png
+
 
 The function signature looks as follows:
 
@@ -250,7 +248,7 @@ Function signature looks as follows:
 
 ``func(k, v) -> int``
 
-.. figure:: images/chop.png
+
 
 In this example, a dictionary with integer keys and string values is created, and chopped up into
 two other dictionaries where one has only even keys and the other only odd keys.
@@ -295,7 +293,7 @@ In the example below, a simple dictionary is multiplied in different ways with d
 and the results are shown in the comments
 
 
-.. figure:: images/multiply.png
+
 
 .. code:: python
 
@@ -350,7 +348,7 @@ and can be used with the division symbol ``/``
 Every element of ``self`` is applied to every element of ``other`` This is meant to undo what
 multiply did, it won't work if you change the order of the dictionary.
 
-.. figure:: images/divide.png
+
 
 In this example, the division is used to undo the result of a multiplication (o1),
 to retrieve the original dictionary (o2)
@@ -374,7 +372,7 @@ to retrieve the original dictionary (o2)
 .. _FuncMap:
 
 FuncMap
-======
+=======
 Combine self and Iterable-like 'other' with a combine function and
 using a mapping function. Can be in-place or not.
 
@@ -499,7 +497,7 @@ Equal
 =====
 Equal is a Compare_ call with the functino EQ
 
-.. _NotEqual::
+.. _NotEqual:
 
 Not Equal
 =========

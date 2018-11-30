@@ -1,4 +1,4 @@
-dict_plus
+Package overview
 =========
 
 .. toctree::
