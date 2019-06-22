@@ -92,11 +92,11 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
 
     def indexof(self, key):
         base_key = self._find_base_key(key)
-        return super().indexof(base_key or key)
+        return super(FunctionallyInsensitiveDictPlus, self).indexof(base_key or key)
 
     def setdefault(self, k, v_alt=None):
         base_key = self._find_base_key(k)
-        return super().setdefault(base_key or k, v_alt)
+        return super(FunctionallyInsensitiveDictPlus, self).setdefault(base_key or k, v_alt)
 
     def __contains__(self, item):
         """

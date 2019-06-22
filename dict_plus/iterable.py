@@ -1,5 +1,6 @@
 from dict_plus.exceptions import *
 from dict_plus.funcs import Functions as DFuncs
+from six import string_types, integer_types
 
 
 class Iterable(object):
@@ -17,8 +18,12 @@ class Iterable(object):
             :return: The hash of the object
             """
             if o.__hash__:
-                return hash(o)
-            elif isinstance(o, list):
+                try:  # Try needed for python2 compatibility
+                    return hash(o)
+                except TypeError:
+                    pass
+
+            if isinstance(o, list):
                 hashes = []
                 for el in o:
                     hashes.append(self.__make_hash(el))
@@ -30,7 +35,7 @@ class Iterable(object):
             elif hasattr(o, "__str__"):
                 return hash(str(o) + str(o.__class__))
             else:
-                raise TypeError("Can't hash, submit an issue!")
+                raise TypeError("Can't hash {}, submit an issue!".format(o))
 
         def __init__(self, data=None):
             """
@@ -116,9 +121,10 @@ class Iterable(object):
         :param kwargs: Additional data to initialize with
         """
 
-        super().__init__()
+        super(Iterable, self).__init__()
+
         if isinstance(data, Iterable):
-            self._elements = data._elements.copy()
+            self._elements = data._elements[:]
             self._indexes = data._indexes.copy()
             self._eltype = data._eltype
         else:
@@ -376,7 +382,7 @@ class Iterable(object):
         Returns a copy of the elements in the Iterable instance
         :return: List of Elements
         """
-        return self._elements.copy()
+        return self._elements[:]
 
     def keys(self):
         """
@@ -628,7 +634,7 @@ class Iterable(object):
         if not func:
             def func(e1, e2):
                 return (e1.id, e2.id), (e1.value, e2.value)
-        els = self._elements.copy()
+        els = self._elements[:]
         self.clear()
         for el1 in els:
             for el2 in other.elements():
@@ -845,9 +851,19 @@ class Iterable(object):
     def __str__(self):
         """
         Get the string representation of this object, should be the same as str(dict)
+        Except for Python2, where dictionary order is not preserved
         :return: String representing this Iterable
         """
-        return str(self.todict())
+        def type_repr(v):
+            if isinstance(v, string_types):
+                return "'{}'".format(v)
+            else:
+                return str(v)
+
+        entries = []
+        for el in self._elements:
+            entries.append("{}: {}".format(type_repr(el.id), type_repr(el.value)))
+        return "{" + ",".join(entries) + "}"
 
 
 class OrderedIterableMixin(Iterable):
@@ -995,3 +1011,6 @@ class KeyValuePair(Element):
             return True
         elif isinstance(other, tuple) and self.id == other[0] and self.value == other[1]:
             return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
