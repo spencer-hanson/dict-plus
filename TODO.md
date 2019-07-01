@@ -14,10 +14,6 @@ make into metaclass?
 
 Subclasses!
 
-    - CaseInsensitiveDict
-    - PrefixInsensitiveDict
-    - SuffixInsensitiveDict
-    - FunctionalInsensitiveDict
     - FunctionDictPlus
     - FunctionallyOrderedDictPlus
     - TwoWayDictPlus
