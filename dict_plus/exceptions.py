@@ -2,9 +2,9 @@ class InvalidIteratorException(Exception):
     pass
 
 
-class InvalidElementTypeException(Exception):
+class InvalidElementTypeException(TypeError):
     pass
 
 
-class InvalidElementValueException(Exception):
+class InvalidElementValueException(ValueError):
     pass

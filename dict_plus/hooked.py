@@ -1,4 +1,4 @@
-from dict_plus import DictPlus, KeyValuePair
+from dict_plus import DictPlus, KeyValuePair, ElementFactory
 
 
 class HookedDictPlus(DictPlus):
@@ -29,7 +29,7 @@ class HookedDictPlus(DictPlus):
                 "value": lambda x: x
             }
         }
-        super(HookedDictPlus, self).__init__(data, element_type or KeyValuePair, **kwargs)
+        super(HookedDictPlus, self).__init__(data, element_type or ElementFactory.element(KeyValuePair, HookedDictPlus), **kwargs)
 
     def setdefault(self, k, v_alt=None):
         raise NotImplementedError
@@ -111,7 +111,7 @@ class FunctionDictPlus(HookedDictPlus):
                 "value": error_out
             }
         }
-        super(FunctionDictPlus, self).__init__(data, element_type, hooks, **kwargs)
+        super(FunctionDictPlus, self).__init__(data, element_type or ElementFactory.element(KeyValuePair, DictPlus), hooks, **kwargs)
 
     @staticmethod
     def fromkeys(sequence, value=None):

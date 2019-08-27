@@ -1,5 +1,6 @@
-from dict_plus.iterable import Iterable, OrderedIterableMixin, KeyValuePair
-from dict_plus.exceptions import InvalidElementTypeException
+from dict_plus.iterable import Iterable, OrderedIterable
+from dict_plus.elements import ElementFactory, KeyValuePair
+from dict_plus.indexes import SortedIterableIndex
 
 
 class DictPlus(Iterable):
@@ -11,7 +12,7 @@ class DictPlus(Iterable):
         :param element_type: Element type to store the data with, defaults to KeyValuePair
         :param kwargs: keyword args to include in the dict
         """
-        super(DictPlus, self).__init__(data, element_type or KeyValuePair, **kwargs)
+        super(DictPlus, self).__init__(data, element_type or ElementFactory.element(KeyValuePair, DictPlus), **kwargs)
 
     @staticmethod
     def fromkeys(sequence, value=None):
@@ -50,7 +51,7 @@ class DictPlus(Iterable):
         return True
 
 
-class OrderedDictPlus(OrderedIterableMixin):
+class OrderedDictPlus(OrderedIterable):
     def __init__(self, data=None, element_type=None, **kwargs):
         """
         Create a new OrderedDictPlus, with inital data and element_type defaulting to KeyValuePair,
@@ -59,7 +60,7 @@ class OrderedDictPlus(OrderedIterableMixin):
         :param element_type: Element type to store the data with, defaults to KeyValuePair
         :param kwargs: keyword args to include in the dict
         """
-        super(OrderedDictPlus, self).__init__(data, element_type or KeyValuePair, **kwargs)
+        super(OrderedDictPlus, self).__init__(data, element_type or ElementFactory.element(KeyValuePair, OrderedDictPlus), **kwargs)
 
     @staticmethod
     def fromkeys(sequence, value=None):
@@ -92,7 +93,61 @@ class OrderedDictPlus(OrderedIterableMixin):
             return False
         return True
 
-# TODO use for __eq__ in ListPlus
+
+class SortedDictPlus(OrderedDictPlus):
+    def _make_index(self):
+        return SortedIterableIndex()
+
+    @staticmethod
+    def fromkeys(sequence, value=None):
+        """
+        Create a new DictPlus from a sequence of keys, all with value 'value'
+        :param sequence: iterable of keys
+        :param value: value to set each key to, defaults to None
+        :return: DictPlus with populated data
+        """
+        d = SortedDictPlus()
+        for item in sequence:
+            d.insert(len(d), (item, value))
+        return d
+
+    def insert(self, index, obj):
+        """
+        Insert an object into the Iterable, raises a KeyError if the key already exists
+        Index value is ignored in the Iterable superclass, as order is not preserved anyways
+        :param index: Value to insert element to, unless ordered, the index always will be the last
+        :param obj: Object to insert into the Iterable. Must conform with the element type of the iterable
+        :return: Element that was inserted
+        """
+        element = self.elements_type(obj)
+        if self._indexes.has(element.id):
+            raise KeyError("Key '{}' already exists!".format(element.id))
+
+        inserted = -1
+
+        val = self._indexes.make_hash(element.id)
+        if self._indexes.isempty():
+            self._elements.insert(0, element)
+            inserted = 0
+        else:
+            for i in range(len(self._elements)):
+                item = self._elements[i]
+                v = self._indexes.make_hash(item.id)
+                if val < v:
+                    self._elements.insert(i, element)
+                    inserted = i
+                    break
+            if inserted == -1:
+                self._elements.insert(len(self), element)
+                inserted = len(self)
+
+        self._indexes.set(element.id, inserted)
+        self._update_indexes(inserted)  # Make sure to update the indexes after inserting
+
+        return element
+
+
+# TODO use for __eq__ in ListPlus ?
     # def __eq__(self, other):
     #     result = True
     #     if isinstance(other, list):

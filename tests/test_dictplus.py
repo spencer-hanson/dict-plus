@@ -5,6 +5,7 @@
 import pytest
 from dict_plus.dictplus import *
 from dict_plus.insensitive import *
+from dict_plus.indexes import IterableIndex, SortedIterableIndex
 from dict_plus import *
 from dict_plus.exceptions import *
 import operator
@@ -18,6 +19,27 @@ assertions = {
     "t": 0,
     "f": 0
 }
+index_types = [IterableIndex, SortedIterableIndex]
+
+unsorted_dict_types = [DictPlus, OrderedDictPlus, SuffixInsensitiveDictPlus, PrefixInsensitiveDictPlus,
+                       CaseInsensitiveDictPlus, FunctionallyInsensitiveDictPlus]
+
+sorted_dict_types = [SortedDictPlus]
+
+unordered_dict_types = [DictPlus, SuffixInsensitiveDictPlus, PrefixInsensitiveDictPlus,
+                        CaseInsensitiveDictPlus, FunctionallyInsensitiveDictPlus]
+
+ordered_dict_types = [OrderedDictPlus]
+
+all_dict_types = list(unsorted_dict_types)
+all_dict_types.extend(sorted_dict_types)
+all_dict_types.extend(ordered_dict_types)
+all_dict_types.extend(unordered_dict_types)
+
+all_dict_types = list(set(all_dict_types))
+
+
+el_types = [ElementFactory.element(el, ds) for ds in all_dict_types for el in [KeyValuePair]]
 
 
 def ex(f, ex_class, *args, **kwargs):
@@ -59,8 +81,6 @@ def assert_f(val):
     assertions["f"] = assertions["f"] + 1
 
 
-##################
-
 class A(object):
     pass
 
@@ -81,23 +101,23 @@ class B(object):
     False,
     -25,
 ])
-def test_iterableindex(data):
-    ii = Iterable.IterableIndex()
+@pytest.mark.parametrize("index_type", index_types)
+def test_iterableindex(index_type, data):
+    ii = index_type()
 
-    things_to_hash = [data, data, data]
+    things_to_hash = [data, [data], [1, data]]
 
     for idx, thing in enumerate(things_to_hash):
         ii.set(thing, idx)
         ii.get(thing)
 
 
-##################
-
-
 @pytest.mark.parametrize("_id", ["a", u"b", 1])
 @pytest.mark.parametrize("val", ["a", u"b", 2])
-def test_keyvaluepair_parse_object(_id, val):
-    parse = KeyValuePair.parse_object
+@pytest.mark.parametrize("eltyp", el_types)
+@pytest.mark.parametrize("dtyp", all_dict_types)
+def test_keyvaluepair_parse_object(_id, val, eltyp, dtyp):
+    parse = ElementFactory.element(eltyp, dtyp)
 
     ex(parse, InvalidElementTypeException, (_id, _id, _id))
     ex(parse, InvalidElementTypeException, (val, val, val))
@@ -109,65 +129,73 @@ def test_keyvaluepair_parse_object(_id, val):
     assert_eq(parse(KeyValuePair(val, _id)), (val, _id))
 
 
-def test_keyvaluepair___eq__():
-    assert_eq(KeyValuePair("a", "b"), {"a": "b"})
-    assert_eq(KeyValuePair("a", "b"), ("a", "b"))
-    assert_neq(KeyValuePair("a", "b"), ("b", "a"))
-    kvp = KeyValuePair("a", "b")
+@pytest.mark.parametrize("eltyp", el_types)
+def test_keyvaluepair___eq__(eltyp):
+    assert_eq(eltyp("a", "b"), {"a": "b"})
+    assert_eq(eltyp("a", "b"), ("a", "b"))
+    assert_neq(eltyp("a", "b"), ("b", "a"))
+    kvp = eltyp("a", "b")
+
     assert_eq(kvp, kvp.copy())
 
 
 ##################
 
-
-def test_element___init__():
-    ex(KeyValuePair, InvalidElementTypeException, "id", None)
-    ex(KeyValuePair, TypeError, None, "value")
-    assert_eq(KeyValuePair(0, 1), KeyValuePair((0, 1)))
-    assert_eq(KeyValuePair(KeyValuePair(0, 1)), KeyValuePair((0, 1)))
-
-
-def test_element_parts():
-    assert_eq(Element(0, 1).parts(), (0, 1))
+@pytest.mark.parametrize("eltyp", el_types)
+def test_element___init__(eltyp):
+    ex(eltyp, InvalidElementTypeException, "id", None)
+    ex(eltyp, TypeError, None, "value")
+    assert_eq(eltyp(0, 1), eltyp((0, 1)))
+    assert_eq(eltyp(eltyp(0, 1)), eltyp((0, 1)))
 
 
-def test_element___eq__():
-    d = OrderedDictPlus()
+@pytest.mark.parametrize("eltyp", el_types)
+def test_element_parts(eltyp):
+    assert_eq(eltyp(0, 1).parts(), (0, 1))
+
+
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_element___eq__(dtype):
+    d = dtype()
+    eltyp = d.elements_type
+
     d.insert(0, ("4", "3"))
-    assert_eq(d.getitem("4"), KeyValuePair("4", "3"))
-    assert_eq(("4", "3"), KeyValuePair("4", "3"))
-    assert_eq(KeyValuePair("a", "b"), KeyValuePair("a", "b"))
-    assert_eq(KeyValuePair("1", "2"), ("1", "2"))
-    assert_neq(KeyValuePair("1", "2"), ["1", "2"])
-    assert_eq(KeyValuePair("a", "b"), {"a": "b"})
-    assert_neq(KeyValuePair("c", "d"), {"a": "b", "c": "d"})
+    assert_eq(d.getitem("4"), eltyp("4", "3"))
+    assert_eq(("4", "3"), eltyp("4", "3"))
+    assert_eq(eltyp("a", "b"), eltyp("a", "b"))
+    assert_eq(eltyp("1", "2"), ("1", "2"))
+    assert_neq(eltyp("1", "2"), ["1", "2"])
+    assert_eq(eltyp("a", "b"), {"a": "b"})
+    assert_neq(eltyp("c", "d"), {"a": "b", "c": "d"})
 
 
-##################
-
-def test_iterable_get():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_get(dtype):
+    d = dtype()
     d.insert(0, ("1", "2"))
     assert_eq(d.get("1"), "2")
 
 
-def test_iterable_getitem():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_getitem(dtype):
+    d = dtype()
     d.insert(0, ("1", "2"))
     assert_neq(d.getitem("1"), 8)
-    assert_eq(d.getitem("1"), KeyValuePair("1", "2"))
+    assert_eq(d.getitem("1"), d.elements_type("1", "2"))
 
 
-def test_iterable_insert():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_insert(dtype):
+    d = dtype()
     assert_t(d.insert(12345, ("a", "g")))
     ex(d.insert, KeyError, 12345, ("a", "b"))
     assert_eq(d._indexes.get("a"), 0)
     assert_eq(d._elements[0], ("a", "g"))
 
 
-def test_iterable_pop():
-    d = DictPlus({"a": "b", "c": "d"})
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_pop(dtype):
+    d = dtype({"a": "b", "c": "d"})
     assert_eq(d.pop("a"), "b")
     assert_eq(d, {"c": "d"})
     d.insert(1, ("a", "b"))
@@ -176,15 +204,17 @@ def test_iterable_pop():
     ex(d.pop, KeyError, "a")
 
 
-def test_iterable_popitem():
-    d = DictPlus({"a": "b"})
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_popitem(dtype):
+    d = dtype({"a": "b"})
     t = d.popitem()
     assert_eq(t, ("a", "b"))
     ex(d.popitem, KeyError)
 
 
-def test_iterable_copy():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_copy(dtype):
+    d = dtype()
     d.insert(0, ("1", "2"))
     c = d.copy()
     assert_eq(d, c)
@@ -196,21 +226,24 @@ def test_iterable_copy():
     assert_neq(d, c)
 
 
-def test_iterable_atindex():
-    d = DictPlus({"a": 1, "b": 2})
+@pytest.mark.parametrize("dtype", unsorted_dict_types)
+def test_iterable_atindex(dtype):
+    d = dtype({"a": 1, "b": 2})
     assert_eq(d.atindex(0), ("a", 1))
     assert_eq(d.atindex(1), ("b", 2))
 
 
-def test_iterable_indexof():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_indexof(dtype):
+    d = dtype()
     ex(d.indexof, KeyError, "a")
     d.insert(0, ("a", 1))
     assert_eq(d.indexof("a"), 0)
 
 
-def test_iterable___getitem__():
-    d = OrderedDictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___getitem__(dtype):
+    d = dtype()
     d.insert(0, ("1", "2"))
     assert_eq(d.get("1"), d["1"])
     assert_eq(d["1"], "2")
@@ -219,8 +252,9 @@ def test_iterable___getitem__():
     ex(d.__getitem__, KeyError, "5")
 
 
-def test_iterable___setitem__():
-    d = OrderedDictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___setitem__(dtype):
+    d = dtype()
     d.insert(0, ("AAA", "AAA"))
     d["asdf"] = "ghjkl;"
     assert_eq(d, {"asdf": "ghjkl;", "AAA": "AAA"})
@@ -228,25 +262,28 @@ def test_iterable___setitem__():
     assert_eq(d, {"asdf": "asdf", "AAA": "AAA"})
 
 
-def test_iterable___contains__():
-    d = DictPlus({"a": 1, "b": 2})
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___contains__(dtype):
+    d = dtype({"a": 1, "b": 2})
     assert_t("a" in d)
     assert_t("b" in d)
     assert_t("c" not in d)
 
 
-def test_iterable___iter__():
-    d = DictPlus({a: a for a in range(0, 10)})
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___iter__(dtype):
+    d = dtype({a: a for a in range(0, 10)})
     ii = iter(d)
     iid = iter(d.keys())
     for i in range(0, len(d)):
         assert_eq(next(ii), next(iid))
 
 
-def test_iterable___len__():
-    assert_eq(len(DictPlus()), 0)
-    assert_eq(len(DictPlus(a="b")), 1)
-    d = DictPlus(a="1", b="2")
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___len__(dtype):
+    assert_eq(len(dtype()), 0)
+    assert_eq(len(dtype(a="b")), 1)
+    d = dtype(a="1", b="2")
     assert_eq(len(d), 2)
     d.popitem()
     assert_eq(len(d), 1)
@@ -254,13 +291,15 @@ def test_iterable___len__():
     assert_eq(len(d), 2)
 
 
-def test_iterable___str__():
-    assert_eq(str(DictPlus()), str({}))
-    assert_eq(str(DictPlus({"a": "b"})), str({"a": "b"}))
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___str__(dtype):
+    assert_eq(str(dtype()), str({}))
+    assert_eq(str(dtype({"a": "b"})), str({"a": "b"}))
 
 
-def test_iterable___repr__():
-    d = DictPlus({a: a ** 3 for a in range(0, 50, 3)})
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___repr__(dtype):
+    d = dtype({a: a ** 3 for a in range(0, 50, 3)})
     assert_eq(eval(repr(d)), d)
 
 
@@ -268,27 +307,30 @@ def test_iterable_fromkeys():
     ex(Iterable.fromkeys, NotImplementedError, ["a"], 5)
 
 
-def test_iterable_items():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_items(dtype):
+    d = dtype()
     assert_eq(d.items(), list({}.items()))
     d.insert(0, ("a", "b"))
     assert_eq(d.items(), list({"a": "b"}.items()))
 
 
-def test_iterable_elements():
-    d = DictPlus({"a": 1, "b": 2})
-    assert_eq(d.elements(), [KeyValuePair("a", 1), KeyValuePair("b", 2)])
+@pytest.mark.parametrize("dtype", unsorted_dict_types)
+def test_iterable_elements(dtype):
+    d = dtype({"a": 1, "b": 2})
+    assert_eq(d.elements(), [d.elements_type("a", 1), d.elements_type("b", 2)])
 
 
-def test_iterable_keys():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", unsorted_dict_types)
+def test_iterable_keys(dtype):
+    d = dtype()
     assert_eq(d.keys(), list({}.keys()))
     d.insert(0, ("a", 1))
     d.insert(1, ("b", 2))
     assert_eq(d.keys(), list({"a": 1, "b": 2}.keys()))
 
     o = {str(a): a for a in range(0, 10)}
-    d = DictPlus(o)
+    d = dtype(o)
 
     keys = []
     for k in d:
@@ -297,16 +339,18 @@ def test_iterable_keys():
     assert_eq(keys, list(o.keys()))
 
 
-def test_iterable_values():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", unsorted_dict_types)
+def test_iterable_values(dtype):
+    d = dtype()
     assert_eq(d.values(), list({}.values()))
     d.insert(0, ("a", 1))
     d.insert(1, ("b", 2))
     assert_eq(d.values(), list({"a": 1, "b": 2}.values()))
 
 
-def test_iterable_setdefault():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_setdefault(dtype):
+    d = dtype()
     d2 = {}
     assert_eq(d.setdefault("a", 1), d2.setdefault("a", 1))
     assert_eq(d, d2)
@@ -314,8 +358,9 @@ def test_iterable_setdefault():
     assert_eq(d, d2)
 
 
-def test_iterable_todict():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_todict(dtype):
+    d = dtype()
     assert_eq(d.todict(), {})
     d.insert(0, ("1", "2"))
     assert_eq(d.todict(), {"1": "2"})
@@ -323,33 +368,37 @@ def test_iterable_todict():
     assert_eq(d, d.copy().todict())
 
 
-def test_iterable_tolist():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_tolist(dtype):
+    d = dtype()
     assert_eq(d.tolist(), [])
     d.insert(0, ("1", "2"))
     assert_eq(d.tolist(), [("1", "2")])
-    assert_eq(d.tolist(), DictPlus(d.tolist()).tolist())
+    assert_eq(d.tolist(), dtype(d.tolist()).tolist())
     assert_eq(d.tolist(), d.copy().tolist())
 
 
-def test_iterable_swap():
-    d = DictPlus({"a": {"aa": 1}, "b": {"bb": 2}})
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_swap(dtype):
+    d = dtype({"a": {"aa": 1}, "b": {"bb": 2}})
     d.swap("a", "b")
     assert_eq(d.get("a"), {"bb": 2})
     assert_eq(d.get("b"), {"aa": 1})
 
 
-def test_iterable_clear():
-    d = DictPlus({"a": 1})
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_clear(dtype):
+    d = dtype({"a": 1})
     assert_eq(d, {"a": 1})
     d.clear()
     assert_eq(d, {})
 
 
+@pytest.mark.parametrize("dtype", all_dict_types)
 @pytest.mark.parametrize("e", [{"21": "12", "Y": "YZ"}, [("21", "12")], [("21", "12"), ("Y", "YZ")]])
 @pytest.mark.parametrize("kwargs", [{"a": "meow", "b": "cat"}, {}])
-def test_iterable_update(e, kwargs):
-    d = DictPlus()
+def test_iterable_update(dtype, e, kwargs):
+    d = dtype()
     d.insert(0, ("1", "2"))
     d.update(e, **kwargs)
 
@@ -372,11 +421,12 @@ def test_iterable_update(e, kwargs):
     assert_t(len(d.values()) == len(l3))
 
 
+@pytest.mark.parametrize("dtype", all_dict_types)
 @pytest.mark.parametrize("e", [{"gg": "wp"}, [("gg", "wp")]])
 @pytest.mark.parametrize("ee", [{"gg": "ez"}, [("gg", "ez")]])
 @pytest.mark.parametrize("kwargs", [{"a": "meow", "b": "cat"}, {}])
-def test_iterable_unupdate(e, ee, kwargs):
-    d = OrderedDictPlus()
+def test_iterable_unupdate(dtype, e, ee, kwargs):
+    d = dtype()
     d.insert(0, ("1", "2"))
     d.update(e, **kwargs)
 
@@ -392,15 +442,16 @@ def test_iterable_unupdate(e, ee, kwargs):
     d.update(e, **kwargs)
     ex(d.unupdate, InvalidElementValueException, ee, **kwargs)
 
-    d = OrderedDictPlus()
+    d = dtype()
     d.insert(0, ("1", "2"))
     d.insert(-1, ("A", "B"))
 
     ex(d.unupdate, ValueError, ("A", "B"))
 
 
-def test_iterable_map():
-    d = OrderedDictPlus()
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_map(dtype):
+    d = dtype()
     d["a"] = 1
     d.update({"b": 2, "c": 3})
 
@@ -424,13 +475,15 @@ def test_iterable_map():
     ex(d.map, IndexError, func_broke)
 
 
-def test_iterable_filter():
-    d = OrderedDictPlus({"a": 1, "b": 2, "c": 3, "d": 4})
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_filter(dtype):
+    d = dtype({"a": 1, "b": 2, "c": 3, "d": 4})
     d.filter(lambda k, v: bool(v % 2))
     assert_eq(d, {"a": 1, "c": 3})
 
 
-def test_iterable_rekey():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_rekey(dtype):
     def func_k2k(k):
         return k + "a"
 
@@ -438,7 +491,7 @@ def test_iterable_rekey():
         return k[:-1]
 
     o = {"a": 1, "b": 2}
-    d = DictPlus(o)
+    d = dtype(o)
     d.rekey(func_k2k)
     assert_eq(d, {"aa": 1, "ba": 2})
     assert_eq(d.get("aa"), 1)
@@ -447,13 +500,14 @@ def test_iterable_rekey():
     assert_eq(d, o)
 
 
-def test_iterable_chop():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_chop(dtype):
     o = {
         0: "a", 1: "b", 2: "c",
         3: "d", 4: "e", 5: "f",
         6: "g", 7: "h"
     }
-    d = DictPlus(o)
+    d = dtype(o)
 
     def func_chop(k, v):
         return int(k % 2 != 0)
@@ -461,12 +515,12 @@ def test_iterable_chop():
     chopped = d.chop(func_chop)
     assert_eq(chopped[0], {0: "a", 2: "c", 4: "e", 6: "g"})
     assert_eq(chopped[1], {1: "b", 3: "d", 5: "f", 7: "h"})
-    d2 = DictPlus()
+    d2 = dtype()
     d2.update(chopped[0])
     d2.update(chopped[1])
     assert_eq(d2, o)
-    assert_eq(chopped[0].__class__, DictPlus)
-    assert_eq(chopped[1].__class__, DictPlus)
+    assert_eq(chopped[0].__class__, dtype)
+    assert_eq(chopped[1].__class__, dtype)
 
     def func_chop2(k, v):
         return "asdf"
@@ -474,18 +528,20 @@ def test_iterable_chop():
     ex(d.chop, ValueError, func_chop2)
 
 
-def test_iterable_squish():
-    d = DictPlus({"1": "8", "asdf": "[E]"})
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_squish(dtype):
+    d = dtype({"1": "8", "asdf": "[E]"})
 
     d.squish(["1", "asdf"], "tt", lambda x: x[0] + x[1])
     assert_eq(d, {"tt": "8[E]"})
 
 
-def test_iterable_expand():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_expand(dtype):
     o = {"tt": "8[E]"}
     o2 = {"1": "8", "asdf": "[E]"}
 
-    d = DictPlus({"1": "8", "asdf": "[E]"})
+    d = dtype({"1": "8", "asdf": "[E]"})
     d.squish(["1", "asdf"], "tt", lambda x: x[0] + x[1])
     assert_eq(d, o)
 
@@ -503,13 +559,14 @@ def subsubtest_funcmap(inplace, result, expected, returned):
         assert_eq(returned, expected)
 
 
+@pytest.mark.parametrize("dtype", all_dict_types)
 @pytest.mark.parametrize("inplace", [True, False])
-def test_iterable_funcmap_basic(inplace):
+def test_iterable_funcmap_basic(dtype, inplace):
     o = {a: a for a in range(0, 100)}
     o2 = {a: a for a in range(0, 100)}
 
     # Basic test
-    d = DictPlus(o)
+    d = dtype(o)
     dp = d.funcmap(
         o2,
         lambda _v1, _v2: _v1,
@@ -519,13 +576,14 @@ def test_iterable_funcmap_basic(inplace):
     subsubtest_funcmap(inplace, d, o, dp)
 
 
+@pytest.mark.parametrize("dtype", all_dict_types)
 @pytest.mark.parametrize("inplace", [True, False])
-def test_iterable_funcmap_nontrivial_f(inplace):
+def test_iterable_funcmap_nontrivial_f(dtype, inplace):
     o = {a: a for a in range(0, 100)}
     o2 = {a: a for a in range(0, 100)}
 
     # Test with nontrivial f
-    d = DictPlus(o)
+    d = dtype(o)
     dp = d.funcmap(
         o2,
         lambda _v1, _v2: _v1 * _v2,
@@ -535,13 +593,14 @@ def test_iterable_funcmap_nontrivial_f(inplace):
     subsubtest_funcmap(inplace, d, {a: a * a for a in range(0, 100)}, dp)
 
 
+@pytest.mark.parametrize("dtype", all_dict_types)
 @pytest.mark.parametrize("inplace", [True, False])
-def test_iterable_funcmap_nontrivial_fg(inplace):
+def test_iterable_funcmap_nontrivial_fg(dtype, inplace):
     o = {a: a for a in range(0, 100)}
     o2 = {a: a for a in range(0, 100)}
 
     # Test with nontrivial f and g
-    d = DictPlus(o)
+    d = dtype(o)
     dp = d.funcmap(
         o2,
         lambda _v1, _v2: _v1 * _v2,
@@ -551,12 +610,13 @@ def test_iterable_funcmap_nontrivial_fg(inplace):
     subsubtest_funcmap(inplace, d, {a: a * (99 - a) for a in range(0, 100)}, dp)
 
 
+@pytest.mark.parametrize("dtype", all_dict_types)
 @pytest.mark.parametrize("inplace", [True, False])
-def test_iterable_funcmap_scaled(inplace):
+def test_iterable_funcmap_scaled(dtype, inplace):
     o = {a: a for a in range(0, 100)}
 
     # Test with scaled g
-    d = DictPlus(o)
+    d = dtype(o)
     dp = d.funcmap(
         {a * 2: 1 / float(a) if a else 0 for a in range(0, 100)},
         lambda _v1, _v2: round(_v1 * _v2),
@@ -566,12 +626,13 @@ def test_iterable_funcmap_scaled(inplace):
     subsubtest_funcmap(inplace, d, {a: 1 if a else 0 for a in range(0, 100)}, dp)
 
 
+@pytest.mark.parametrize("dtype", all_dict_types)
 @pytest.mark.parametrize("inplace", [True, False])
-def test_iterable_funcmap_d_gt(inplace):
+def test_iterable_funcmap_d_gt(dtype, inplace):
     o = {a: a for a in range(0, 100)}
 
     # Test with len(d) > len(other)
-    d = DictPlus(o)
+    d = dtype(o)
     dp = d.funcmap(
         {a: " % 50 = " + str(a) for a in range(0, 50)},
         lambda _v1, _v2: str(_v1) + _v2,
@@ -582,12 +643,13 @@ def test_iterable_funcmap_d_gt(inplace):
     subsubtest_funcmap(inplace, d, {a: "{} % 50 = {}".format(a, a % 50) for a in range(0, 100)}, dp)
 
 
+@pytest.mark.parametrize("dtype", all_dict_types)
 @pytest.mark.parametrize("inplace", [True, False])
-def test_iterable_funcmap_d_gl(inplace):
+def test_iterable_funcmap_d_gl(dtype, inplace):
     o = {a: a for a in range(0, 100)}
 
     # Test with len(d) < len(other)
-    d = DictPlus(o)
+    d = dtype(o)
     dp = d.funcmap(
         {a: a for a in range(0, 200)},
         lambda _v1, _v2: (_v1 * 2) / _v2 if _v2 else 1,
@@ -598,13 +660,14 @@ def test_iterable_funcmap_d_gl(inplace):
     subsubtest_funcmap(inplace, d, {a: 1 for a in range(0, 100)}, dp)
 
 
+@pytest.mark.parametrize("dtype", unsorted_dict_types)
 @pytest.mark.parametrize("fold_type", [("fold_left", {3: "abc"}), ("fold_right", {3: "cba"})])
 @pytest.mark.parametrize("vals", [
     ({}, []),
     ({1: 1}, [(0, (1, 1))]),
     ({3: 3}, [(0, (1, 1)), (1, (2, 2))]),
 ])
-def test_iterable_folds(fold_type, vals):
+def test_iterable_folds(dtype, fold_type, vals):
     def func_ee2e(e1, e2):
         return e1.id + e2.id, e1.value + e2.value
 
@@ -621,7 +684,7 @@ def test_iterable_folds(fold_type, vals):
     #     assert_eq(gp, g)
     #     return g
 
-    d = DictPlus()
+    d = dtype()
     for da in data:
         d.insert(*da)
 
@@ -636,24 +699,25 @@ def test_iterable_folds(fold_type, vals):
     # d.insert(1, (2, 2))
     # assert_eq(subsubtest_iterable_fold(d), {3: 3})
 
-    d = DictPlus()
+    d = dtype()
     d.update([(0, "a"), (1, "b"), (2, "c")])
     r = getattr(d, fn_name)(func_ee2e)
     assert_eq(r, result)
 
 
-def test_iterable_add():
+@pytest.mark.parametrize("dtype", unsorted_dict_types)
+def test_iterable_add(dtype):
     o1 = {"a": 1, "b": 2}
     o2 = {"c": 3, "d": 4}
     o3 = {"a": 1, "b": 2, "c": 3, "d": 4}
-    d1 = OrderedDictPlus(o1)
-    d2 = OrderedDictPlus(o2)
+    d1 = dtype(o1)
+    d2 = dtype(o2)
     if six.PY2:  # Python 2 dictionaries aren't created in order as defined, ie o3/d3 in py2 is acdb
-        d3 = OrderedDictPlus({"a": 1, "b": 2})
+        d3 = dtype({"a": 1, "b": 2})
         d3 = d3 + {"c": 3}
         d3 += {"d": 4}
     else:
-        d3 = OrderedDictPlus(o3)
+        d3 = dtype(o3)
 
     def func_ee2e(e1, e2):
         return e1.id + e2.id, e1.value + e2.value
@@ -661,22 +725,23 @@ def test_iterable_add():
     tt = d1.add(d2)
     assert_eq(tt, d3)
     assert_eq(d1, d3)
-    d1 = OrderedDictPlus(o1)
+    d1 = dtype(o1)
     assert_eq(d1.add(d2, func_ee2e), {"ac": 4, "bd": 6})
-    d1 = OrderedDictPlus(o1)
+    d1 = dtype(o1)
     d1.insert(len(d1), ("g", 6))
     assert_eq(d1.add(o2, func_ee2e), {"ac": 4, "bd": 6, "g": 6})
 
 
-def test_iterable___add__():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___add__(dtype):
     o1 = {"a": 1, "b": 2}
     o2 = {"c": 3, "d": 4}
 
     o3 = o1.copy()
     o3.update(o2)
 
-    d1 = DictPlus(o1)
-    d2 = DictPlus(o2)
+    d1 = dtype(o1)
+    d2 = dtype(o2)
     d3 = d1 + d2
 
     assert_eq(d1 + d2, d3)
@@ -685,13 +750,14 @@ def test_iterable___add__():
     assert_eq(d2 + o1, o3)
 
 
-def test_iterable_sub():
+@pytest.mark.parametrize("dtype", unsorted_dict_types)
+def test_iterable_sub(dtype):
     o1 = {"a": 1, "b": 2}
     o2 = {"c": 3, "d": 4}
     o3 = {"a": 1, "b": 2, "c": 3, "d": 4}
-    d1 = OrderedDictPlus(o1)
-    d2 = OrderedDictPlus(o2)
-    d3 = OrderedDictPlus(o3)
+    d1 = dtype(o1)
+    d2 = dtype(o2)
+    d3 = dtype(o3)
 
     def func_ee2e(e1, e2):
         return e1.id + e2.id, e1.value + e2.value
@@ -700,7 +766,7 @@ def test_iterable_sub():
         return e1.id[:-1], e1.value - e2.value
 
     assert_eq(d3.sub(d2), d1)
-    d3 = OrderedDictPlus(o3)
+    d3 = dtype(o3)
     assert_eq(d3.sub(d1), d2)
     assert_eq(d2, d3)
     assert_eq(d3.add(d1), o3)
@@ -716,16 +782,17 @@ def test_iterable_sub():
     assert_eq(d3, o3)
 
 
-def test_iterable___sub__():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___sub__(dtype):
     o1 = {"a": 1, "b": 2}
     o2 = {"c": 3, "d": 4}
 
     o3 = o1.copy()
     o3.update(o2)
 
-    d3 = DictPlus(o3)
-    d2 = DictPlus(o2)
-    d1 = DictPlus(o1)
+    d3 = dtype(o3)
+    d2 = dtype(o2)
+    d1 = dtype(o1)
 
     assert_eq(d3 - d2, d1)
     assert_eq(d3 - o2, o1)
@@ -738,13 +805,14 @@ def test_iterable___sub__():
     assert_eq(d3, o3)
 
 
-def test_iterable_multiply():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_multiply(dtype):
     o = {"a": 1, "b": 2, "c": 3}
-    d = OrderedDictPlus(o)
+    d = dtype(o)
 
     d.multiply({})
     assert_eq(d, {})
-    d = OrderedDictPlus(o)
+    d = dtype(o)
 
     d.multiply(o)
     assert_eq(d, {
@@ -752,7 +820,7 @@ def test_iterable_multiply():
         ("b", "a"): (2, 1), ("b", "b"): (2, 2), ("b", "c"): (2, 3),
         ("c", "a"): (3, 1), ("c", "b"): (3, 2), ("c", "c"): (3, 3)
     })
-    d = OrderedDictPlus(o)
+    d = dtype(o)
     d.multiply(o, lambda e1, e2: e1)
     assert_eq(d, o)
     d.multiply(o, lambda e1, e2: (e1.id + e2.id, (e1.value, e2.value)))
@@ -763,9 +831,10 @@ def test_iterable_multiply():
     })
 
 
-def test_iterable___mul__():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___mul__(dtype):
     o = {"a": 1, "b": 2, "c": 3}
-    d = OrderedDictPlus(o)
+    d = dtype(o)
 
     assert_eq(d * {}, {})
     assert_eq(d, o)
@@ -777,14 +846,15 @@ def test_iterable___mul__():
     })
 
 
-def test_iterable_divide():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable_divide(dtype):
     o = {
         ("a", "a"): (1, 1), ("a", "b"): (1, 2), ("a", "c"): (1, 3),
         ("b", "a"): (2, 1), ("b", "b"): (2, 2), ("b", "c"): (2, 3),
         ("c", "a"): (3, 1), ("c", "b"): (3, 2), ("c", "c"): (3, 3)
     }
     o2 = {"a": 1, "b": 2, "c": 3}
-    d = OrderedDictPlus(o)
+    d = dtype(o)
     d.divide(o, lambda el, e2: (el.id[0], el.value[0]))
     assert_eq(d, o2)
 
@@ -794,26 +864,28 @@ def test_iterable_divide():
     assert_eq(d, o2)
 
 
-def test_iterable___truediv__():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___truediv__(dtype):
     o = {
         ("a", "a"): (1, 1), ("a", "b"): (1, 2), ("a", "c"): (1, 3),
         ("b", "a"): (2, 1), ("b", "b"): (2, 2), ("b", "c"): (2, 3),
         ("c", "a"): (3, 1), ("c", "b"): (3, 2), ("c", "c"): (3, 3)
     }
     o2 = {"a": 1, "b": 2, "c": 3}
-    d = OrderedDictPlus(o2)
+    d = dtype(o2)
     assert_eq(d * d, o)
-    # TODO python 2 doesn't have a / ? wtf?
+    # Python 2 doesn't have a / ? wtf?
     if not six.PY2:
         assert_eq((d * d) / d, d)
 
 
-def test_iterable___le__():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___le__(dtype):
     ao = {0: 0, 1: 1}
     bo = {2: 2, 3: 3}
 
-    ad = OrderedDictPlus(ao)
-    bd = OrderedDictPlus(bo)
+    ad = dtype(ao)
+    bd = dtype(bo)
 
     assert_op(ad, bd, operator.le)
     assert_eq(ad, ao)
@@ -825,12 +897,13 @@ def test_iterable___le__():
     assert_eq(bd, bo)
 
 
-def test_iterable___lt__():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___lt__(dtype):
     ao = {0: 0, 1: 1}
     bo = {2: 2, 3: 3}
 
-    ad = OrderedDictPlus(ao)
-    bd = OrderedDictPlus(bo)
+    ad = dtype(ao)
+    bd = dtype(bo)
 
     assert_op(ad, bd, operator.lt)
     assert_nop(bd, ad, operator.lt)
@@ -843,12 +916,13 @@ def test_iterable___lt__():
     assert_eq(bd, bo)
 
 
-def test_iterable___ge__():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___ge__(dtype):
     ao = {0: 0, 1: 1}
     bo = {2: 2, 3: 3}
 
-    ad = OrderedDictPlus(ao)
-    bd = OrderedDictPlus(bo)
+    ad = dtype(ao)
+    bd = dtype(bo)
 
     assert_op(bd, ad, operator.ge)
     assert_nop(ad, bd, operator.ge)
@@ -861,12 +935,13 @@ def test_iterable___ge__():
     assert_eq(bd, bo)
 
 
-def test_iterable___gt__():
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_iterable___gt__(dtype):
     ao = {0: 0, 1: 1}
     bo = {2: 2, 3: 3}
 
-    ad = OrderedDictPlus(ao)
-    bd = OrderedDictPlus(bo)
+    ad = dtype(ao)
+    bd = dtype(bo)
 
     assert_op(bd, ad, operator.gt)
     assert_nop(ad, bd, operator.gt)
@@ -877,9 +952,6 @@ def test_iterable___gt__():
     assert_nop(bd, bd, operator.gt)
     assert_eq(ad, ao)
     assert_eq(bd, bo)
-
-
-##################
 
 
 def test_orderediterable_insert():
@@ -901,15 +973,13 @@ def test_orderediterable_pop():
     assert_eq(d.pop("1", "2"), "2")
 
 
-#################
-
-
-def test_dictplus___eq__():
-    d = DictPlus()
+@pytest.mark.parametrize("dtype", unordered_dict_types)
+def test_dictplus___eq__(dtype):
+    d = dtype()
     d.insert(0, (0, "asdf"))
     d.insert(1, (1, "fdsa"))
 
-    d2 = DictPlus()
+    d2 = dtype()
     d2.insert(0, (1, "fdsa"))
     d2.insert(1, (0, "asdf"))
 
@@ -918,10 +988,13 @@ def test_dictplus___eq__():
     assert_eq(d, {1: "fdsa", 0: "asdf"})
     assert_eq(d2, {1: "fdsa", 0: "asdf"})
     assert_eq(d, d2)
-    assert_eq(DictPlus(), {})
-    assert_neq(DictPlus(), [])
+    assert_eq(dtype(), {})
+    assert_neq(dtype(), [])
 
-    d3 = OrderedDictPlus({1: "fdsa", 0: "asdf"})
+    d3 = OrderedDictPlus()  # Have to insert manually for py2 dict compatiblilty
+    d3[1] = "fdsa"
+    d3[0] = "asdf"
+
     assert_eq(d, d3)  # DictPlus doesn't care about order
     assert_neq(d3, d)  # OrderedDictPlus does
 
@@ -932,37 +1005,38 @@ def test_dictplus___eq__():
     assert_eq(d4, d)
 
 
-def test_dictplus_fromkeys():
-    assert_eq(dict.fromkeys(["a", "b", "c"]), DictPlus.fromkeys(["a", "b", "c"]))
-    assert_eq(dict.fromkeys(["a", "b", "c"], 10), DictPlus.fromkeys(["a", "b", "c"], 10))
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_dictplus_fromkeys(dtype):
+    assert_eq(dict.fromkeys(["a", "b", "c"]), dtype.fromkeys(["a", "b", "c"]))
+    assert_eq(dict.fromkeys(["a", "b", "c"], 10), dtype.fromkeys(["a", "b", "c"], 10))
 
 
-##################
-
+@pytest.mark.parametrize("dtype", all_dict_types)
 @pytest.mark.parametrize("data", [OrderedDictPlus(), {}, {"a": 1, "b": 2}])
-def test_ordereddictplus___init__(data):
-    assert_neq(OrderedDictPlus(), [])
-    assert_eq(OrderedDictPlus(), {})
-    assert_eq(OrderedDictPlus([]), {})
-    assert_eq(OrderedDictPlus({}), {})
-    assert_eq(OrderedDictPlus(OrderedDictPlus()), {})
-    assert_eq(OrderedDictPlus([("a", 1), ("b", 2)]), {"a": 1, "b": 2})
+def test_ordereddictplus___init__(dtype, data):
+    assert_neq(dtype(), [])
+    assert_eq(dtype(), {})
+    assert_eq(dtype([]), {})
+    assert_eq(dtype({}), {})
+    assert_eq(dtype(dtype()), {})
+    assert_eq(dtype([("a", 1), ("b", 2)]), {"a": 1, "b": 2})
     # subtest_ordereddictplus__init__(OrderedDictPlus())
     # subtest_ordereddictplus__init__({})
     # subtest_ordereddictplus__init__({"a": 1, "b": 2})
 
-    d = OrderedDictPlus(data=data)
+    d = dtype(data=data)
     assert_eq(d, data)
-    assert_eq(OrderedDictPlus(data={"v": data}), {"v": data})
+    assert_eq(dtype(data={"v": data}), {"v": data})
 
 
-def test_ordereddictplus___eq__():
-    d = OrderedDictPlus()
+@pytest.mark.parametrize("dtype", ordered_dict_types)
+def test_ordereddictplus___eq__(dtype):
+    d = dtype()
 
     d.insert(0, (0, "asdf"))
     d.insert(1, (1, "fdsa"))
 
-    d2 = OrderedDictPlus()
+    d2 = dtype()
     d2.insert(0, (1, "fdsa"))
     d2.insert(1, (0, "asdf"))
 
@@ -970,20 +1044,14 @@ def test_ordereddictplus___eq__():
     assert_eq(d, {1: "fdsa", 0: "asdf"})
     assert_eq(d2, {1: "fdsa", 0: "asdf"})
     assert_neq(d, d2)
-    assert_eq(OrderedDictPlus(), {})
-    assert_neq(OrderedDictPlus(), [])
+    assert_eq(dtype(), {})
+    assert_neq(dtype(), [])
 
     d3 = DictPlus({1: "fdsa", 0: "asdf"})
-    assert_neq(d, d3)
+    # assert_neq(d, d3)  # Removed this test because py2 dicts are ordered differently
     assert_eq(d3, d)
 
 
-def test_ordereddictplus_fromkeys():
-    assert_eq(dict.fromkeys(["a", "b", "c"]), DictPlus.fromkeys(["a", "b", "c"]))
-    assert_eq(dict.fromkeys(["a", "b", "c"], 10), DictPlus.fromkeys(["a", "b", "c"], 10))
-
-
-###############
 def test_functionallyinsensitivedictplus___init__():
     def comp_func(new_key, old_key):
         if new_key == "1" + old_key or new_key == old_key:
@@ -1137,3 +1205,9 @@ def test_suffixinsensitivedictplus___init__():
     d["google.net"] = 4
     assert_eq(d["google"], 4)
     assert_eq(d["google.com"], 4)
+
+
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_isinstance(dtype):
+    d = dtype()
+    assert isinstance(d, dict)

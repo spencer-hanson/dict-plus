@@ -1,104 +1,13 @@
 from dict_plus.exceptions import *
+from dict_plus.etypes import *
 from dict_plus.funcs import Functions as DFuncs
-from six import string_types, integer_types
+from dict_plus.indexes import IterableIndex
+from dict_plus.elements import Element
 
 
-class Iterable(object):
+class Iterable(dict):
+    __slots__ = ()  # remove __dict__ internals
     # __hash__ = None  # TODO ?
-
-    class IterableIndex(object):
-        """
-        Index object to keep track of 'unhashable' types
-        """
-
-        def __make_hash(self, o):
-            """
-            Makes a hash for a given object, doesn't guarantee collisions won't happen.
-            :param o: Object to get a hash for
-            :return: The hash of the object
-            """
-            if o.__hash__:
-                try:  # Try needed for python2 compatibility
-                    return hash(o)
-                except TypeError:
-                    pass
-
-            if isinstance(o, list):
-                hashes = []
-                for el in o:
-                    hashes.append(self.__make_hash(el))
-                return hash(str(hashes) + str(o.__class__))
-            elif isinstance(o, dict):
-                return self.__make_hash(o.items())
-            elif isinstance(o, set):
-                return hash(str(self.__make_hash(list(o))) + str(o.__class__))
-            elif hasattr(o, "__str__"):
-                return hash(str(o) + str(o.__class__))
-            else:
-                raise TypeError("Can't hash {}, submit an issue!".format(o))
-
-        def __init__(self, data=None):
-            """
-            :param data: Internal data dict to create the index from, optional
-            """
-            self.__data = {} if not data else data.copy()
-
-        def get(self, key):
-            """
-            Get a value from the index
-            :param key: Key to get the value of
-            :return: Integer index of the key's location in the element list
-            """
-            key_hash = self.__make_hash(key)
-            if key_hash in self.__data:
-                return self.__data[key_hash]
-            else:
-                raise KeyError("Key '{}' not in index ".format(key))
-
-        def set(self, key, value):
-            """
-            Set a key's location in the index
-            :param key: Key to get the location of
-            :param value: Integer value to set in the index
-            :return: None
-            """
-            if not isinstance(value, int):
-                raise ValueError("Can't set index value to non-integer value!")
-
-            self.__data[self.__make_hash(key)] = value
-
-        def has(self, key):
-            """
-            Check whether the index has a given key in it
-            :param key: Key to check for
-            :return: True if the key exists, else False
-            """
-            if self.__make_hash(key) in self.__data:
-                return True
-            else:
-                return False
-
-        def pop(self, key):
-            """
-            Remove and get the value of the given key
-            :param key: Key to get the value of
-            :return: Integer index value of the key in the element list
-            """
-            return self.__data.pop(self.__make_hash(key))
-
-        def isempty(self):
-            """
-            Check whether the index is empty
-            :return: True if index is empty else False
-            """
-            return self.__data == {}
-
-        def copy(self):
-            """
-            Copy this index
-            :return: A copy of the index
-            """
-            return Iterable.IterableIndex(self.__data)
 
     def __init__(self, data=None, element_type=None, **kwargs):
         """
@@ -126,13 +35,13 @@ class Iterable(object):
         if isinstance(data, Iterable):
             self._elements = data._elements[:]
             self._indexes = data._indexes.copy()
-            self._eltype = data._eltype
+            self.elements_type = data.elements_type
         else:
             if not element_type:
                 element_type = Element
 
             self._elements = []
-            self._eltype = element_type
+            self.elements_type = element_type
             self._indexes = self._make_index()
 
             if isinstance(data, dict):
@@ -148,7 +57,7 @@ class Iterable(object):
                 self[k] = v
 
     def _make_index(self):
-        return Iterable.IterableIndex()
+        return IterableIndex()
 
     # TODO Use from_idx to optimize
     def _update_indexes(self, from_idx):
@@ -174,7 +83,7 @@ class Iterable(object):
         :param obj: Object to insert into the Iterable. Must conform with the element type of the iterable
         :return: Element that was inserted
         """
-        element = self._eltype(obj)
+        element = self.elements_type(obj)
         if self._indexes.has(element.id):
             raise KeyError("Key '{}' already exists!".format(element.id))
 
@@ -204,7 +113,7 @@ class Iterable(object):
         if self._indexes.has(k):
             return self._elements[self._indexes.get(k)]
         elif v_alt:
-            return self._eltype(k, v_alt)
+            return self.elements_type(k, v_alt)
         else:
             raise KeyError("No key '{}' found!".format(k))
 
@@ -298,8 +207,10 @@ class Iterable(object):
         :param func: func(k,v) -> True or False
         :return: True or False
         """
+
         def wrap_func(kvp):
             return func(kvp.id, kvp.value)
+
         self._elements = list(filter(wrap_func, self._elements))
         self._update_indexes(0)
 
@@ -310,7 +221,7 @@ class Iterable(object):
         :return: None
         """
         for i in range(0, len(self)):
-            self._elements[i] = self._eltype(func(*self._elements[i].parts()))
+            self._elements[i] = self.elements_type(func(*self._elements[i].parts()))
         self._update_indexes(0)  # Update indexes
 
     def rekey(self, func):
@@ -337,7 +248,7 @@ class Iterable(object):
         I.copy() -> a shallow copy of I
         :return: Copied instance
         """
-        i = self.__class__(element_type=self._eltype)
+        i = self.__class__(element_type=self.elements_type)
         i._elements = [el.copy() for el in self.elements()]
         i._indexes = self._indexes.copy()
         return i
@@ -376,6 +287,9 @@ class Iterable(object):
         :return: a list providing a view on I's items
         """
         return [el.parts() for el in self._elements]
+
+    def iteritems(self):
+        return self.items()
 
     def elements(self):
         """
@@ -422,6 +336,7 @@ class Iterable(object):
         :param kwargs: Keyword arguments to use for the function
         :return: A function with signature f(instance)
         """
+
         def func(inst):
             return getattr(inst, name)(*args, **kwargs)
 
@@ -508,7 +423,7 @@ class Iterable(object):
                 el2 = next(it2)
                 elp = func(el1, el2)
                 if elp:
-                    elp = self._eltype(elp)
+                    elp = self.elements_type(elp)
                     idx = self._indexes.pop(el1.id)
                     self._indexes.set(elp.id, idx)
                     self._elements[idx] = elp
@@ -600,7 +515,7 @@ class Iterable(object):
         tmp_el = self._elements[0]
         for el in self._elements[1:]:
             result = func(tmp_el, el)
-            tmp_el = self._eltype(result)
+            tmp_el = self.elements_type(result)
         return tmp_el
 
     def fold_right(self, func):
@@ -617,7 +532,7 @@ class Iterable(object):
         tmp_el = self._elements[-1]
         for idx in range(len(self._elements) - 1, 0, -1):
             result = func(tmp_el, self._elements[idx - 1])
-            tmp_el = self._eltype(result)
+            tmp_el = self.elements_type(result)
         return tmp_el
 
     def multiply(self, other, func=None):
@@ -638,7 +553,7 @@ class Iterable(object):
         self.clear()
         for el1 in els:
             for el2 in other.elements():
-                el3 = self._eltype(func(el1, el2))
+                el3 = self.elements_type(func(el1, el2))
                 self[el3.id] = el3.value
         return self
 
@@ -759,6 +674,9 @@ class Iterable(object):
                         return False
         return True
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __add__(self, other):
         """
         Default behavior the same as self.update(other)
@@ -854,8 +772,9 @@ class Iterable(object):
         Except for Python2, where dictionary order is not preserved
         :return: String representing this Iterable
         """
+
         def type_repr(v):
-            if isinstance(v, string_types):
+            if isinstance(v, StringTypes):
                 return "'{}'".format(v)
             else:
                 return str(v)
@@ -866,11 +785,12 @@ class Iterable(object):
         return "{" + ",".join(entries) + "}"
 
 
-class OrderedIterableMixin(Iterable):
+class OrderedIterable(Iterable):
     """
     Mixin of Iterable, specializing in keeping the order of the elements intact
     through any internal operations.
     """
+
     def insert(self, index, obj):
         """
         Insert an object into the OrderedIterable, raises a KeyError if the key already exists
@@ -879,7 +799,7 @@ class OrderedIterableMixin(Iterable):
         :param obj: Object to insert into the Iterable. Must conform with the element type of the iterable
         :return: Element that was inserted
         """
-        element = self._eltype(obj)
+        element = self.elements_type(obj)
         if self._indexes.has(element.id):
             raise KeyError("Key '{}' already exists!".format(element.id))
 
@@ -915,102 +835,3 @@ class OrderedIterableMixin(Iterable):
         :return: Instance with keys from 'sequence' with value 'value'
         """
         raise NotImplementedError("Can't call .fromkeys() on OrderedIterator!")
-
-
-class Element(object):
-    """
-    Element superclass of an item in an Iterable
-    Must have an id and value, where id is unique to the Element
-    Subclasses can give other restrictions to what can and can't be used
-    """
-    def __init__(self, _id=None, value=None):
-        """
-        Create a new Element, must include either id and value or just id
-        If just id is used, it will attempt to parse it into self.id and self.value
-        Otherwise, self.id = id and self.value = value
-        :param _id: Id of Element, or object to be parsed
-        :param value: Value of the element, required if _id isn't going to be parsed
-        """
-        if _id and not value:
-            self.id, self.value = self.parse_object(_id)
-        else:
-            if _id is None or value is None:
-                raise TypeError("Invalid args, must provide id and value or object")
-            self.id = _id
-            self.value = value
-
-    # Parse stuff like ("a", 1) -> Element("a", 1)
-    @staticmethod
-    def parse_object(obj):
-        """
-        Parse an object into an Element type, possibly raising InvalidElementTypeException if the object cannot be
-        parsed
-        :param obj: Element-like object to be parsed
-        :return: Element
-        """
-        raise NotImplementedError("Can't parse object as an Element!")
-
-    def parts(self):
-        """
-        Break down the Element into a tuple, with (id, value)
-        :return: (id, value)
-        """
-        return self.id, self.value
-
-    def __eq__(self, other):
-        """
-        Check if self == other
-        Not implemented for Element
-        :param other: Element-like
-        :return: True or False
-        """
-        raise NotImplementedError("Can't equate superclass Element!")
-
-    def __str__(self):
-        """
-        String representation of the Element
-        :return: String representing self
-        """
-        return "<{}, {}>".format(self.id, self.value)
-
-    def copy(self):
-        """
-        Make a shallow copy of self
-        :return: Copied version of self
-        """
-        return self.__class__(self.id, self.value)
-
-
-class KeyValuePair(Element):
-    """
-    Basic Element implementation
-    """
-    @staticmethod
-    def parse_object(obj):
-        if isinstance(obj, KeyValuePair):
-            return obj.id, obj.value
-        if not isinstance(obj, tuple):
-            raise InvalidElementTypeException("Invalid KeyPair object, must be a tuple")
-        if len(obj) != 2:
-            raise InvalidElementTypeException("Invalid KeyPair object, length must be 2")
-        return obj[0], obj[1]
-
-    def __eq__(self, other):
-        """
-        Check if self == other
-        if other is a KeyValuePair, other.id == self.id and self.value == other.value
-        if other is a tuple, treat it as (id, value) and check for equality there
-        :param other: Element-like
-        :return: True or False
-        """
-        if isinstance(other, dict) and len(other) == 1:
-            k, v = list(other.items())[0]
-            if k == self.id and v == self.value:
-                return True
-        elif isinstance(other, KeyValuePair) and other.id == self.id and self.value == other.value:
-            return True
-        elif isinstance(other, tuple) and self.id == other[0] and self.value == other[1]:
-            return True
-
-    def __ne__(self, other):
-        return not self.__eq__(other)

@@ -1,4 +1,4 @@
-from dict_plus import DictPlus
+from dict_plus import DictPlus, KeyValuePair, ElementFactory
 
 
 class FunctionallyInsensitiveDictPlus(DictPlus):
@@ -15,7 +15,10 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
         :param element_type: Element type to store the data with, defaults to KeyValuePair
         :param kwargs: keyword args to include in the dict
         """
-        super(FunctionallyInsensitiveDictPlus, self).__init__(data, element_type, **kwargs)
+        super(FunctionallyInsensitiveDictPlus, self).__init__(
+            data,
+            element_type or ElementFactory.element(KeyValuePair, FunctionallyInsensitiveDictPlus),
+            **kwargs)
         self.compare_func = compare_func or self.compare_func
 
     @staticmethod
@@ -42,10 +45,10 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
         return new_key == old_key
 
     def _find_base_key(self, new_key):
-            for k in self.keys():
-                if self.compare_func(new_key, k):
-                    return k
-            return None
+        for k in self.keys():
+            if self.compare_func(new_key, k):
+                return k
+        return None
 
     def getitem(self, k, v_alt=None):
         """
@@ -56,11 +59,12 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
         :return: Element with key 'k'
         """
         base_key = self._find_base_key(k)
-        if base_key:
+        if base_key is not None:
             return self._elements[self._indexes.get(base_key)]
         elif v_alt:
-            return self._eltype(k, v_alt)
+            return self.elements_type(k, v_alt)
         else:
+            self._find_base_key(k)
             raise KeyError("No key '{}' found!".format(k))
 
     def pop(self, k, v_alt=None):
@@ -122,6 +126,13 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
 
 
 class CaseInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
+    def __init__(self, data=None, element_type=None, compare_func=None, **kwargs):
+        super(CaseInsensitiveDictPlus, self).__init__(
+            data,
+            element_type or ElementFactory.element(KeyValuePair, CaseInsensitiveDictPlus),
+            compare_func,
+            **kwargs)
+
     def compare_func(self, new_key, old_key):
         """
         If you return True, it exists in the dict, and should be overridden.
@@ -130,7 +141,10 @@ class CaseInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
         :param old_key: Key already in dictionary to check against
         :return: True if new_key is old_key
         """
-        return new_key.lower() == old_key.lower()
+        if hasattr(new_key, "lower") and hasattr(old_key, "lower"):
+            return new_key.lower() == old_key.lower()
+        else:
+            return new_key == old_key  # Included for non-string keys
 
     @staticmethod
     def fromkeys(sequence, value=None):
@@ -150,8 +164,14 @@ class PrefixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
     def __init__(self, data=None, element_type=None, prefix_list=[], **kwargs):
         if not isinstance(prefix_list, list):
             prefix_list = [prefix_list]
+
         compare_func = self._get_compare_func(prefix_list)
-        super(PrefixInsensitiveDictPlus, self).__init__(data, element_type, compare_func=compare_func, **kwargs)
+
+        super(PrefixInsensitiveDictPlus, self).__init__(
+            data,
+            element_type or ElementFactory.element(KeyValuePair, PrefixInsensitiveDictPlus),
+            compare_func=compare_func,
+            **kwargs)
 
     def set_prefix_list(self, new_prefix_list):
         if not isinstance(new_prefix_list, list):
@@ -184,6 +204,7 @@ class PrefixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
                 return True
             else:
                 return False
+
         return compare_func
 
     @staticmethod
@@ -205,7 +226,12 @@ class SuffixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
         if not isinstance(suffix_list, list):
             suffix_list = [suffix_list]
         compare_func = self._get_compare_func(suffix_list)
-        super(SuffixInsensitiveDictPlus, self).__init__(data, element_type, compare_func=compare_func, **kwargs)
+        super(SuffixInsensitiveDictPlus, self).__init__(
+            data,
+            element_type or ElementFactory.element(KeyValuePair, SuffixInsensitiveDictPlus),
+            compare_func=compare_func,
+            **kwargs
+        )
 
     def set_suffix_list(self, new_suffix_list):
         if not isinstance(new_suffix_list, list):
@@ -238,6 +264,7 @@ class SuffixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
                 return True
             else:
                 return False
+
         return compare_func
 
     @staticmethod
