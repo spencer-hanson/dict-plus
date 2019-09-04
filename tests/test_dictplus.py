@@ -1211,3 +1211,10 @@ def test_suffixinsensitivedictplus___init__():
 def test_isinstance(dtype):
     d = dtype()
     assert isinstance(d, dict)
+
+
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_subdict_type(dtype):
+    data = {"a": 1, "b": {"c": 2}}
+    d = dtype(data)
+    assert type(d["b"]) == type(d)

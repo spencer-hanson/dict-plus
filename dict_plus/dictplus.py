@@ -60,7 +60,9 @@ class OrderedDictPlus(OrderedIterable):
         :param element_type: Element type to store the data with, defaults to KeyValuePair
         :param kwargs: keyword args to include in the dict
         """
-        super(OrderedDictPlus, self).__init__(data, element_type or ElementFactory.element(KeyValuePair, OrderedDictPlus), **kwargs)
+        super(OrderedDictPlus, self).__init__(data,
+                                              element_type or ElementFactory.element(KeyValuePair, OrderedDictPlus),
+                                              **kwargs)
 
     @staticmethod
     def fromkeys(sequence, value=None):
@@ -95,6 +97,11 @@ class OrderedDictPlus(OrderedIterable):
 
 
 class SortedDictPlus(OrderedDictPlus):
+    def __init__(self, data=None, element_type=None, **kwargs):
+        super(SortedDictPlus, self).__init__(data,
+                                             element_type or ElementFactory.element(KeyValuePair, SortedDictPlus),
+                                             **kwargs)
+
     def _make_index(self):
         return SortedIterableIndex()
 
@@ -146,21 +153,20 @@ class SortedDictPlus(OrderedDictPlus):
 
         return element
 
-
 # TODO use for __eq__ in ListPlus ?
-    # def __eq__(self, other):
-    #     result = True
-    #     if isinstance(other, list):
-    #         for i in range(0, self.__len__()):
-    #             idx = self._elements[i].id
-    #             if not isinstance(idx, int):
-    #                 result = False
-    #                 break
-    #             else:
-    #                 if other[idx] != self._elements[i].value:
-    #                     result = False
-    #                     break
-    #         return result
-    #     else:
-    #         return False
-    #
+# def __eq__(self, other):
+#     result = True
+#     if isinstance(other, list):
+#         for i in range(0, self.__len__()):
+#             idx = self._elements[i].id
+#             if not isinstance(idx, int):
+#                 result = False
+#                 break
+#             else:
+#                 if other[idx] != self._elements[i].value:
+#                     result = False
+#                     break
+#         return result
+#     else:
+#         return False
+#
