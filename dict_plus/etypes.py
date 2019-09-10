@@ -1,3 +1,11 @@
+"""
+Python version compatible type import helper
+Exported types:
+- DictType
+- ListType
+- StringTypes
+"""
+
 import six
 
 

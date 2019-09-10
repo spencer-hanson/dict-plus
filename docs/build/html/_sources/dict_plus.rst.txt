@@ -12,6 +12,22 @@ dict\_plus.dictplus module
     :undoc-members:
     :show-inheritance:
 
+dict\_plus.elements module
+--------------------------
+
+.. automodule:: dict_plus.elements
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dict\_plus.etypes module
+------------------------
+
+.. automodule:: dict_plus.etypes
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 dict\_plus.exceptions module
 ----------------------------
 
@@ -28,6 +44,21 @@ dict\_plus.funcs module
     :undoc-members:
     :show-inheritance:
 
+dict\_plus.hooked module
+------------------------
+
+.. automodule:: dict_plus.hooked
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dict\_plus.indexes module
+-------------------------
+
+.. automodule:: dict_plus.indexes
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 dict\_plus.insensitive module
 -----------------------------
@@ -44,6 +75,7 @@ dict\_plus.iterable module
     :members:
     :undoc-members:
     :show-inheritance:
+
 
 Module contents
 ---------------

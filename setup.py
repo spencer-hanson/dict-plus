@@ -1,4 +1,10 @@
 from setuptools import setup
+import json
+
+
+def version_info():
+    with open("version.json", "r") as f:
+        return json.load(f)
 
 
 def parse_requirements(requirement_file):
@@ -14,7 +20,7 @@ with open('./README.rst') as f:
 setup(
     name='dict_plus',
     packages=['dict_plus'],
-    version='0.1.1',
+    version=version_info()["version"],
     description='Extended Dictionary Package',
     author='Spencer Hanson',
     author_email="spencerhanson3141@gmail.com",

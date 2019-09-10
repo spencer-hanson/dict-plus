@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>dict_plus.funcs &#8212; Dictionary Plus 0.0.3 documentation</title>
+    <title>dict_plus.funcs &#8212; Dictionary Plus 0.1.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -33,12 +33,20 @@
           <div class="body" role="main">
             
   <h1>Source code for dict_plus.funcs</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">functools</span>
-
-
-<div class="viewcode-block" id="Functions"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.funcs.Functions">[docs]</a><span class="k">class</span> <span class="nc">Functions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Functions"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.funcs.Functions">[docs]</a><span></span><span class="k">class</span> <span class="nc">Functions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <div class="viewcode-block" id="Functions.AND"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.funcs.Functions.AND">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">AND</span><span class="p">(</span><span class="o">*</span><span class="n">els</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Basic AND function operation for elements</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *els: Element-like instances to AND values with</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (True, True) if all values evaluate to true</span>
+<span class="sd">            (False, False) otherwise</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">els</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">el</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
@@ -46,6 +54,15 @@
 
 <div class="viewcode-block" id="Functions.OR"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.funcs.Functions.OR">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">OR</span><span class="p">(</span><span class="o">*</span><span class="n">els</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Basic OR function operation for elements</span>
+<span class="sd">        Args:</span>
+<span class="sd">            *els: Element-like instances to OR values with</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if any value evaluates to True</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">els</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">el</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
@@ -53,6 +70,15 @@
 
 <div class="viewcode-block" id="Functions.LE"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.funcs.Functions.LE">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">LE</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Is v1 &lt;= v2 ?</span>
+<span class="sd">        Args:</span>
+<span class="sd">            v1: Value 1</span>
+<span class="sd">            v2: Value 2</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if v1 &lt;= v2 else false</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">v1</span> <span class="o">&lt;=</span> <span class="n">v2</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
@@ -60,6 +86,15 @@
 
 <div class="viewcode-block" id="Functions.LT"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.funcs.Functions.LT">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">LT</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Is v1 &lt; v2 ?</span>
+<span class="sd">        Args:</span>
+<span class="sd">            v1: Value 1</span>
+<span class="sd">            v2: Value 2</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if v1 &lt; v2 else false</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">v1</span> <span class="o">&lt;</span> <span class="n">v2</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
@@ -67,6 +102,15 @@
 
 <div class="viewcode-block" id="Functions.GE"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.funcs.Functions.GE">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">GE</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Is v1 &gt;= v2 ?</span>
+<span class="sd">        Args:</span>
+<span class="sd">            v1: Value 1</span>
+<span class="sd">            v2: Value 2</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if v1 &gt;= v2 else False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">v1</span> <span class="o">&gt;=</span> <span class="n">v2</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
@@ -74,6 +118,15 @@
 
 <div class="viewcode-block" id="Functions.GT"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.funcs.Functions.GT">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">GT</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Is v1 &gt; v2 ?</span>
+<span class="sd">        Args:</span>
+<span class="sd">            v1: Value 1</span>
+<span class="sd">            v2: Value 2</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if v1 .&gt;v2 else false</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">v1</span> <span class="o">&gt;</span> <span class="n">v2</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
@@ -98,8 +151,8 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Notable and  Useful Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Package overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">dict_plus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Notable Functions</a></li>
 </ul>
 
 <div class="relations">
@@ -128,7 +181,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2018, Spencer Hanson.
+      &copy;2019, Spencer Hanson.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.8</a>

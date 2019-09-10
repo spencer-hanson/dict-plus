@@ -5,22 +5,28 @@ from dict_plus.indexes import SortedIterableIndex
 
 class DictPlus(Iterable):
     def __init__(self, data=None, element_type=None, **kwargs):
-        """
-        Create a new DictPlus
+        """Create a new DictPlus
         Default element_type is KeyValuePair
-        :param data: data to use initially in the DictPlus. Can be a tuple list or a dict, or an object with .keys()
-        :param element_type: Element type to store the data with, defaults to KeyValuePair
-        :param kwargs: keyword args to include in the dict
+
+        Args:
+            data: data to use initially in the DictPlus. Can be a tuple list or a dict, or an object with .keys()
+            element_type: Element type to store the data with, defaults to KeyValuePair
+            kwargs: keyword args to include in the dict
+
         """
         super(DictPlus, self).__init__(data, element_type or ElementFactory.element(KeyValuePair, DictPlus), **kwargs)
 
     @staticmethod
     def fromkeys(sequence, value=None):
-        """
-        Create a new DictPlus from a sequence of keys, all with value 'value'
-        :param sequence: iterable of keys
-        :param value: value to set each key to, defaults to None
-        :return: DictPlus with populated data
+        """Create a new DictPlus from a sequence of keys, all with value 'value'
+
+        Args:
+            sequence: iterable of keys
+            value: value to set each key to, defaults to None
+
+        Returns:
+             DictPlus with populated data
+
         """
         d = DictPlus()
         for item in sequence:
@@ -28,10 +34,14 @@ class DictPlus(Iterable):
         return d
 
     def __eq__(self, other):
-        """
-        Check if self == other, for each key and value
-        :param other: Iterable-like to compare to
-        :return: Boolean True or False
+        """Check if self == other, for each key and value
+
+        Args:
+            other: Iterable-like to compare to
+
+        Returns:
+            Boolean True or False
+
         """
         result = super(DictPlus, self).__eq__(other)
         if not result:
@@ -53,12 +63,14 @@ class DictPlus(Iterable):
 
 class OrderedDictPlus(OrderedIterable):
     def __init__(self, data=None, element_type=None, **kwargs):
-        """
-        Create a new OrderedDictPlus, with inital data and element_type defaulting to KeyValuePair,
+        """Create a new OrderedDictPlus, with inital data and element_type defaulting to KeyValuePair,
         and other keyword args to include in the dict upon creation
-        :param data: data to use initially in the OrderedDictPlus. Can be a tuple list or a dict, or an object with .keys()
-        :param element_type: Element type to store the data with, defaults to KeyValuePair
-        :param kwargs: keyword args to include in the dict
+
+        Args:
+            data: data to use initially in the OrderedDictPlus. Can be a tuple list or a dict, or an object with .keys()
+            element_type: Element type to store the data with, defaults to KeyValuePair
+            kwargs: keyword args to include in the dict
+
         """
         super(OrderedDictPlus, self).__init__(data,
                                               element_type or ElementFactory.element(KeyValuePair, OrderedDictPlus),
@@ -66,11 +78,15 @@ class OrderedDictPlus(OrderedIterable):
 
     @staticmethod
     def fromkeys(sequence, value=None):
-        """
-        Create a new DictPlus from a sequence of keys, all with value 'value'
-        :param sequence: iterable of keys
-        :param value: value to set each key to, defaults to None
-        :return: DictPlus with populated data
+        """Create a new DictPlus from a sequence of keys, all with value 'value'
+
+        Args:
+            sequence: iterable of keys
+            value: value to set each key to, defaults to None
+
+        Returns:
+            DictPlus with populated data
+
         """
         d = OrderedDictPlus()
         for item in sequence:
@@ -78,10 +94,14 @@ class OrderedDictPlus(OrderedIterable):
         return d
 
     def __eq__(self, other):
-        """
-        Check if self == other, for each key and value
-        :param other: Iterable-like to compare to
-        :return: Boolean True or False
+        """Check if self == other, for each key and value
+
+        Args:
+            other: Iterable-like to compare to
+
+        Returns:
+            Boolean True or False
+
         """
         result = super(OrderedDictPlus, self).__eq__(other)
         if not result:
@@ -103,15 +123,25 @@ class SortedDictPlus(OrderedDictPlus):
                                              **kwargs)
 
     def _make_index(self):
+        """Make the internal index for the Dictionary, for custom indexing
+
+        Returns:
+            A subclass of IterableIndex
+
+        """
         return SortedIterableIndex()
 
     @staticmethod
     def fromkeys(sequence, value=None):
-        """
-        Create a new DictPlus from a sequence of keys, all with value 'value'
-        :param sequence: iterable of keys
-        :param value: value to set each key to, defaults to None
-        :return: DictPlus with populated data
+        """Create a new DictPlus from a sequence of keys, all with value 'value'
+
+        Args:
+            sequence: iterable of keys
+            value: value to set each key to, defaults to None
+
+        Returns:
+            DictPlus with populated data
+
         """
         d = SortedDictPlus()
         for item in sequence:
@@ -119,12 +149,16 @@ class SortedDictPlus(OrderedDictPlus):
         return d
 
     def insert(self, index, obj):
-        """
-        Insert an object into the Iterable, raises a KeyError if the key already exists
+        """Insert an object into the Iterable, raises a KeyError if the key already exists
         Index value is ignored in the Iterable superclass, as order is not preserved anyways
-        :param index: Value to insert element to, unless ordered, the index always will be the last
-        :param obj: Object to insert into the Iterable. Must conform with the element type of the iterable
-        :return: Element that was inserted
+
+        Args:
+            index: Value to insert element to, unless ordered, the index always will be the last
+            obj: Object to insert into the Iterable. Must conform with the element type of the iterable
+
+        Returns:
+            Element that was inserted
+
         """
         element = self.elements_type(obj)
         if self._indexes.has(element.id):

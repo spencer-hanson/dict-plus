@@ -1,5 +1,5 @@
-Notable and  Useful Functions
-*****************************
+Notable Functions
+*****************
 The dict-plus library contains a multitude of interesting and
 useful functions. Here is some documentation on what they are and examples.
 
@@ -474,31 +474,31 @@ Less than is a Compare_ call with the function LT
 
 GreaterThan
 ===========
-Greater than is a Compare_ call with the functino GT
+Greater than is a Compare_ call with the function GT
 
 
 .. _GreaterThanEqual:
 
 GreaterThanEqual
 ================
-Greater tha equal is a Compare_ call with the functino GTE
+Greater tha equal is a Compare_ call with the function GTE
 
 
 .. _LessThanEqual:
 
 LessThanEqual
 =============
-Greater than is a Compare_ call with the functino LTE
+Greater than is a Compare_ call with the function LTE
 
 
 .. _Equal:
 
 Equal
 =====
-Equal is a Compare_ call with the functino EQ
+Equal is a Compare_ call with the function EQ
 
 .. _NotEqual:
 
 Not Equal
 =========
-Not Equal is a Compare_ call with the functino NEQ
+Not Equal is a Compare_ call with the function NEQ

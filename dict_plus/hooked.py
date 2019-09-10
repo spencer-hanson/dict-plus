@@ -3,12 +3,15 @@ from dict_plus import DictPlus, KeyValuePair, ElementFactory
 
 class HookedDictPlus(DictPlus):
     def __init__(self, data=None, element_type=None, hooks=None, **kwargs):
-        """
-        Create a new HookedDictPlus
+        """Create a new HookedDictPlus
         Default element_type is KeyValuePair
-        :param data: data to use initially in the HookedDictPlus. Can be a tuple list or a dict, or an object with .keys()
-        :param element_type: Element type to store the data with, defaults to KeyValuePair
-        :param kwargs: keyword args to include in the dict
+        TODO Finish this class!
+
+        Args:
+            data: data to use initially in the HookedDictPlus. Can be a tuple list or a dict, or an object with .keys()
+            element_type: Element type to store the data with, defaults to KeyValuePair
+            kwargs: keyword args to include in the dict
+
         """
         self.hooks = hooks
         self.hooks = {
@@ -69,11 +72,15 @@ class HookedDictPlus(DictPlus):
 
     @staticmethod
     def fromkeys(sequence, value=None):
-        """
-        Create a new DictPlus from a sequence of keys, all with value 'value'
-        :param sequence: iterable of keys
-        :param value: value to set each key to, defaults to None
-        :return: DictPlus with populated data
+        """Create a new HookedDictPlus from a sequence of keys, all with value 'value'
+
+        Args:
+            sequence: iterable of keys
+            value: value to set each key to, defaults to None
+
+        Returns:
+            HookedDictPlus with populated data
+
         """
         d = HookedDictPlus()
         for item in sequence:
@@ -84,12 +91,13 @@ class HookedDictPlus(DictPlus):
 class FunctionDictPlus(HookedDictPlus):
 
     def __init__(self, data=None, element_type=None, func=None, **kwargs):
-        """
-        Create a new HookedDictPlus
-        Default element_type is KeyValuePair
-        :param data: data to use initially in the HookedDictPlus. Can be a tuple list or a dict, or an object with .keys()
-        :param element_type: Element type to store the data with, defaults to KeyValuePair
-        :param kwargs: keyword args to include in the dict
+        """Create a new FunctionDictPlus
+
+        Args:
+            data: data to use initially in the HookedDictPlus. Can be a tuple list or a dict, or an object with .keys()
+            element_type: Element type to store the data with, defaults to KeyValuePair
+            kwargs: keyword args to include in the dict
+
         """
         def error_out(inp):
             raise ValueError("Can't do that on a FunctionDictPlus!")
@@ -119,4 +127,8 @@ class FunctionDictPlus(HookedDictPlus):
 
 
 class TwoWayDictPlus(DictPlus):
+    """ TODO """
+    def __init__(self):
+        raise NotImplementedError
+
     pass

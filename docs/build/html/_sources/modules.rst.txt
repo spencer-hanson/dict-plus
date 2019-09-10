@@ -1,5 +1,5 @@
-Package overview
-================
+dict_plus
+=========
 
 .. toctree::
    :maxdepth: 4

@@ -3,15 +3,18 @@ import zlib
 
 
 class IterableIndex(object):
-    """
-    Index object to keep track of 'unhashable' types
+    """Index object to keep track of 'unhashable' types
     """
 
     def make_hash(self, o):
-        """
-        Makes a hash for a given object, doesn't guarantee collisions won't happen.
-        :param o: Object to get a hash for
-        :return: The hash of the object
+        """Makes a hash for a given object, doesn't guarantee collisions won't happen.
+
+        Args:
+            o: Object to get a hash for
+
+        Returns:
+            The hash of the object
+
         """
 
         if o.__hash__:
@@ -35,16 +38,23 @@ class IterableIndex(object):
             raise TypeError("Can't hash {}, submit an issue!".format(o))
 
     def __init__(self, data=None):
-        """
-        :param data: Internal data dict to create the index from, optional
+        """Create a new Iterable Index
+
+        Args:
+            data: Internal data dict to create the index from, optional
+
         """
         self.__data = {} if not data else data.copy()
 
     def get(self, key):
-        """
-        Get a value from the index
-        :param key: Key to get the value of
-        :return: Integer index of the key's location in the element list
+        """Get a value from the index
+
+        Args:
+            key: Key to get the value of
+
+        Returns:
+            Integer index of the key's location in the element list
+
         """
         key_hash = self.make_hash(key)
         if key_hash in self.__data:
@@ -53,11 +63,12 @@ class IterableIndex(object):
             raise KeyError("Key '{}' not in index ".format(key))
 
     def set(self, key, value):
-        """
-        Set a key's location in the index
-        :param key: Key to get the location of
-        :param value: Integer value to set in the index
-        :return: None
+        """Set a key's location in the index
+
+        Args:
+            key: Key to get the location of
+            value: Integer value to set in the index
+
         """
         if not isinstance(value, int):
             raise ValueError("Can't set index value to non-integer value!")
@@ -65,10 +76,14 @@ class IterableIndex(object):
         self.__data[self.make_hash(key)] = value
 
     def has(self, key):
-        """
-        Check whether the index has a given key in it
-        :param key: Key to check for
-        :return: True if the key exists, else False
+        """Check whether the index has a given key in it
+
+        Args:
+            key: Key to check for
+
+        Returns:
+            True if the key exists, else False
+
         """
         if self.make_hash(key) in self.__data:
             return True
@@ -76,37 +91,47 @@ class IterableIndex(object):
             return False
 
     def pop(self, key):
-        """
-        Remove and get the value of the given key
-        :param key: Key to get the value of
-        :return: Integer index value of the key in the element list
+        """ Remove and get the value of the given key
+
+        Args:
+            key: Key to get the value of
+
+        Returns:
+            Integer index value of the key in the element list
+
         """
         return self.__data.pop(self.make_hash(key))
 
     def isempty(self):
-        """
-        Check whether the index is empty
-        :return: True if index is empty else False
+        """Check whether the index is empty
+
+        Returns:
+            True if index is empty else False
         """
         return self.__data == {}
 
     def copy(self):
-        """
-        Copy this index
-        :return: A copy of the index
+        """Copy this index
+
+        Returns:
+            A copy of the index
+
         """
         return self.__class__(self.__data)
 
 
 class SortedIterableIndex(IterableIndex):
-    """
-    Index object to keep track of 'unhashable' types
+    """Index object to keep track of 'unhashable' types
     """
     def make_hash(self, o):
-        """
-        Makes a hash for a given object, doesn't guarantee collisions won't happen.
-        :param o: Object to get a hash for
-        :return: The hash of the object
+        """Makes a hash for a given object, doesn't guarantee collisions won't happen.
+
+        Args:
+            o: Object to get a hash for
+
+        Returns:
+            The hash of the object
+
         """
 
         if isinstance(o, StringTypes):

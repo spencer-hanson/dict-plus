@@ -1,3 +1,6 @@
+import json
+import os
+
 # -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.
@@ -13,20 +16,26 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import sys
+sys.path.insert(0, os.path.abspath('../../'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Dictionary Plus'
-copyright = '2018, Spencer Hanson'
+copyright = '2019, Spencer Hanson'
 author = 'Spencer Hanson'
 
+
+def get_version_info():
+    with open(str(os.environ["VERSION_JSON_PATH"]), "r") as f:
+        return json.load(f)
+
+
 # The short X.Y version
-version = '0.0.3'
+version = get_version_info()["version"]
 # The full version, including alpha/beta/rc tags
-release = '0.0.3'
+release = version
 
 
 # -- General configuration ---------------------------------------------------
@@ -45,10 +54,12 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'sphinx.ext.napoleon'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+# autosummary_generate = True
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -108,6 +119,17 @@ html_static_path = ['_static']
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'DictionaryPlusDoc'
+funcs_not_to_doc = ["__doc__", "__module__", "__weakref__", "__dict__", "__hash__", "__slots__"]
+
+
+def skip(app, what, name, obj, would_skip, options):
+    if name.startswith("__") and name not in funcs_not_to_doc:
+        return False
+    return would_skip
+
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -156,7 +178,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'DictionaryPlus', 'Dictionary Plus Documentation',
-     author, 'DictionaryPlus', 'One line description of project.',
+     author, 'DictionaryPlus', 'Extended Dictionary Operations',
      'Miscellaneous'),
 ]
 

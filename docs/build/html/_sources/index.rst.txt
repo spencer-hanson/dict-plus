@@ -1,8 +1,3 @@
-.. Dictionary Plus documentation master file, created by
-   sphinx-quickstart on Thu Aug 30 15:13:35 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to Dictionary Plus's documentation!
 ===========================================
 
@@ -10,8 +5,9 @@ Welcome to Dictionary Plus's documentation!
    :maxdepth: 4
    :caption: Contents:
 
-   functions.rst
    modules.rst
+   functions.rst
+
 
 
 Indices and tables
@@ -20,3 +16,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+

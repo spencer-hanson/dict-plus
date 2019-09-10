@@ -3,8 +3,22 @@ from dict_plus.etypes import *
 
 
 class ElementFactory(object):
+    """
+    Factory to create Elements within Dictionaries
+    """
+
     @staticmethod
     def element(subclass_type, superclass_type):
+        """Create a new element of type subclass_type in containing dictionary of type superclass_type
+
+        Args:
+            subclass_type: Type of Element to create, ie KeyValuePair
+            superclass_type: Type of Dictionary to hold this element, ie. SortedDictPlus
+
+        Returns:
+            A new element type class for the specific use of the subclass type and superclass type
+
+        """
         class ElementType(subclass_type):
             @staticmethod
             def get_dictlike_supertype():
@@ -19,19 +33,20 @@ class ElementFactory(object):
 
 
 class Element(object):
-    """
-    Element superclass of an item in an Iterable
+    """Element superclass of an item in an Iterable
     Must have an id and value, where id is unique to the Element
     Subclasses can give other restrictions to what can and can't be used
     """
 
     def __init__(self, _id=None, value=None):
-        """
-        Create a new Element, must include either id and value or just id
+        """Create a new Element, must include either id and value or just id
         If just id is used, it will attempt to parse it into self.id and self.value
         Otherwise, self.id = id and self.value = value
-        :param _id: Id of Element, or object to be parsed
-        :param value: Value of the element, required if _id isn't going to be parsed
+
+        Args:
+            _id: Id of Element, or object to be parsed
+            value: Value of the element, required if _id isn't going to be parsed
+
         """
         if _id and not value:
             self.id, self.value = self.parse_object(_id)
@@ -43,64 +58,96 @@ class Element(object):
 
     @staticmethod
     def get_dictlike_supertype():
-        """
-        Get the type of the containing dictionary so that items within the dict are also of the same type
-        Example: mydict = DictPlus({"a": DictPlus({"b": 1}), "c": {"d": 1}, ...})
-        We want mydict["c"] == DictPlus({"d": 1})
-        So we convert any dict-like values recursively using the typing of the superclass dictionary class type
-
-        By default will raise a notimplemented error, so that it can be implemeneted during instantiation, by using
+        """Get the type of the containing dictionary so that items within the dict are also of the same type
+        By default will raise a NotImplemented error, so that it can be implemeneted during instantiation, by using
         ElementFactory.element()
-        :return:
+
+        Examples:
+            So we convert any dict-like values recursively using the typing of the superclass dictionary class type::
+
+                >>>mydict = DictPlus({"a": DictPlus({"b": 1}), "c": {"d": 1}, ...})
+                mydict["c"] == DictPlus({"d": 1})
+
+
+        Returns:
+            A Iterable classtype
+
         """
         raise NotImplementedError("No supertype defined in this Element! Use ElementFactory.element()")
 
     def parse_object(self, obj):
-        """
-        Parse an object into an Element type, possibly raising InvalidElementTypeException if the object cannot be
+        """Parse an object into an Element type, possibly raising InvalidElementTypeException if the object cannot be
         parsed
-        :param obj: Element-like object to be parsed
-        :return: Element
+
+        Args:
+            obj: Element-like object to be parsed
+
+        Raises:
+            InvalidElementTypeException: If the object cannot be parsed
+
+        Returns:
+            parsed Element instance
+
         """
         raise NotImplementedError("Can't parse object as an Element!")
 
     def parts(self):
-        """
-        Break down the Element into a tuple, with (id, value)
-        :return: (id, value)
+        """Break down the Element into a tuple, with (id, value)
+
+        Returns
+            Tuple like (id, value)
+
         """
         return self.id, self.value
 
     def __eq__(self, other):
-        """
-        Check if self == other
+        """Check if self == other
         Not implemented for Element
-        :param other: Element-like
-        :return: True or False
+
+        Args:
+            other: Element-like
+
+        Returns
+            True if equal or False if not
+
         """
         raise NotImplementedError("Can't equate superclass Element!")
 
     def __str__(self):
-        """
-        String representation of the Element
-        :return: String representing self
+        """String representation of the Element
+
+        Returns:
+            String representing self
+
         """
         return "<{}, {}>".format(self.id, self.value)
 
     def copy(self):
-        """
-        Make a shallow copy of self
-        :return: Copied version of self
+        """Make a shallow copy of self
+
+        Returns:
+            Copied version of self
+
         """
         return self.__class__(self.id, self.value)
 
 
 class KeyValuePair(Element):
     """
-    Basic Element implementation
+    General use Element implementation
     """
 
     def parse_object(self, obj):
+        """
+        Parse an object into a KeyValuePair
+
+        Args:
+            obj: Object to be parsed
+
+        Returns:
+            KeyValuePair instance
+
+        """
         if isinstance(obj, KeyValuePair):
             return obj.id, obj.value
         if not isinstance(obj, (list, tuple)):
@@ -122,25 +169,32 @@ class KeyValuePair(Element):
 
     @staticmethod
     def get_dictlike_supertype():
-        """
-        Get the type of the containing dictionary so that items within the dict are also of the same type
-        Example: mydict = DictPlus({"a": DictPlus({"b": 1}), "c": {"d": 1}, ...})
-        We want mydict["c"] == DictPlus({"d": 1})
-        So we convert any dict-like values recursively using the typing of the superclass dictionary class type
-
-        By default will raise a notimplemented error, so that it can be implemeneted during instantiation, by using
+        """Get the type of the containing dictionary so that items within the dict are also of the same type
+        By default will raise a NotImplemented error, so that it can be implemented during instantiation, by using
         ElementFactory.element()
-        :return:
+
+        Examples:
+            So we convert any dict-like values recursively using the typing of the superclass dictionary class type::
+                >> mydict = DictPlus({"a": DictPlus({"b": 1}), "c": {"d": 1}, ...})
+                mydict["c"] == DictPlus({"d": 1})
+
+        Returns:
+            Element Instance
+
         """
         raise NotImplementedError("No supertype defined in this Element! Use ElementFactory.element()")
 
     def __eq__(self, other):
-        """
-        Check if self == other
+        """Check if self == other
         if other is a KeyValuePair, other.id == self.id and self.value == other.value
         if other is a tuple, treat it as (id, value) and check for equality there
-        :param other: Element-like
-        :return: True or False
+
+        Args:
+            other: Element-like
+
+        Returns:
+            True or False
+
         """
         if isinstance(other, dict) and len(other) == 1:
             k, v = list(other.items())[0]
@@ -152,4 +206,12 @@ class KeyValuePair(Element):
             return True
 
     def __ne__(self, other):
+        """Check if element is not equal,
+        Args:
+            other: Element-like to compare against
+
+        Returns:
+            True or False
+
+        """
         return not self.__eq__(other)
