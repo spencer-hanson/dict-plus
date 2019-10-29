@@ -97,10 +97,9 @@ class Iterable(dict):
         self._indexes.set(element.id, len(self) - 1)
         return element
 
-    def get(self, k, v_alt=None):
+    def get(self, k, v_alt=NoneVal):
         """I.get(k[, v_alt]) -> I[k] if k in I, else v_alt.
         v_alt defaults to None.
-        If no such key is found, will throw a KeyError
 
         Args:
             k: key to get the value of
@@ -110,9 +109,12 @@ class Iterable(dict):
             The value stored with the key
 
         """
+        if v_alt == NoneVal:  # Return None if the key doesn't exist, only from get
+            v_alt = None
+
         return self.getitem(k, v_alt).value
 
-    def getitem(self, k, v_alt=None):
+    def getitem(self, k, v_alt=NoneVal):
         """Get the full element from key 'k'
         if no key or value is present, Element(k, v_alt) will be returned
 
@@ -126,12 +128,12 @@ class Iterable(dict):
         """
         if self._indexes.has(k):
             return self._elements[self._indexes.get(k)]
-        elif v_alt:
+        elif v_alt != NoneVal:
             return self.elements_type(k, v_alt)
         else:
             raise KeyError("No key '{}' found!".format(k))
 
-    def pop(self, k, v_alt=None):
+    def pop(self, k, v_alt=NoneVal):
         """Don't care about order, so we move the last element to the position of the removed
         element, remove the index to the popped element, to keep the time complexity constant
 
@@ -153,7 +155,7 @@ class Iterable(dict):
                 element = last_el
             self._indexes.pop(k)
             return element.value
-        elif v_alt:
+        elif v_alt != NoneVal:
             return v_alt
         raise KeyError("Key '{}' not found!".format(k))
 
@@ -959,7 +961,7 @@ class OrderedIterable(Iterable):
         self._update_indexes(index)
         return element
 
-    def pop(self, k, v_alt=None):
+    def pop(self, k, v_alt=NoneVal):
         """I.pop(k[,v_alt]) -> v, remove specified key and return the corresponding value.
         If key is not found, v_alt is returned if given, otherwise KeyError is raised.
         After the pop an indexes update must be performed
@@ -977,7 +979,7 @@ class OrderedIterable(Iterable):
             result = self._elements.pop(idx).value
             self._update_indexes(idx)
             return result
-        elif v_alt:
+        elif v_alt != NoneVal:
             return v_alt
         raise KeyError("Key '{}' not found!".format(k))
 

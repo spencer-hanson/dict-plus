@@ -1,4 +1,5 @@
 from dict_plus import DictPlus, KeyValuePair, ElementFactory
+from dict_plus.etypes import NoneVal
 
 
 class FunctionallyInsensitiveDictPlus(DictPlus):
@@ -68,7 +69,7 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
                 return k
         return None
 
-    def getitem(self, k, v_alt=None):
+    def getitem(self, k, v_alt=NoneVal):
         """Get the full element from key 'k'
         if no key or value is present, Element(k, v_alt) will be returned
 
@@ -83,13 +84,12 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
         base_key = self._find_base_key(k)
         if base_key is not None:
             return self._elements[self._indexes.get(base_key)]
-        elif v_alt:
+        elif v_alt != NoneVal:
             return self.elements_type(k, v_alt)
         else:
-            self._find_base_key(k)
             raise KeyError("No key '{}' found!".format(k))
 
-    def pop(self, k, v_alt=None):
+    def pop(self, k, v_alt=NoneVal):
         """Pop off a key from the dict (remove a key)
 
         Args:
@@ -106,7 +106,7 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
             result = self._elements.pop(idx).value
             self._update_indexes(idx)
             return result
-        elif v_alt:
+        elif v_alt != NoneVal:
             return v_alt
         raise KeyError("Key '{}' not found!".format(base_key))
 

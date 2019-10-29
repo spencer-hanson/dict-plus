@@ -38,7 +38,7 @@ class Element(object):
     Subclasses can give other restrictions to what can and can't be used
     """
 
-    def __init__(self, _id=None, value=None):
+    def __init__(self, _id=NoneVal, value=NoneVal):
         """Create a new Element, must include either id and value or just id
         If just id is used, it will attempt to parse it into self.id and self.value
         Otherwise, self.id = id and self.value = value
@@ -48,10 +48,10 @@ class Element(object):
             value: Value of the element, required if _id isn't going to be parsed
 
         """
-        if _id and not value:
+        if _id and value == NoneVal:
             self.id, self.value = self.parse_object(_id)
         else:
-            if _id is None or value is None:
+            if _id == NoneVal or value == NoneVal:
                 raise TypeError("Invalid args, must provide id and value or object")
             self.id = _id
             self.value = value
@@ -65,6 +65,7 @@ class Element(object):
         Examples:
             So we convert any dict-like values recursively using the typing of the superclass dictionary class type::
 
+                >>>from dict_plus import DictPlus
                 >>>mydict = DictPlus({"a": DictPlus({"b": 1}), "c": {"d": 1}, ...})
                 mydict["c"] == DictPlus({"d": 1})
 

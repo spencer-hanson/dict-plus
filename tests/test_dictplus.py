@@ -143,8 +143,9 @@ def test_keyvaluepair___eq__(eltyp):
 
 @pytest.mark.parametrize("eltyp", el_types)
 def test_element___init__(eltyp):
-    ex(eltyp, InvalidElementTypeException, "id", None)
-    ex(eltyp, TypeError, None, "value")
+    ex(eltyp, InvalidElementTypeException, "id", NoneVal)
+    ex(eltyp, InvalidElementTypeException, "value")
+    ex(eltyp, TypeError, value="value", _id=NoneVal)
     assert_eq(eltyp(0, 1), eltyp((0, 1)))
     assert_eq(eltyp(eltyp(0, 1)), eltyp((0, 1)))
 
@@ -249,7 +250,7 @@ def test_iterable___getitem__(dtype):
     assert_eq(d["1"], "2")
     assert_t("1" in d)
     assert_t("5" not in d)
-    ex(d.__getitem__, KeyError, "5")
+    assert_t(d.get("5") is None)
 
 
 @pytest.mark.parametrize("dtype", all_dict_types)
@@ -1218,3 +1219,14 @@ def test_subdict_type(dtype):
     data = {"a": 1, "b": {"c": 2}}
     d = dtype(data)
     assert type(d["b"]) == type(d)
+
+
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_nonekey_ops(dtype):
+    d = dtype()
+
+    assert d.get("c") is None
+    assert d.get("c", None) is None
+    assert d.getitem("c", None) == ("c", None)
+    assert d.pop("c", None) is None
+    assert d.setdefault("g", None) is None
