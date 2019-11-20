@@ -2,13 +2,15 @@ from dict_plus.exceptions import *
 from dict_plus.etypes import *
 from dict_plus.funcs import Functions as DFuncs
 from dict_plus.indexes import IterableIndex
-from dict_plus.elements import Element
+from dict_plus.elements import Element, ElementFactory, KeyValuePair
+import abc
 
 
 class Iterable(dict):
-    __slots__ = ()  # removes __dict__ internals
+    def get_element_type(self):
+        return ElementFactory.element(KeyValuePair, self.__class__)
 
-    def __init__(self, data=None, element_type=None, **kwargs):
+    def __init__(self, data=None, **kwargs):
         """Initialize a new Iterable
 
         Examples:
@@ -36,13 +38,16 @@ class Iterable(dict):
         if isinstance(data, Iterable):
             self._elements = data._elements[:]
             self._indexes = data._indexes.copy()
-            self.elements_type = data.elements_type
+            self._elements_type = data._elements_type
         else:
-            if not element_type:
-                element_type = Element
+            # if not element_type:
+            #     element_type = Element
+            self._elements_type = self.get_element_type()
+
+            if not self._elements_type:
+                raise ValueError("Must set _element_type in subclass before super() call!")
 
             self._elements = []
-            self.elements_type = element_type
             self._indexes = self._make_index()
 
             if isinstance(data, dict):
@@ -77,6 +82,21 @@ class Iterable(dict):
                 raise IndexError("Duplicate key {} found!".format(el.id))
             self._indexes.set(el.id, idx)
 
+    def _insert_to_dict_memory(self, element):
+        """
+        Function to help keep the inner dict memory the same
+        Args:
+            element: element_type to add
+
+        Returns: None
+
+        """
+        if isinstance(element.id, (StringTypes, tuple, int, float)):  # Not hashable normally
+            super(Iterable, self).__setitem__(element.id, element.value)
+        else:
+            super(Iterable, self).__setitem__("unhashable-{}".format(str(element.id)), element.value)
+            # Idk if there's a better way around this TODO ?
+
     def insert(self, index, obj):
         """Insert an object into the Iterable, raises a KeyError if the key already exists
         Index value is ignored in the Iterable superclass, as order is not preserved anyways
@@ -89,12 +109,13 @@ class Iterable(dict):
             Element that was inserted
 
         """
-        element = self.elements_type(obj)
+        element = self._elements_type(obj)
         if self._indexes.has(element.id):
             raise KeyError("Key '{}' already exists!".format(element.id))
 
         self._elements.insert(len(self), element)  # Just add to the end of the iterable
         self._indexes.set(element.id, len(self) - 1)
+        self._insert_to_dict_memory(element)
         return element
 
     def get(self, k, v_alt=NoneVal):
@@ -129,7 +150,7 @@ class Iterable(dict):
         if self._indexes.has(k):
             return self._elements[self._indexes.get(k)]
         elif v_alt != NoneVal:
-            return self.elements_type(k, v_alt)
+            return self._elements_type(k, v_alt)
         else:
             raise KeyError("No key '{}' found!".format(k))
 
@@ -239,7 +260,7 @@ class Iterable(dict):
             func: func(key, value) -> (new_key, new_value
         """
         for i in range(0, len(self)):
-            self._elements[i] = self.elements_type(func(*self._elements[i].parts()))
+            self._elements[i] = self._elements_type(func(*self._elements[i].parts()))
         self._update_indexes(0)  # Update indexes
 
     def rekey(self, func):
@@ -268,7 +289,7 @@ class Iterable(dict):
             Copied instance
 
         """
-        i = self.__class__(element_type=self.elements_type)
+        i = self.__class__(element_type=self._elements_type)
         i._elements = [el.copy() for el in self.elements()]
         i._indexes = self._indexes.copy()
         return i
@@ -422,9 +443,9 @@ class Iterable(dict):
             k2: second key
 
         """
-        tmp_val = self._elements[self._indexes.get(k1)]
-        self._elements[self._indexes.get(k1)] = self._elements[self._indexes.get(k2)]
-        self._elements[self._indexes.get(k2)] = tmp_val
+        tmp_val = self[k1]
+        self[k1] = self[k2]
+        self[k2] = tmp_val
 
     def squish(self, keys, new_key, func):
         """Squish elements into another new element, using function 'func'
@@ -456,67 +477,6 @@ class Iterable(dict):
             raise IndexError("Number of values returned from the function != number of keys given!")
         for idx in range(0, len(new_keys)):
             self.insert(len(self), (new_keys[idx], vals[idx]))
-
-    def add(self, other, func=None):
-        """Add this Iterable with another Iterable-like
-        combine with function 'func'
-        If no function is given, the default function will concatenate the two Iterables
-        Works in place, allows for concurrent modification
-
-        Args:
-            other: Iterable-like to add to
-            func: func(element1, element2) -> new_element
-
-        Returns:
-            self
-
-        """
-        if not isinstance(other, Iterable):
-            other = self.__class__(other)
-        if not func:
-            def func(e1, e2):
-                self.insert(len(self), e2)
-                return e1
-
-        done = False
-        it1 = iter(self.elements())
-        it2 = iter(other.elements())
-
-        while not done:
-            try:
-                el1 = next(it1)
-                el2 = next(it2)
-                elp = func(el1, el2)
-                if elp:
-                    elp = self.elements_type(elp)
-                    idx = self._indexes.pop(el1.id)
-                    self._indexes.set(elp.id, idx)
-                    self._elements[idx] = elp
-            except StopIteration:
-                done = True
-        return self
-
-    def sub(self, other, func_inv=None):
-        """Inverse of I.add(), combines with another Iterable-like with function 'func'
-        If no function is given will default to removing the 'other's elements from self
-
-        Args:
-            other: Iterable-like to subtrace from
-            func_inv: func(element1, element2) -> new_element
-
-        Returns:
-            self
-
-        """
-        if not isinstance(other, Iterable):
-            other = self.__class__(other)
-        if not func_inv:
-            def func_inv(_, e2):
-                if e2 != self.getitem(e2.id):
-                    raise KeyError("Cannot pop '{}'".format(e2))
-                self.pop(e2.id)
-                return None  # Explicitly return None for example purposes
-        return self.add(other, func_inv)
 
     def chop(self, func):
         """Chop the Iterable into other Iterables using a binning function 'func'
@@ -596,7 +556,7 @@ class Iterable(dict):
         tmp_el = self._elements[0]
         for el in self._elements[1:]:
             result = func(tmp_el, el)
-            tmp_el = self.elements_type(result)
+            tmp_el = self._elements_type(result)
         return tmp_el
 
     def fold_right(self, func):
@@ -618,7 +578,7 @@ class Iterable(dict):
         tmp_el = self._elements[-1]
         for idx in range(len(self._elements) - 1, 0, -1):
             result = func(tmp_el, self._elements[idx - 1])
-            tmp_el = self.elements_type(result)
+            tmp_el = self._elements_type(result)
         return tmp_el
 
     def multiply(self, other, func=None):
@@ -643,7 +603,7 @@ class Iterable(dict):
         self.clear()
         for el1 in els:
             for el2 in other.elements():
-                el3 = self.elements_type(func(el1, el2))
+                el3 = self._elements_type(func(el1, el2))
                 self[el3.id] = el3.value
         return self
 
@@ -697,6 +657,10 @@ class Iterable(dict):
             inplace=inplace
         )
         return agg(result)
+
+    def __delitem__(self, k):
+        """Delete an item from the Iterable"""
+        self.pop(k)
 
     def __le__(self, other):
         """Compare each element in self to other with <= operator,
@@ -806,7 +770,9 @@ class Iterable(dict):
             Added Iterables
 
         """
-        return self.copy().add(other, func=None)
+        cp = self.copy()
+        cp.update(other)
+        return cp
 
     def __sub__(self, other):
         """Default behavior the same as self.unupdate(other)
@@ -819,7 +785,9 @@ class Iterable(dict):
             Difference of Iterables
 
         """
-        return self.copy().sub(other, func_inv=None)
+        cp = self.copy()
+        cp.unupdate(other)
+        return cp
 
     def __mul__(self, other):
         """Multiply self by other
@@ -889,10 +857,12 @@ class Iterable(dict):
             value: value to set under key
 
         """
-        if self._indexes.has(key):
+        if self._indexes.has(key):  # TODO Fix me
             self._elements[self._indexes.get(key)].value = value
         else:
             self.insert(len(self), (key, value))
+
+        self._insert_to_dict_memory(self.get_element_type()(key, value))
 
     def __len__(self):
         """Get the number of elements in self
@@ -953,12 +923,14 @@ class OrderedIterable(Iterable):
             Element that was inserted
 
         """
-        element = self.elements_type(obj)
+        element = self._elements_type(obj)
         if self._indexes.has(element.id):
             raise KeyError("Key '{}' already exists!".format(element.id))
 
         self._elements.insert(index, element)
         self._update_indexes(index)
+
+        self._insert_to_dict_memory(element)
         return element
 
     def pop(self, k, v_alt=NoneVal):
@@ -982,6 +954,72 @@ class OrderedIterable(Iterable):
         elif v_alt != NoneVal:
             return v_alt
         raise KeyError("Key '{}' not found!".format(k))
+
+    def add(self, other, func=None):
+        """Add this Iterable with another Iterable-like
+        combine with function 'func'
+        If no function is given, the default function will concatenate the two Iterables
+        Works in place, allows for concurrent modification
+
+        Args:
+            other: Iterable-like to add to
+            func: func(element1, element2) -> new_element
+
+        Returns:
+            self
+
+        """
+        if not isinstance(other, Iterable):
+            other = self.__class__(other)
+        if not func:
+            def func(e1, e2):
+                self.insert(len(self), e2)
+                return e1
+
+        done = False
+        it1 = iter(self.elements())
+        it2 = iter(other.elements())
+
+        while not done:
+            try:
+                el1 = next(it1)
+                el2 = next(it2)
+                elp = func(el1, el2)
+                if elp:
+                    elp = self._elements_type(elp)
+                    idx = self._indexes.get(el1.id)
+                    self.pop(el1.id)
+
+                    self.insert(idx, elp)
+                    # self[elp.id] = elp.value
+                    # idx = self._indexes.pop(el1.id)
+                    # self._indexes.set(elp.id, idx)
+                    # self._elements[idx] = elp
+            except StopIteration:
+                done = True
+        return self
+
+    def sub(self, other, func_inv=None):
+        """Inverse of I.add(), combines with another Iterable-like with function 'func'
+        If no function is given will default to removing the 'other's elements from self
+
+        Args:
+            other: Iterable-like to subtrace from
+            func_inv: func(element1, element2) -> new_element
+
+        Returns:
+            self
+
+        """
+        if not isinstance(other, Iterable):
+            other = self.__class__(other)
+        if not func_inv:
+            def func_inv(_, e2):
+                if e2 != self.getitem(e2.id):
+                    raise KeyError("Cannot pop '{}'".format(e2))
+                self.pop(e2.id)
+                return None  # Explicitly return None for example purposes
+        return self.add(other, func_inv)
 
     @staticmethod
     def fromkeys(sequence, value=None):

@@ -4,7 +4,10 @@ from dict_plus.indexes import SortedIterableIndex
 
 
 class DictPlus(Iterable):
-    def __init__(self, data=None, element_type=None, **kwargs):
+    # def get_element_type(self):
+    #     return ElementFactory.element(KeyValuePair, DictPlus)
+
+    def __init__(self, *args,  **kwargs):
         """Create a new DictPlus
         Default element_type is KeyValuePair
 
@@ -14,7 +17,9 @@ class DictPlus(Iterable):
             kwargs: keyword args to include in the dict
 
         """
-        super(DictPlus, self).__init__(data, element_type or ElementFactory.element(KeyValuePair, DictPlus), **kwargs)
+
+        # self._elements_type = element_type or ElementFactory.element(KeyValuePair, DictPlus)
+        super(DictPlus, self).__init__(*args, **kwargs)
 
     @staticmethod
     def fromkeys(sequence, value=None):
@@ -62,7 +67,7 @@ class DictPlus(Iterable):
 
 
 class OrderedDictPlus(OrderedIterable):
-    def __init__(self, data=None, element_type=None, **kwargs):
+    def __init__(self, *args, **kwargs):
         """Create a new OrderedDictPlus, with inital data and element_type defaulting to KeyValuePair,
         and other keyword args to include in the dict upon creation
 
@@ -72,9 +77,8 @@ class OrderedDictPlus(OrderedIterable):
             kwargs: keyword args to include in the dict
 
         """
-        super(OrderedDictPlus, self).__init__(data,
-                                              element_type or ElementFactory.element(KeyValuePair, OrderedDictPlus),
-                                              **kwargs)
+        # self._elements_type = element_type or ElementFactory.element(KeyValuePair, OrderedDictPlus)
+        super(OrderedDictPlus, self).__init__(*args, **kwargs)
 
     @staticmethod
     def fromkeys(sequence, value=None):
@@ -117,10 +121,9 @@ class OrderedDictPlus(OrderedIterable):
 
 
 class SortedDictPlus(OrderedDictPlus):
-    def __init__(self, data=None, element_type=None, **kwargs):
-        super(SortedDictPlus, self).__init__(data,
-                                             element_type or ElementFactory.element(KeyValuePair, SortedDictPlus),
-                                             **kwargs)
+    def __init__(self, *args, **kwargs):
+        # self._elements_type = element_type or ElementFactory.element(KeyValuePair, SortedDictPlus)
+        super(SortedDictPlus, self).__init__(*args, **kwargs)
 
     def _make_index(self):
         """Make the internal index for the Dictionary, for custom indexing
@@ -160,7 +163,7 @@ class SortedDictPlus(OrderedDictPlus):
             Element that was inserted
 
         """
-        element = self.elements_type(obj)
+        element = self._elements_type(obj)
         if self._indexes.has(element.id):
             raise KeyError("Key '{}' already exists!".format(element.id))
 
@@ -184,6 +187,7 @@ class SortedDictPlus(OrderedDictPlus):
 
         self._indexes.set(element.id, inserted)
         self._update_indexes(inserted)  # Make sure to update the indexes after inserting
+        self._insert_to_dict_memory(element)
 
         return element
 

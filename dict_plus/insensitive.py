@@ -1,10 +1,10 @@
-from dict_plus import DictPlus, KeyValuePair, ElementFactory
+from dict_plus import DictPlus
 from dict_plus.etypes import NoneVal
 
 
 class FunctionallyInsensitiveDictPlus(DictPlus):
 
-    def __init__(self, data=None, element_type=None, compare_func=None, **kwargs):
+    def __init__(self, *args, **kwargs):
         """Create a new FunctionallyInsensitiveDictPlus
         Pass in a compare function with signature (new_key, old_key) and it will determine if a given key is equal on
         add,delete,modify,update
@@ -16,11 +16,22 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
             kwargs: keyword args to include in the dict
 
         """
-        super(FunctionallyInsensitiveDictPlus, self).__init__(
-            data,
-            element_type or ElementFactory.element(KeyValuePair, FunctionallyInsensitiveDictPlus),
-            **kwargs)
-        self.compare_func = compare_func or self.compare_func
+        self.compare_func = kwargs.pop("compare_func", None) or self.compare_func
+        super(FunctionallyInsensitiveDictPlus, self).__init__(*args, **kwargs)
+
+    def compare_func(self, new_key, old_key):
+        """If you return True, it exists in the dict, and should be overridden.
+        If you return False, the key doesn't match, and if no keys match, it will be added as a new entry
+
+        Args:
+            new_key: Key trying to be added to dictionary
+            old_key: Key already in dictionary to check against
+
+        Returns:
+            True if new_key is old_key
+
+        """
+        return new_key == old_key
 
     @staticmethod
     def fromkeys(sequence, value=None):
@@ -38,20 +49,6 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
         for item in sequence:
             d.insert(-1, (item, value))
         return d
-
-    def compare_func(self, new_key, old_key):
-        """If you return True, it exists in the dict, and should be overridden.
-        If you return False, the key doesn't match, and if no keys match, it will be added as a new entry
-
-        Args:
-            new_key: Key trying to be added to dictionary
-            old_key: Key already in dictionary to check against
-
-        Returns:
-            True if new_key is old_key
-
-        """
-        return new_key == old_key
 
     def _find_base_key(self, new_key):
         """
@@ -85,7 +82,7 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
         if base_key is not None:
             return self._elements[self._indexes.get(base_key)]
         elif v_alt != NoneVal:
-            return self.elements_type(k, v_alt)
+            return self._elements_type(k, v_alt)
         else:
             raise KeyError("No key '{}' found!".format(k))
 
@@ -179,12 +176,8 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
 
 
 class CaseInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
-    def __init__(self, data=None, element_type=None, compare_func=None, **kwargs):
-        super(CaseInsensitiveDictPlus, self).__init__(
-            data,
-            element_type or ElementFactory.element(KeyValuePair, CaseInsensitiveDictPlus),
-            compare_func,
-            **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(CaseInsensitiveDictPlus, self).__init__(*args, **kwargs)
 
     def compare_func(self, new_key, old_key):
         """If you return True, it exists in the dict, and should be overridden.
@@ -222,17 +215,15 @@ class CaseInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
 
 
 class PrefixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
-    def __init__(self, data=None, element_type=None, prefix_list=[], **kwargs):
+    def __init__(self, *args, **kwargs):
+
+        prefix_list = kwargs.pop("prefix_list", [])
+        self.compare_func = lambda x, y: x == y
         if not isinstance(prefix_list, list):
             prefix_list = [prefix_list]
 
         compare_func = self._get_compare_func(prefix_list)
-
-        super(PrefixInsensitiveDictPlus, self).__init__(
-            data,
-            element_type or ElementFactory.element(KeyValuePair, PrefixInsensitiveDictPlus),
-            compare_func=compare_func,
-            **kwargs)
+        super(PrefixInsensitiveDictPlus, self).__init__(*args, compare_func=compare_func, **kwargs)
 
     def set_prefix_list(self, new_prefix_list):
         """
@@ -291,23 +282,20 @@ class PrefixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
             DictPlus with populated data
 
         """
-        d = PrefixInsensitiveDictPlus("")
+        d = PrefixInsensitiveDictPlus(prefix_list=[""])
         for item in sequence:
             d.insert(-1, (item, value))
         return d
 
 
 class SuffixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
-    def __init__(self, data=None, element_type=None, suffix_list=[], **kwargs):
+    def __init__(self, *args, **kwargs):
+        suffix_list = kwargs.pop("suffix_list", [])
         if not isinstance(suffix_list, list):
             suffix_list = [suffix_list]
+
         compare_func = self._get_compare_func(suffix_list)
-        super(SuffixInsensitiveDictPlus, self).__init__(
-            data,
-            element_type or ElementFactory.element(KeyValuePair, SuffixInsensitiveDictPlus),
-            compare_func=compare_func,
-            **kwargs
-        )
+        super(SuffixInsensitiveDictPlus, self).__init__(*args, compare_func=compare_func, **kwargs)
 
     def set_suffix_list(self, new_suffix_list):
         if not isinstance(new_suffix_list, list):
@@ -359,7 +347,7 @@ class SuffixInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):
             SuffixInsensitiveDict with populated data
 
         """
-        d = SuffixInsensitiveDictPlus("")
+        d = SuffixInsensitiveDictPlus(suffix_list=[""])
         for item in sequence:
             d.insert(-1, (item, value))
         return d

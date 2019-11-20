@@ -139,8 +139,6 @@ def test_keyvaluepair___eq__(eltyp):
     assert_eq(kvp, kvp.copy())
 
 
-##################
-
 @pytest.mark.parametrize("eltyp", el_types)
 def test_element___init__(eltyp):
     ex(eltyp, InvalidElementTypeException, "id", NoneVal)
@@ -158,7 +156,7 @@ def test_element_parts(eltyp):
 @pytest.mark.parametrize("dtype", all_dict_types)
 def test_element___eq__(dtype):
     d = dtype()
-    eltyp = d.elements_type
+    eltyp = d._elements_type
 
     d.insert(0, ("4", "3"))
     assert_eq(d.getitem("4"), eltyp("4", "3"))
@@ -182,7 +180,7 @@ def test_iterable_getitem(dtype):
     d = dtype()
     d.insert(0, ("1", "2"))
     assert_neq(d.getitem("1"), 8)
-    assert_eq(d.getitem("1"), d.elements_type("1", "2"))
+    assert_eq(d.getitem("1"), d._elements_type("1", "2"))
 
 
 @pytest.mark.parametrize("dtype", all_dict_types)
@@ -319,7 +317,7 @@ def test_iterable_items(dtype):
 @pytest.mark.parametrize("dtype", unsorted_dict_types)
 def test_iterable_elements(dtype):
     d = dtype({"a": 1, "b": 2})
-    assert_eq(d.elements(), [d.elements_type("a", 1), d.elements_type("b", 2)])
+    assert_eq(d.elements(), [d._elements_type("a", 1), d._elements_type("b", 2)])
 
 
 @pytest.mark.parametrize("dtype", unsorted_dict_types)
@@ -706,7 +704,7 @@ def test_iterable_folds(dtype, fold_type, vals):
     assert_eq(r, result)
 
 
-@pytest.mark.parametrize("dtype", unsorted_dict_types)
+@pytest.mark.parametrize("dtype", ordered_dict_types)
 def test_iterable_add(dtype):
     o1 = {"a": 1, "b": 2}
     o2 = {"c": 3, "d": 4}
@@ -751,7 +749,7 @@ def test_iterable___add__(dtype):
     assert_eq(d2 + o1, o3)
 
 
-@pytest.mark.parametrize("dtype", unsorted_dict_types)
+@pytest.mark.parametrize("dtype", ordered_dict_types)
 def test_iterable_sub(dtype):
     o1 = {"a": 1, "b": 2}
     o2 = {"c": 3, "d": 4}
@@ -799,7 +797,7 @@ def test_iterable___sub__(dtype):
     assert_eq(d3 - o2, o1)
     assert_eq((d3 - o2) - o1, {})
     ex(d3.__sub__, KeyError, {"g": 5})
-    ex(d3.__sub__, KeyError, {"a": 20})
+    ex(d3.__sub__, InvalidElementValueException, {"a": 20})
 
     assert_eq(d1, o1)
     assert_eq(d2, o2)
@@ -1230,3 +1228,19 @@ def test_nonekey_ops(dtype):
     assert d.getitem("c", None) == ("c", None)
     assert d.pop("c", None) is None
     assert d.setdefault("g", None) is None
+
+
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_delitem(dtype):
+    d = dtype({"a": 1, "b": 2})
+    assert "a" in d
+    del d["a"]
+    assert "a" not in d
+
+
+@pytest.mark.parametrize("dtype", all_dict_types)
+def test_python_update(dtype):
+    d = dtype({"a": 1})
+    d2 = {}
+    g = d2.update(d)
+    assert d2["a"] == 1
