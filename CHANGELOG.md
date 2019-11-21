@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.2.0 - 2019-11-21
+* Fixed .get not behaving as expected
+* Fixed .update() for internal dict
+* Made .pop() respect None alt arg
+
 ## 0.1.1 - 2019-09-04
 
 * Fixed recursive typing in SortedDict
