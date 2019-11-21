@@ -186,8 +186,8 @@ class SortedDictPlus(OrderedDictPlus):
                 inserted = len(self)
 
         self._indexes.set(element.id, inserted)
-        self._update_indexes(inserted)  # Make sure to update the indexes after inserting
         self._insert_to_dict_memory(element)
+        self._update_indexes(inserted)  # Make sure to update the indexes after inserting
 
         return element
 

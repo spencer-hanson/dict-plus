@@ -3,7 +3,6 @@ from dict_plus.etypes import *
 from dict_plus.funcs import Functions as DFuncs
 from dict_plus.indexes import IterableIndex
 from dict_plus.elements import Element, ElementFactory, KeyValuePair
-import abc
 
 
 class Iterable(dict):
@@ -40,12 +39,7 @@ class Iterable(dict):
             self._indexes = data._indexes.copy()
             self._elements_type = data._elements_type
         else:
-            # if not element_type:
-            #     element_type = Element
             self._elements_type = self.get_element_type()
-
-            if not self._elements_type:
-                raise ValueError("Must set _element_type in subclass before super() call!")
 
             self._elements = []
             self._indexes = self._make_index()
@@ -77,10 +71,28 @@ class Iterable(dict):
 
         """
         self._indexes = self._make_index()
+
         for idx, el in enumerate(self._elements):
             if self._indexes.has(el.id):
                 raise IndexError("Duplicate key {} found!".format(el.id))
             self._indexes.set(el.id, idx)
+
+        self._update_dict_memory()
+
+    def _is_default_hashable(self, value):
+        return isinstance(value, (StringTypes, tuple, int, float))  # Not hashable normally
+
+    def _update_dict_memory(self):
+        self._clear_dict_memory()
+        for el in self._elements:
+            self._insert_to_dict_memory(el)
+
+    def _clear_dict_memory(self):
+        for k in self.keys():
+            try:
+                self._remove_from_dict_memory(k)
+            except KeyError:
+                continue
 
     def _insert_to_dict_memory(self, element):
         """
@@ -91,11 +103,17 @@ class Iterable(dict):
         Returns: None
 
         """
-        if isinstance(element.id, (StringTypes, tuple, int, float)):  # Not hashable normally
+        if self._is_default_hashable(element.id):
             super(Iterable, self).__setitem__(element.id, element.value)
         else:
             super(Iterable, self).__setitem__("unhashable-{}".format(str(element.id)), element.value)
             # Idk if there's a better way around this TODO ?
+
+    def _remove_from_dict_memory(self, key):
+        if self._is_default_hashable(key):
+            super(Iterable, self).__delitem__(key)
+        else:
+            super(Iterable, self).__delitem__("unhashable-{}".format(str(key)))
 
     def insert(self, index, obj):
         """Insert an object into the Iterable, raises a KeyError if the key already exists
@@ -175,6 +193,7 @@ class Iterable(dict):
             else:
                 element = last_el
             self._indexes.pop(k)
+            self._remove_from_dict_memory(k)
             return element.value
         elif v_alt != NoneVal:
             return v_alt
@@ -246,21 +265,27 @@ class Iterable(dict):
             func: func(k,v) -> True or False
 
         """
+        keys_to_pop = []
 
-        def wrap_func(kvp):
-            return func(kvp.id, kvp.value)
+        for i in range(0, len(self)):
+            k, v = self._elements[i].parts()
+            if not func(k, v):
+                keys_to_pop.append(k)
 
-        self._elements = list(filter(wrap_func, self._elements))
-        self._update_indexes(0)
+        for k in keys_to_pop:
+            self.pop(k)
 
     def map(self, func):
         """Map each element in the Iterable to another using function 'func'
 
         Args:
-            func: func(key, value) -> (new_key, new_value
+            func: func(key, value) -> (new_key, new_value)
         """
+        self._clear_dict_memory()
         for i in range(0, len(self)):
-            self._elements[i] = self._elements_type(func(*self._elements[i].parts()))
+            k, v = self._elements[i].parts()
+            self._elements[i] = self._elements_type(func(k, v))
+
         self._update_indexes(0)  # Update indexes
 
     def rekey(self, func):
@@ -271,14 +296,18 @@ class Iterable(dict):
             func: func(key1) -> key2
 
         """
+        self._clear_dict_memory()
         for i in range(0, len(self)):
             self._elements[i].id = func(self._elements[i].id)
+
         self._update_indexes(0)
 
     def clear(self):
         """I.clear() -> None.  Remove all items from the dict
         """
-        self._elements = []
+        for k in self.keys():
+            del self[k]
+
         self._indexes = self._make_index()
 
     def copy(self):
@@ -289,9 +318,11 @@ class Iterable(dict):
             Copied instance
 
         """
-        i = self.__class__(element_type=self._elements_type)
-        i._elements = [el.copy() for el in self.elements()]
-        i._indexes = self._indexes.copy()
+        i = self.__class__()
+        for el in self.elements():
+            el_c = el.copy()
+            i[el_c.id] = el_c.value
+
         return i
 
     def atindex(self, int_val):
@@ -528,12 +559,12 @@ class Iterable(dict):
             d = self.copy()
 
         for idx in range(0, len(self)):
-            el = d._elements[idx]
+            el = self.atindex(idx)
             val1 = el.value
             gval = mapp(el.id)
             val2 = other[gval]
             fval = comb(val1, val2)
-            d._elements[idx].value = fval
+            d[el.id] = fval
 
         return d
 
@@ -716,17 +747,6 @@ class Iterable(dict):
         agg = self.getfunc("fold_left", DFuncs.AND)
         return self.compare(other, DFuncs.GT, agg).value
 
-    ##
-    # @staticmethod  # known case of __new__
-    # def __new__(*args, **kwargs):  # real signature unknown
-    #     """ Create and return a new object.  See help(type) for accurate signature. """
-    #     raise NotImplementedError
-
-    # def __delitem__(self, *args, **kwargs):  # real signature unknown
-    #     """ Delete self[key]. """
-    #     raise NotImplementedError
-    #
-
     def __eq__(self, other):
         """Check if this Iterable is equal to another Iterable-like 'other'
         Must have the same length, and each key must have the same value, order doesn't matter
@@ -857,7 +877,7 @@ class Iterable(dict):
             value: value to set under key
 
         """
-        if self._indexes.has(key):  # TODO Fix me
+        if self._indexes.has(key):
             self._elements[self._indexes.get(key)].value = value
         else:
             self.insert(len(self), (key, value))
@@ -928,9 +948,9 @@ class OrderedIterable(Iterable):
             raise KeyError("Key '{}' already exists!".format(element.id))
 
         self._elements.insert(index, element)
+        self._insert_to_dict_memory(element)
         self._update_indexes(index)
 
-        self._insert_to_dict_memory(element)
         return element
 
     def pop(self, k, v_alt=NoneVal):
@@ -947,6 +967,7 @@ class OrderedIterable(Iterable):
 
         """
         if self._indexes.has(k):
+            self._remove_from_dict_memory(k)
             idx = self._indexes.get(k)
             result = self._elements.pop(idx).value
             self._update_indexes(idx)

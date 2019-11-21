@@ -102,6 +102,7 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
             idx = self._indexes.get(base_key)
             result = self._elements.pop(idx).value
             self._update_indexes(idx)
+            self._remove_from_dict_memory(base_key)
             return result
         elif v_alt != NoneVal:
             return v_alt
@@ -170,9 +171,14 @@ class FunctionallyInsensitiveDictPlus(DictPlus):
         """
         base_key = self._find_base_key(key)
         if self._indexes.has(base_key):
-            self._elements[self._indexes.get(base_key)].value = value
+            key = base_key
+            idx = self._indexes.get(base_key)
+            self._elements[idx].value = value
         else:
             self.insert(len(self), (key, value))
+
+        el = self.get_element_type()(key, value)
+        self._insert_to_dict_memory(el)
 
 
 class CaseInsensitiveDictPlus(FunctionallyInsensitiveDictPlus):

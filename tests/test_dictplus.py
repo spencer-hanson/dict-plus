@@ -19,6 +19,7 @@ assertions = {
     "t": 0,
     "f": 0
 }
+
 index_types = [IterableIndex, SortedIterableIndex]
 
 unsorted_dict_types = [DictPlus, OrderedDictPlus, SuffixInsensitiveDictPlus, PrefixInsensitiveDictPlus,
@@ -42,6 +43,12 @@ all_dict_types = list(set(all_dict_types))
 el_types = [ElementFactory.element(el, ds) for ds in all_dict_types for el in [KeyValuePair]]
 
 
+def check_internal_dict(mydict):
+    d = {}
+    d.update(mydict)
+    assert d == mydict.todict()
+
+
 def ex(f, ex_class, *args, **kwargs):
     try:
         f(*args, **kwargs)
@@ -62,6 +69,12 @@ def assert_nop(val1, val2, op):
 
 
 def assert_eq(val1, val2):
+
+    if isinstance(val1, Iterable):
+        check_internal_dict(val1)
+    if isinstance(val2, Iterable):
+        check_internal_dict(val2)
+
     assert val1 == val2
     assertions["eq"] = assertions["eq"] + 1
 
@@ -217,12 +230,26 @@ def test_iterable_copy(dtype):
     d.insert(0, ("1", "2"))
     c = d.copy()
     assert_eq(d, c)
+    assert_eq(len(d), len(c))
 
     d.insert(-1, ("[E]", "no u"))
     assert_neq(d, c)
     d.pop("[E]")
     d["1"] = "1"
     assert_neq(d, c)
+
+
+@pytest.mark.parametrize("dtype", ordered_dict_types)
+def test_ordered_copy(dtype):
+    d = dtype()
+    d.insert(0, (1, 2))
+    d.insert(1, (2, 3))
+    d.insert(2, (3, 4))
+    d.insert(3, (5, 6))
+    c = d.copy()
+    assert_eq(len(d), len(c))
+    for i in range(0, len(d)):
+        assert_eq(d.atindex(i), c.atindex(i))
 
 
 @pytest.mark.parametrize("dtype", unsorted_dict_types)
@@ -1223,19 +1250,18 @@ def test_subdict_type(dtype):
 def test_nonekey_ops(dtype):
     d = dtype()
 
-    assert d.get("c") is None
-    assert d.get("c", None) is None
-    assert d.getitem("c", None) == ("c", None)
-    assert d.pop("c", None) is None
-    assert d.setdefault("g", None) is None
-
+    assert_eq(d.get("c"), None)
+    assert_eq(d.get("c", None), None)
+    assert_eq(d.getitem("c", None), ("c", None))
+    assert_eq(d.pop("c", None), None)
+    assert_eq(d.setdefault("g", None), None)
 
 @pytest.mark.parametrize("dtype", all_dict_types)
 def test_delitem(dtype):
     d = dtype({"a": 1, "b": 2})
-    assert "a" in d
+    assert_t("a" in d)
     del d["a"]
-    assert "a" not in d
+    assert_f("a" in d)
 
 
 @pytest.mark.parametrize("dtype", all_dict_types)
@@ -1243,4 +1269,8 @@ def test_python_update(dtype):
     d = dtype({"a": 1})
     d2 = {}
     g = d2.update(d)
-    assert d2["a"] == 1
+    assert_eq(d2["a"], 1)
+
+
+# NOTES FOR NEW TESTS:
+# Make sure to use assert_eq, not assert. as it has additional tests
