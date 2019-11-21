@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>dict_plus.insensitive &#8212; Dictionary Plus 0.1.1 documentation</title>
+    <title>dict_plus.insensitive &#8212; Dictionary Plus 0.2.0 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -33,12 +33,13 @@
           <div class="body" role="main">
             
   <h1>Source code for dict_plus.insensitive</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dict_plus</span> <span class="k">import</span> <span class="n">DictPlus</span><span class="p">,</span> <span class="n">KeyValuePair</span><span class="p">,</span> <span class="n">ElementFactory</span>
+<span></span><span class="kn">from</span> <span class="nn">dict_plus</span> <span class="k">import</span> <span class="n">DictPlus</span>
+<span class="kn">from</span> <span class="nn">dict_plus.etypes</span> <span class="k">import</span> <span class="n">NoneVal</span>
 
 
 <div class="viewcode-block" id="FunctionallyInsensitiveDictPlus"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.FunctionallyInsensitiveDictPlus">[docs]</a><span class="k">class</span> <span class="nc">FunctionallyInsensitiveDictPlus</span><span class="p">(</span><span class="n">DictPlus</span><span class="p">):</span>
 
-<div class="viewcode-block" id="FunctionallyInsensitiveDictPlus.__init__"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.FunctionallyInsensitiveDictPlus.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">element_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compare_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="FunctionallyInsensitiveDictPlus.__init__"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.FunctionallyInsensitiveDictPlus.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a new FunctionallyInsensitiveDictPlus</span>
 <span class="sd">        Pass in a compare function with signature (new_key, old_key) and it will determine if a given key is equal on</span>
 <span class="sd">        add,delete,modify,update</span>
@@ -50,11 +51,22 @@
 <span class="sd">            kwargs: keyword args to include in the dict</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">FunctionallyInsensitiveDictPlus</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">,</span>
-            <span class="n">element_type</span> <span class="ow">or</span> <span class="n">ElementFactory</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="n">KeyValuePair</span><span class="p">,</span> <span class="n">FunctionallyInsensitiveDictPlus</span><span class="p">),</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">compare_func</span> <span class="o">=</span> <span class="n">compare_func</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">compare_func</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_func</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;compare_func&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">compare_func</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FunctionallyInsensitiveDictPlus</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FunctionallyInsensitiveDictPlus.compare_func"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.FunctionallyInsensitiveDictPlus.compare_func">[docs]</a>    <span class="k">def</span> <span class="nf">compare_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_key</span><span class="p">,</span> <span class="n">old_key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;If you return True, it exists in the dict, and should be overridden.</span>
+<span class="sd">        If you return False, the key doesn&#39;t match, and if no keys match, it will be added as a new entry</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_key: Key trying to be added to dictionary</span>
+<span class="sd">            old_key: Key already in dictionary to check against</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if new_key is old_key</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">new_key</span> <span class="o">==</span> <span class="n">old_key</span></div>
 
 <div class="viewcode-block" id="FunctionallyInsensitiveDictPlus.fromkeys"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.FunctionallyInsensitiveDictPlus.fromkeys">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromkeys</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -73,20 +85,6 @@
             <span class="n">d</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">d</span></div>
 
-<div class="viewcode-block" id="FunctionallyInsensitiveDictPlus.compare_func"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.FunctionallyInsensitiveDictPlus.compare_func">[docs]</a>    <span class="k">def</span> <span class="nf">compare_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_key</span><span class="p">,</span> <span class="n">old_key</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;If you return True, it exists in the dict, and should be overridden.</span>
-<span class="sd">        If you return False, the key doesn&#39;t match, and if no keys match, it will be added as a new entry</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            new_key: Key trying to be added to dictionary</span>
-<span class="sd">            old_key: Key already in dictionary to check against</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            True if new_key is old_key</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">new_key</span> <span class="o">==</span> <span class="n">old_key</span></div>
-
     <span class="k">def</span> <span class="nf">_find_base_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Helper func to find a key in the dict using the compare func</span>
@@ -103,7 +101,7 @@
                 <span class="k">return</span> <span class="n">k</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="FunctionallyInsensitiveDictPlus.getitem"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.FunctionallyInsensitiveDictPlus.getitem">[docs]</a>    <span class="k">def</span> <span class="nf">getitem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v_alt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="FunctionallyInsensitiveDictPlus.getitem"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.FunctionallyInsensitiveDictPlus.getitem">[docs]</a>    <span class="k">def</span> <span class="nf">getitem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v_alt</span><span class="o">=</span><span class="n">NoneVal</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the full element from key &#39;k&#39;</span>
 <span class="sd">        if no key or value is present, Element(k, v_alt) will be returned</span>
 
@@ -118,13 +116,12 @@
         <span class="n">base_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_base_key</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">base_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base_key</span><span class="p">)]</span>
-        <span class="k">elif</span> <span class="n">v_alt</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements_type</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v_alt</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">v_alt</span> <span class="o">!=</span> <span class="n">NoneVal</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements_type</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v_alt</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_find_base_key</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;No key &#39;</span><span class="si">{}</span><span class="s2">&#39; found!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="FunctionallyInsensitiveDictPlus.pop"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.FunctionallyInsensitiveDictPlus.pop">[docs]</a>    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v_alt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="FunctionallyInsensitiveDictPlus.pop"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.FunctionallyInsensitiveDictPlus.pop">[docs]</a>    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v_alt</span><span class="o">=</span><span class="n">NoneVal</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Pop off a key from the dict (remove a key)</span>
 
 <span class="sd">        Args:</span>
@@ -140,8 +137,9 @@
             <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base_key</span><span class="p">)</span>
             <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_update_indexes</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_from_dict_memory</span><span class="p">(</span><span class="n">base_key</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">result</span>
-        <span class="k">elif</span> <span class="n">v_alt</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">v_alt</span> <span class="o">!=</span> <span class="n">NoneVal</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">v_alt</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Key &#39;</span><span class="si">{}</span><span class="s2">&#39; not found!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_key</span><span class="p">))</span></div>
 
@@ -208,18 +206,19 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">base_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_base_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">base_key</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base_key</span><span class="p">)]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">base_key</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base_key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+        <span class="n">el</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element_type</span><span class="p">()(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_insert_to_dict_memory</span><span class="p">(</span><span class="n">el</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="CaseInsensitiveDictPlus"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.CaseInsensitiveDictPlus">[docs]</a><span class="k">class</span> <span class="nc">CaseInsensitiveDictPlus</span><span class="p">(</span><span class="n">FunctionallyInsensitiveDictPlus</span><span class="p">):</span>
-<div class="viewcode-block" id="CaseInsensitiveDictPlus.__init__"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.CaseInsensitiveDictPlus.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">element_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compare_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">CaseInsensitiveDictPlus</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">,</span>
-            <span class="n">element_type</span> <span class="ow">or</span> <span class="n">ElementFactory</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="n">KeyValuePair</span><span class="p">,</span> <span class="n">CaseInsensitiveDictPlus</span><span class="p">),</span>
-            <span class="n">compare_func</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+<div class="viewcode-block" id="CaseInsensitiveDictPlus.__init__"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.CaseInsensitiveDictPlus.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CaseInsensitiveDictPlus</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CaseInsensitiveDictPlus.compare_func"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.CaseInsensitiveDictPlus.compare_func">[docs]</a>    <span class="k">def</span> <span class="nf">compare_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_key</span><span class="p">,</span> <span class="n">old_key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;If you return True, it exists in the dict, and should be overridden.</span>
@@ -257,17 +256,15 @@
 
 
 <div class="viewcode-block" id="PrefixInsensitiveDictPlus"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.PrefixInsensitiveDictPlus">[docs]</a><span class="k">class</span> <span class="nc">PrefixInsensitiveDictPlus</span><span class="p">(</span><span class="n">FunctionallyInsensitiveDictPlus</span><span class="p">):</span>
-<div class="viewcode-block" id="PrefixInsensitiveDictPlus.__init__"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.PrefixInsensitiveDictPlus.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">element_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix_list</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="PrefixInsensitiveDictPlus.__init__"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.PrefixInsensitiveDictPlus.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">prefix_list</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;prefix_list&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_func</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">==</span> <span class="n">y</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prefix_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">prefix_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">prefix_list</span><span class="p">]</span>
 
         <span class="n">compare_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_compare_func</span><span class="p">(</span><span class="n">prefix_list</span><span class="p">)</span>
-
-        <span class="nb">super</span><span class="p">(</span><span class="n">PrefixInsensitiveDictPlus</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">,</span>
-            <span class="n">element_type</span> <span class="ow">or</span> <span class="n">ElementFactory</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="n">KeyValuePair</span><span class="p">,</span> <span class="n">PrefixInsensitiveDictPlus</span><span class="p">),</span>
-            <span class="n">compare_func</span><span class="o">=</span><span class="n">compare_func</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PrefixInsensitiveDictPlus</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">compare_func</span><span class="o">=</span><span class="n">compare_func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PrefixInsensitiveDictPlus.set_prefix_list"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.PrefixInsensitiveDictPlus.set_prefix_list">[docs]</a>    <span class="k">def</span> <span class="nf">set_prefix_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_prefix_list</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -326,23 +323,20 @@
 <span class="sd">            DictPlus with populated data</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="n">PrefixInsensitiveDictPlus</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">PrefixInsensitiveDictPlus</span><span class="p">(</span><span class="n">prefix_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">:</span>
             <span class="n">d</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">d</span></div></div>
 
 
 <div class="viewcode-block" id="SuffixInsensitiveDictPlus"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.SuffixInsensitiveDictPlus">[docs]</a><span class="k">class</span> <span class="nc">SuffixInsensitiveDictPlus</span><span class="p">(</span><span class="n">FunctionallyInsensitiveDictPlus</span><span class="p">):</span>
-<div class="viewcode-block" id="SuffixInsensitiveDictPlus.__init__"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.SuffixInsensitiveDictPlus.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">element_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suffix_list</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SuffixInsensitiveDictPlus.__init__"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.SuffixInsensitiveDictPlus.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">suffix_list</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;suffix_list&quot;</span><span class="p">,</span> <span class="p">[])</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">suffix_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">suffix_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">suffix_list</span><span class="p">]</span>
+
         <span class="n">compare_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_compare_func</span><span class="p">(</span><span class="n">suffix_list</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SuffixInsensitiveDictPlus</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">,</span>
-            <span class="n">element_type</span> <span class="ow">or</span> <span class="n">ElementFactory</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="n">KeyValuePair</span><span class="p">,</span> <span class="n">SuffixInsensitiveDictPlus</span><span class="p">),</span>
-            <span class="n">compare_func</span><span class="o">=</span><span class="n">compare_func</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SuffixInsensitiveDictPlus</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">compare_func</span><span class="o">=</span><span class="n">compare_func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SuffixInsensitiveDictPlus.set_suffix_list"><a class="viewcode-back" href="../../dict_plus.html#dict_plus.insensitive.SuffixInsensitiveDictPlus.set_suffix_list">[docs]</a>    <span class="k">def</span> <span class="nf">set_suffix_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_suffix_list</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_suffix_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -394,7 +388,7 @@
 <span class="sd">            SuffixInsensitiveDict with populated data</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="n">SuffixInsensitiveDictPlus</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">SuffixInsensitiveDictPlus</span><span class="p">(</span><span class="n">suffix_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">:</span>
             <span class="n">d</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">d</span></div></div>
