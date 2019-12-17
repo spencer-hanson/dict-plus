@@ -28,8 +28,9 @@ author = 'Spencer Hanson'
 
 
 def get_version_info():
-    with open(str(os.environ["VERSION_JSON_PATH"]), "r") as f:
-        return json.load(f)
+    return {
+        "version": os.environ["DICTPLUS_VER"]
+    }
 
 
 # The short X.Y version
