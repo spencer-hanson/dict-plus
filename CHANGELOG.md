@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.2.3 - 2019-12-17-19
+## 0.2.2 - 2019-12-17-19
+## 0.2.1 - 2019-12-17-19
+* Fixed PyPi stuff
+
 ## 0.2.0 - 2019-11-21
 * Fixed .get not behaving as expected
 * Fixed .update() for internal dict
