@@ -22,3 +22,7 @@ Subclasses!
     - SerializableDictPlus
     - ImmutableDictPlus
     - UniqueDictPlus
+
+
+ListDictPlus
+- popmap
