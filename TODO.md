@@ -41,7 +41,7 @@ TODO
         - FuncMap
         - Compare (LT, GT, LTE, GTE, EQ, NEQ)
 
--  ListDictPlus
+-  ListDict
     + Two types of operations
     + ForEachMapping Op ListDict -> ListDict
         - Map (Each subdict)
@@ -50,10 +50,9 @@ TODO
         - InsertEach (insert a key to each subdict, with context on which subdict)
         - PopMap (pop keys off in each dict, mapping to a new key in each dict)
     + ForEachTransform Op ListDict -> Dict
-        - Pop Map (pop keys off in each dict, mapping to a new dict)
+        - Pop Transform (pop keys off in each dict, mapping to a new dict)
         - Aggregate (take each key of each inner dict and move it to a dict with list keys of the same type)
     + Ops
-        - PlaceEach (place a key in each subdict, could be functional)
         - Hoist (take a key from each subdict and return a list of them)
         - Hoist multiple
         - Pop by Regex
@@ -82,10 +81,11 @@ TODO
     +
 
 - Misc
-    + Reorganize package into a dicts/ folder
+    + (DONE) Reorganize package into a dicts/ folder
     + Python typings
     + Add Schema req to dict/list/etc
     + runtime language to describe transforms?
         - DTL (dict transform language?)
+        - JTL (json transform language?)
         - get_dtl (from ops used on dict from creation)
         - clear_dtl (clear ops and start from new on existing dict)

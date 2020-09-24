@@ -1,35 +1,5 @@
-from dict_plus.exceptions import *
-from dict_plus.etypes import *
-
-
-class ElementFactory(object):
-    """
-    Factory to create Elements within Dictionaries
-    """
-
-    @staticmethod
-    def element(subclass_type, superclass_type):
-        """Create a new element of type subclass_type in containing dictionary of type superclass_type
-
-        Args:
-            subclass_type: Type of Element to create, ie KeyValuePair
-            superclass_type: Type of Dictionary to hold this element, ie. SortedDictPlus
-
-        Returns:
-            A new element type class for the specific use of the subclass type and superclass type
-
-        """
-        class ElementType(subclass_type):
-            @staticmethod
-            def get_dictlike_supertype():
-                return superclass_type
-
-        ElementType.__name__ = "[{dict_type}]{el_type}".format(
-            dict_type=superclass_type.__name__,
-            el_type=subclass_type.__name__
-        )
-
-        return ElementType
+from dict_plus.exceptions import InvalidElementTypeException
+from dict_plus.etypes import NoneVal, DictType, ListType
 
 
 class Element(object):
@@ -202,6 +172,95 @@ class KeyValuePair(Element):
             if k == self.id and v == self.value:
                 return True
         elif isinstance(other, KeyValuePair) and other.id == self.id and self.value == other.value:
+            return True
+        elif isinstance(other, tuple) and self.id == other[0] and self.value == other[1]:
+            return True
+
+    def __ne__(self, other):
+        """Check if element is not equal,
+        Args:
+            other: Element-like to compare against
+
+        Returns:
+            True or False
+
+        """
+        return not self.__eq__(other)
+
+
+class ListElement(KeyValuePair):
+    """
+    List Element implementation
+    """
+    def parse_object(self, obj):
+        """
+        Parse an object into a ListElement
+
+        Args:
+            obj: Object to be parsed
+
+        Returns:
+            KeyValuePair instance
+
+        """
+        if isinstance(obj, ListElement):
+            return obj.id, obj.value
+        if not isinstance(obj, (list, tuple)):
+            raise InvalidElementTypeException("Invalid ListElement object, must be a list, tuple or ListElement!")
+        if len(obj) != 2:
+            raise InvalidElementTypeException("Invalid ListElement object, length must be 2")
+
+        key = obj[0]
+        val = obj[1]
+
+        if not isinstance(key, int):
+            raise InvalidElementTypeException("Invalid key type, must be integer")
+
+        if isinstance(val, DictType):
+            val = self.get_dictlike_supertype()(val)
+
+        # TODO force ListPlus here?
+        # if isinstance(val, ListType):
+        #     for i in range(0, len(val)):
+        #         if isinstance(val[i], DictType):
+        #             val[i] = self.get_dictlike_supertype()(val[i])
+
+        return key, val
+
+    @staticmethod
+    def get_dictlike_supertype():
+        """Get the type of the containing dictionary so that items within the dict are also of the same type
+        By default will raise a NotImplemented error, so that it can be implemented during instantiation, by using
+        ElementFactory.element()
+
+        Examples:
+            So we convert any dict-like values recursively using the typing of the superclass dictionary class type::
+                >> mydict = DictPlus({"a": DictPlus({"b": 1}), "c": {"d": 1}, ...})
+                mydict["c"] == DictPlus({"d": 1})
+
+        Returns:
+            Element Instance
+
+        """
+        raise NotImplementedError("No supertype defined in this Element! Use ElementFactory.element()")
+
+    def __eq__(self, other):
+        """Check if self == other
+        if other is a KeyValuePair, other.id == self.id and self.value == other.value
+        if other is a tuple, treat it as (id, value) and check for equality there
+
+        Args:
+            other: Element-like
+
+        Returns:
+            True or False
+
+        """
+        if isinstance(other, dict) and len(other) == 1:
+            k, v = list(other.items())[0]
+            if k == self.id and v == self.value:
+                return True
+        elif isinstance(other, ListElement) and other.id == self.id and self.value == other.value:
             return True
         elif isinstance(other, tuple) and self.id == other[0] and self.value == other[1]:
             return True

@@ -2,7 +2,7 @@ from dict_plus.exceptions import *
 from dict_plus.etypes import *
 from dict_plus.funcs import Functions as DFuncs
 from dict_plus.indexes import IterableIndex
-from dict_plus.elements import Element, ElementFactory, KeyValuePair
+from dict_plus.elements import ElementFactory, KeyValuePair
 
 
 class Iterable(dict):

@@ -17,3 +17,10 @@ class InvalidElementValueException(ValueError):
     Raised when the Element value doesn't match the expected element value constraints
     """
     pass
+
+
+class InvalidSubDictType(ValueError):
+    """
+    Raised when the subdict type of a listdict isn't the correct type
+    """
+    pass

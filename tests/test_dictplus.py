@@ -2,11 +2,19 @@
 # myPath = os.path.dirname(os.path.abspath(__file__))
 # sys.path.insert(0, myPath + '/../')
 #
+
 import pytest
-from dict_plus.dictplus import *
-from dict_plus.insensitive import *
+from dict_plus.dicts import HookedDictPlus, FunctionDictPlus
+from dict_plus.dicts import CaseInsensitiveDictPlus, PrefixInsensitiveDictPlus, SuffixInsensitiveDictPlus, FunctionallyInsensitiveDictPlus
+from dict_plus.dicts import OrderedDictPlus, SortedDictPlus
+from dict_plus.dicts import DictPlus
+
+from dict_plus.iterable import Iterable
+
+from dict_plus.elements import ElementFactory, KeyValuePair
 from dict_plus.indexes import IterableIndex, SortedIterableIndex
-from dict_plus import *
+
+from dict_plus.etypes import NoneVal
 from dict_plus.exceptions import *
 import operator
 import six
