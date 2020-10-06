@@ -1,35 +1,5 @@
-from dict_plus.exceptions import *
-from dict_plus.etypes import *
-
-
-class ElementFactory(object):
-    """
-    Factory to create Elements within Dictionaries
-    """
-
-    @staticmethod
-    def element(subclass_type, superclass_type):
-        """Create a new element of type subclass_type in containing dictionary of type superclass_type
-
-        Args:
-            subclass_type: Type of Element to create, ie KeyValuePair
-            superclass_type: Type of Dictionary to hold this element, ie. SortedDictPlus
-
-        Returns:
-            A new element type class for the specific use of the subclass type and superclass type
-
-        """
-        class ElementType(subclass_type):
-            @staticmethod
-            def get_dictlike_supertype():
-                return superclass_type
-
-        ElementType.__name__ = "[{dict_type}]{el_type}".format(
-            dict_type=superclass_type.__name__,
-            el_type=subclass_type.__name__
-        )
-
-        return ElementType
+from dict_plus.exceptions import InvalidElementTypeException
+from dict_plus.etypes import NoneVal, DictType, ListType
 
 
 class Element(object):
@@ -216,3 +186,59 @@ class KeyValuePair(Element):
 
         """
         return not self.__eq__(other)
+
+
+class ListElement(KeyValuePair):
+    """
+    List Element implementation
+    """
+    def parse_object(self, obj):
+        """
+        Parse an object into a ListElement
+
+        Args:
+            obj: Object to be parsed
+
+        Returns:
+            ListElement instance
+        """
+        if isinstance(obj, ListElement):
+            return obj.id, obj.value
+
+        val = obj
+
+        return None, val
+
+    @staticmethod
+    def get_dictlike_supertype():
+        raise NotImplementedError("No supertype defined in this Element! Use ElementFactory.element()")
+
+    def __eq__(self, other):
+        if isinstance(other, dict) and len(other) == 1:
+            k, v = list(other.items())[0]
+            if k == self.id and v == self.value:
+                return True
+        elif isinstance(other, ListElement) and other.id == self.id and self.value == other.value:
+            return True
+        elif isinstance(other, tuple) and self.id == other[0] and self.value == other[1]:
+            return True
+
+    def __ne__(self, other):
+        """Check if element is not equal,
+        Args:
+            other: Element-like to compare against
+
+        Returns:
+            True or False
+
+        """
+        return not self.__eq__(other)
+
+    def __str__(self):
+        """String representation of the Element
+
+        Returns:
+            String representing self
+
+        """
+        return "{}".format(self.value)

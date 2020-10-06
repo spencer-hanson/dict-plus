@@ -2,7 +2,8 @@ from dict_plus.exceptions import *
 from dict_plus.etypes import *
 from dict_plus.funcs import Functions as DFuncs
 from dict_plus.indexes import IterableIndex
-from dict_plus.elements import Element, ElementFactory, KeyValuePair
+from dict_plus.elements import ElementFactory, KeyValuePair
+import re
 
 
 class Iterable(dict):
@@ -172,6 +173,25 @@ class Iterable(dict):
         else:
             raise KeyError("No key '{}' found!".format(k))
 
+    def pop_regex(self, k_regex):
+        """
+        Pop keys in the dict that match the given regex
+
+        """
+        new_d = self.__class__()
+
+        keys_to_pop = []
+
+        for k, v in self.items():
+            m = re.match(k_regex, k)
+            if m:
+                keys_to_pop.append(k)
+
+        for k in keys_to_pop:
+            new_d[k] = self.pop(k)
+
+        return new_d
+
     def pop(self, k, v_alt=NoneVal):
         """Don't care about order, so we move the last element to the position of the removed
         element, remove the index to the popped element, to keep the time complexity constant
@@ -302,6 +322,26 @@ class Iterable(dict):
 
         self._update_indexes(0)
 
+    def rekey_regex(self, regex, replace_str="", overwrite_collisions=False):
+        """
+        Re-key keys that match the given regex, and replacing the part of the key that matches with
+        replace_str. Useful for removing prefixes in dictionaries.
+
+        overwrite_collisions will overwrite upon collision, else KeyError will be thrown
+        """
+
+        keylist = []  # List of [(old_key, new_key), ...]
+
+        for k, v in self.items():
+            keylist.append((k, re.sub(regex, replace_str, k)))
+        for k1, k2 in keylist:
+            v = self.pop(k1)
+            if k2 in self and overwrite_collisions:
+                raise KeyError("Key '{}' already exists!".format(k2))
+            self[k2] = v
+
+        return self
+
     def clear(self):
         """I.clear() -> None.  Remove all items from the dict
         """
@@ -309,6 +349,33 @@ class Iterable(dict):
             del self[k]
 
         self._indexes = self._make_index()
+
+    def disaggregate(self, placeholder=None):
+        """
+        Opposite of the ListDict .aggregate()
+        """
+        done = False
+        data = []
+        index = 0
+        while not done:
+            entry = self.__class__()
+            failed = True
+            for k, v in self.items():
+                try:
+                    val = v[index]
+                    failed = False
+                except:
+                    val = placeholder
+
+                entry[k] = val
+
+            if failed:  # We've checked all keys with this index, and none work
+                done = True
+            else:
+                data.append(entry)
+            index += 1
+
+        return data
 
     def copy(self):
         """

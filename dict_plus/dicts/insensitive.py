@@ -1,4 +1,4 @@
-from dict_plus import DictPlus
+from dict_plus.dicts.dictplus import DictPlus
 from dict_plus.etypes import NoneVal
 
 

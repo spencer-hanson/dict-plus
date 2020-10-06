@@ -1,8 +1,14 @@
 # CHANGELOG
 
-## 0.2.3 - 2019-12-17-19
-## 0.2.2 - 2019-12-17-19
-## 0.2.1 - 2019-12-17-19
+## 0.3.0 - 2020-10-5
+* Added ListPlus and ListDict
+* Updated TODO.md
+* Added some funcs to Iterable()
+* Reorganized internal import structure, external imports should work the same
+
+## 0.2.3 - 2019-12-17
+## 0.2.2 - 2019-12-17
+## 0.2.1 - 2019-12-17
 * Fixed PyPi stuff
 
 ## 0.2.0 - 2019-11-21
