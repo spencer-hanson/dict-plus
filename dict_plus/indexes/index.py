@@ -1,4 +1,85 @@
-class IterableIndex(object):
+class Index(object):
+    """
+    Index object to keep track of data internals
+    """
+
+    def make_hash(self, o):
+        raise NotImplementedError
+
+    def __init__(self, data=None):
+        """Create a new Iterable Index
+
+        Args:
+            data: Internal data dict to create the index from, optional
+
+        """
+        self.__data = {} if not data else data.copy()
+
+    def get(self, key):
+        """Get a value from the index
+
+        Args:
+            key: Key to get the value of
+
+        Returns:
+            Integer index of the key's location in the element list
+
+        """
+        raise NotImplementedError
+
+    def set(self, key, value):
+        """Set a key's location in the index
+
+        Args:
+            key: Key to get the location of
+            value: Integer value to set in the index
+
+        """
+        raise NotImplementedError
+
+    def has(self, key):
+        """Check whether the index has a given key in it
+
+        Args:
+            key: Key to check for
+
+        Returns:
+            True if the key exists, else False
+
+        """
+        raise NotImplementedError
+
+    def pop(self, key):
+        """ Remove and get the value of the given key
+
+        Args:
+            key: Key to get the value of
+
+        Returns:
+            Integer index value of the key in the element list
+
+        """
+        raise NotImplementedError
+
+    def isempty(self):
+        """Check whether the index is empty
+
+        Returns:
+            True if index is empty else False
+        """
+        raise NotImplementedError
+
+    def copy(self):
+        """Copy this index
+
+        Returns:
+            A copy of the index
+
+        """
+        raise NotImplementedError
+
+
+class IterableIndex(Index):
     """Index object to keep track of 'unhashable' types
     """
 
@@ -40,6 +121,7 @@ class IterableIndex(object):
             data: Internal data dict to create the index from, optional
 
         """
+        super(IterableIndex, self).__init__(data)
         self.__data = {} if not data else data.copy()
 
     def get(self, key):
@@ -113,4 +195,34 @@ class IterableIndex(object):
             A copy of the index
 
         """
+        return self.__class__(self.__data)
+
+
+class NullIndex(Index):
+    """
+    Index that does nothing
+    """
+    def __init__(self, data=None):
+        super(NullIndex, self).__init__()
+        self.__data = None
+
+    def make_hash(self, o):
+        return 0
+
+    def get(self, key):
+        return None
+
+    def set(self, key, value):
+        pass
+
+    def has(self, key):
+        return False
+
+    def pop(self, key):
+        return None
+
+    def isempty(self):
+        return True
+
+    def copy(self):
         return self.__class__(self.__data)

@@ -126,21 +126,3 @@ class SortedDictPlus(OrderedDictPlus):
         self._update_indexes(inserted)  # Make sure to update the indexes after inserting
 
         return element
-
-# TODO use for __eq__ in ListPlus ?
-# def __eq__(self, other):
-#     result = True
-#     if isinstance(other, list):
-#         for i in range(0, self.__len__()):
-#             idx = self._elements[i].id
-#             if not isinstance(idx, int):
-#                 result = False
-#                 break
-#             else:
-#                 if other[idx] != self._elements[i].value:
-#                     result = False
-#                     break
-#         return result
-#     else:
-#         return False
-#

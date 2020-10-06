@@ -200,62 +200,20 @@ class ListElement(KeyValuePair):
             obj: Object to be parsed
 
         Returns:
-            KeyValuePair instance
-
+            ListElement instance
         """
         if isinstance(obj, ListElement):
             return obj.id, obj.value
-        if not isinstance(obj, (list, tuple)):
-            raise InvalidElementTypeException("Invalid ListElement object, must be a list, tuple or ListElement!")
-        if len(obj) != 2:
-            raise InvalidElementTypeException("Invalid ListElement object, length must be 2")
 
-        key = obj[0]
-        val = obj[1]
+        val = obj
 
-        if not isinstance(key, int):
-            raise InvalidElementTypeException("Invalid key type, must be integer")
-
-        if isinstance(val, DictType):
-            val = self.get_dictlike_supertype()(val)
-
-        # TODO force ListPlus here?
-        # if isinstance(val, ListType):
-        #     for i in range(0, len(val)):
-        #         if isinstance(val[i], DictType):
-        #             val[i] = self.get_dictlike_supertype()(val[i])
-
-        return key, val
+        return None, val
 
     @staticmethod
     def get_dictlike_supertype():
-        """Get the type of the containing dictionary so that items within the dict are also of the same type
-        By default will raise a NotImplemented error, so that it can be implemented during instantiation, by using
-        ElementFactory.element()
-
-        Examples:
-            So we convert any dict-like values recursively using the typing of the superclass dictionary class type::
-                >> mydict = DictPlus({"a": DictPlus({"b": 1}), "c": {"d": 1}, ...})
-                mydict["c"] == DictPlus({"d": 1})
-
-        Returns:
-            Element Instance
-
-        """
         raise NotImplementedError("No supertype defined in this Element! Use ElementFactory.element()")
 
     def __eq__(self, other):
-        """Check if self == other
-        if other is a KeyValuePair, other.id == self.id and self.value == other.value
-        if other is a tuple, treat it as (id, value) and check for equality there
-
-        Args:
-            other: Element-like
-
-        Returns:
-            True or False
-
-        """
         if isinstance(other, dict) and len(other) == 1:
             k, v = list(other.items())[0]
             if k == self.id and v == self.value:
@@ -275,3 +233,12 @@ class ListElement(KeyValuePair):
 
         """
         return not self.__eq__(other)
+
+    def __str__(self):
+        """String representation of the Element
+
+        Returns:
+            String representing self
+
+        """
+        return "{}".format(self.value)
