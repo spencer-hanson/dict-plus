@@ -1,7 +1,7 @@
 from setuptools import setup
 import json
 
-VERSION = "0.2.3"
+VERSION = "0.3.0"
 
 
 def check_version_info():
