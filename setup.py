@@ -1,7 +1,7 @@
 from setuptools import setup
 import json
 
-VERSION = "0.3.1"
+VERSION = "0.3.2"
 
 
 def check_version_info():
@@ -28,7 +28,7 @@ check_version_info()
 
 setup(
     name='dict_plus',
-    packages=['dict_plus'],
+    packages=['dict_plus', 'dict_plus.dicts', 'dict_plus.indexes', 'dict_plus.lists', 'dict_plus.elements'],
     version=VERSION,
     description='Extended Dictionary Package',
     author='Spencer Hanson',
