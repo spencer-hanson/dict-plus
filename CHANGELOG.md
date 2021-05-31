@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.3.1 - 2020-10-5
+* Fixed tests and published
+
 ## 0.3.0 - 2020-10-5
 * Added ListPlus and ListDict
 * Updated TODO.md
