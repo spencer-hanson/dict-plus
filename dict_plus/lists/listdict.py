@@ -6,7 +6,16 @@ import re
 
 
 class ListDict(ListPlus):
+    """
+    List of Dictionaries container
+    """
     def __init__(self, data=None, subdict_type=None):
+        """
+        Create a new list of dictionaries
+        Args:
+            data: iterable list of dictionaries
+            subdict_type: DictPlus classtype for the subdicts to be typed
+        """
         super(ListDict, self).__init__()
 
         if subdict_type is None:
@@ -21,22 +30,48 @@ class ListDict(ListPlus):
                 self.append(subdict_type(d))
 
     def map(self, mapfunc):
-        # Map (Each subdict)
+        """
+        For each dictionary in the list, map(mapfunc, list of dicts) -> new list of dicts
+        Args:
+            mapfunc: Function with signature f(d) -> d'
+
+        Returns:
+            self
+        """
+
         data = []
         for d in self:
             data.append(mapfunc(d))
         return self
 
     def submap(self, mapfunc):
-        # SubMap (each key of each subdict)
+        """
+        Map each key in each subdictionary to a new value
+        Args:
+            mapfunc: Function with signature f(k, v) -> k', v'
+        Returns:
+            self
+        """
+
         for d in self:
             d.map(mapfunc)
         return self
 
     def inserteach(self, key, value, overwrite_exist=False):
-        # InsertEach (insert a key to each subdict, with context on which subdict)
-        # if overwrite_exist is True will replace the value
-        # if it's false, will ignore
+        """
+        InsertEach (insert a key to each subdict, with context on which subdict)
+        if overwrite_exist is True will replace the value if it exists
+        if it's false, will ignore the value if it exists
+
+        Args:
+            key: Key to insert
+            value: value to insert
+            overwrite_exist: Overwrite existing key/values
+
+        Returns:
+            self
+        """
+        #
         for d in self:
             if key in d:
                 if overwrite_exist:
@@ -47,8 +82,18 @@ class ListDict(ListPlus):
         return self
 
     def popeach(self, key_name, nonexist_value=NoneVal):
-        # PopEach (pop off a key in each subdict)
-        # if the key doesn't exist, will return the nonexist value in the list
+        """
+        PopEach - pop off a key in each subdict
+        if the key doesn't exist, will return nonexist_value if it is set
+
+        Args:
+            key_name: key to pop in each subdict
+            nonexist_value: Value to replace if they key doesn't exist
+
+        Returns:
+            list of vals
+        """
+
         vals = []
         for d in self:
             if key_name in d:
@@ -60,32 +105,38 @@ class ListDict(ListPlus):
         return vals
 
     def popmap(self, key, func, nonexist_value=NoneVal):
-        # PopMap (pop keys off in each subdict, mapping to a new key in each dict)
-        # Will overrite key if existing
+        """
+        PopMap - pop keys off in each subdict, mapping to a new key, in each subdict
+        Will overwrite key if key exists
+        Args:
+            key: Key to pop in each subdict
+            func: Function with signature f(v) -> k', v'
+            nonexist_value: If key doesn't exist, use this value instead
+
+        Returns:
+            self
+        """
+
         for d in self:
             v = d.pop(key, nonexist_value)
             k, v = func(v)
             d[k] = v
         return self
-    # Wtf is this supposed to do? Remove maybe? dont remember lol
-    # def poptransform(self, key, func=None, nonexist_value=NoneVal):
-    #     # Pop Transform (pop keys off in each dict, mapping to a new dict)
-    #     # default behavior is to keep data the same after popping it off
-    #     if func is None:
-    #         func = lambda x: (key, x)
-    #     new_d = {}
-    #
-    #     for d in self:
-    #         v = d.get(key, nonexist_value)
-    #         k, v = func(v)
-    #         new_d[k] = v
-    #     return new_d
 
     def popregex(self, regex, nonexist_value=None):
-        # Pop each key in each subdict matching the regex, returning a list of dicts
-        # if use_nonexist==True, go through the entire listdict to get all matching regexes,
-        # before checking all dicts for all keys, then inserting nonexist_value in those places
-        # else just match per subdict
+        """
+        Pop each key in each subdict matching the regex, returning a list of dicts
+        if use_nonexist==True, go through the entire listdict to get all matching regexes,
+        before checking all dicts for all keys, then inserting nonexist_value in those places
+        else just match per subdict
+        Args:
+            regex: regex to match against
+            nonexist_value: value to insert if the key doesn't exist in one of the subdicts
+
+        Returns:
+            new ListDict() from popped data
+        """
+
         data = []
 
         if not nonexist_value:
@@ -114,8 +165,17 @@ class ListDict(ListPlus):
         return self.__class__(data)
 
     def aggregate(self, placeholder=NoneVal):
-        # Aggregate (take each key of each inner dict and move it to a dict with list keys of the same type)
-        # If use_placeholder, will insert placeholder inbetween dicts that don't have common keys
+        """
+        Aggregate (take each key of each inner dict and move it to a dict with list keys of the same type)
+        If use_placeholder, will insert placeholder inbetween dicts that don't have common keys.
+
+        Use DictPlus.disaggregate(placeholder) to undo this operation
+        Args:
+            placeholder: value to insert if a key doesn't exist within a subdict
+        Returns:
+            aggregated dict
+        """
+
         new_d = self._subdict_type()
         if placeholder is NoneVal:
             for d in self:
@@ -143,8 +203,16 @@ class ListDict(ListPlus):
         return new_d
 
     def hoist(self, key, nonexist_value=None):
-        # Hoist (take a key from each subdict and return a list of them)
-        # if key doesn't exist return nonexist value in the place
+        """
+        Hoist - take a key from each subdict, and pop it off, returning a list of values
+        Args:
+            key: key to pop from each subdict
+            nonexist_value: if the key doesn't exist in the subdict, use this value instead
+
+        Returns:
+            list of values
+        """
+
         vals = []
         for d in self:
             if key in d:
@@ -154,13 +222,18 @@ class ListDict(ListPlus):
         return vals
 
     def hoist_multiple(self, keylist, nonexist_value=None):
-        # Hoist per key and return a dict with keys of keylist, and
-        # values of lists of the values
+        """
+        Hoist multiple keys from each subdict, into a dictionary with keys 'keylist' where the values are lists
+        of values within each subdict
+        Args:
+            keylist: list of keys within the subdicts
+            nonexist_value: value to insert when the the key doesn't exist
+
+        Returns:
+         dict of lists
+        """
         new_d = self._subdict_type()
         for k in keylist:
             new_d[k] = self.hoist(k, nonexist_value)
 
         return new_d
-
-    def indexof(self, key):
-        raise NotImplementedError
