@@ -1,4 +1,4 @@
-# dict-plus v0.2.3
+# dict-plus
 
 [![Build Status](https://travis-ci.org/spencer-hanson/dict-plus.svg?branch=master)](https://travis-ci.org/spencer-hanson/dict-plus)
 
