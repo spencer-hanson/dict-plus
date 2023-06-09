@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import json
 
-VERSION = "0.3.3"
+VERSION = "0.3.4"
 
 
 def check_version_info():
