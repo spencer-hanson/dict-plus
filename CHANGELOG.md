@@ -1,5 +1,6 @@
 # CHANGELOG
 
+## 0.3.4 - 2023-6-9
 ## 0.3.3 - 2023-6-9
 * Added a simple dict flattener utility class
 
