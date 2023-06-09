@@ -1,3 +1,3 @@
-dict-plus v0.0.4
+dict-plus
 Documentation: https://dict-plus.readthedocs.io/en/latest/
 
