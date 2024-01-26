@@ -19,17 +19,21 @@ class SimpleFlattener(object):
         def __init__(self, val):
             self.val = val
 
-    def __init__(self, simple_types=[], maxdepth=math.inf, delimiter="_"):
+    def __init__(self, simple_types=[], maxdepth=math.inf, delimiter="_", dict_types=[]):
         """
         simple_types is a list of types that should be treated as simple, base cases
         maxdepth is the maximum depth within the data to traverse, defaults to no maximum
         delimiter is the string used to separate subkeys in the flattened dict
+        dict_types are types that should be treated as a dict
         """
         self.simple_types = {str, bytes, int, float, bool, tuple}
-        self.max_depth = maxdepth
         for s in simple_types:
             self.simple_types.add(s)
+        self.max_depth = maxdepth
         self.delimiter = delimiter
+        self.dict_types = {dict}
+        for d in dict_types:
+            self.dict_types.add(d)
 
     def is_simplelist(self, val):
         """
@@ -53,7 +57,7 @@ class SimpleFlattener(object):
         if current_depth > self.max_depth:
             return {key_prefix: data}
 
-        if isinstance(data, dict):
+        if type(data) in self.dict_types:
             newdict = {}
             for key, val in data.items():
                 new_keyprefix = f"{key_prefix}{key}"
